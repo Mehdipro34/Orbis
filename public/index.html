@@ -2382,11 +2382,29 @@ document.addEventListener("click",event=>{
   }catch(error){window.notify?.("Не удалось загрузить профиль: "+error.message)}
  }
  function cardPostMini(post){
-  const box=document.createElement("article");box.className="post";box.style.marginTop="12px";
-  const h=document.createElement("b");h.textContent=post.title;
-  const p=document.createElement("p");p.className="post-body";p.textContent=post.body;
-  const t=document.createElement("span");t.className="topic";t.textContent=post.topic;
-  box.append(h,t,p);return box;
+  const box=document.createElement("article");box.className="post profile-post";box.style.marginTop="12px";
+  const top=document.createElement("div");top.className="post-top";
+  const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=(post.author||post.username||"O").slice(0,1).toUpperCase();
+  const identity=document.createElement("div");
+  const author=document.createElement("div");author.className="author";author.textContent=post.author||post.username||"Участник ORBIS";
+  const handle=document.createElement("span");handle.className="handle";handle.textContent="@"+(post.username||"user");author.append(handle);
+  const date=document.createElement("div");date.className="post-meta";date.textContent=post.createdAt?new Date(post.createdAt).toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"Публикация ORBIS";
+  identity.append(author,date);top.append(avatar,identity);
+  const h=document.createElement("div");h.className="post-title";h.textContent=post.title||"Публикация";
+  const t=document.createElement("span");t.className="topic";t.textContent=post.topic||"Идеи";
+  const p=document.createElement("p");p.className="post-body";p.textContent=post.body||"";
+  box.dataset.postId=post.id||"";
+  box.append(top,h,t,p);
+  if(Array.isArray(post.media)&&post.media.length){
+   const media=document.createElement("div");media.className="post-media";media.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0";
+   post.media.forEach(item=>{
+    if(String(item.type||"").startsWith("video/")){const video=document.createElement("video");video.src=item.url;video.controls=true;video.playsInline=true;video.style.cssText="width:100%;max-height:300px;border-radius:13px;background:#111";media.append(video)}
+    else{const image=document.createElement("img");image.src=item.url;image.alt="Медиа публикации ORBIS";image.loading="lazy";image.style.cssText="width:100%;max-height:300px;object-fit:cover;border-radius:13px";media.append(image)}
+   });
+   box.append(media);
+  }
+  const meta=document.createElement("div");meta.className="post-meta";meta.textContent="♥ "+(post.likes||0)+" реакций · "+(post.comments||0)+" комментариев";
+  box.append(meta);return box;
  }
  document.addEventListener("submit",async event=>{
   if(event.target.id!=="orbisAuthForm")return;
