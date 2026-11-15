@@ -4,8 +4,9 @@ ORBIS is a guest-first social network with a cinematic orbital identity.
 
 ## Product rules
 
-- ORBIS opens directly in guest mode. No email, password, Telegram login or registration form is required.
-- Supabase Auth creates a private anonymous session automatically; PostgreSQL stores the guest profile and social data. The same browser keeps its session, but clearing browser data or switching devices loses access to that guest identity.
+- Registration uses email, a unique username and a password. Login accepts either email or username plus password.
+- Supabase Auth stores credentials and sessions; PostgreSQL stores public profiles and social data. Passwords and email addresses are not exposed in public profile responses.
+- Email confirmation and the deployed site URL/redirect allow-list must be configured in Supabase Auth before public registration.
 - The feed uses paginated queries. Posts support likes, comments, post replies, media and bookmarks.
 - Comments are stored separately from posts and loaded 20 at a time.
 - Stories support text, photo or video and expire after 24 hours.
@@ -34,11 +35,11 @@ ORBIS is a guest-first social network with a cinematic orbital identity.
 - Aggregate views: `post_like_counts`, `post_comment_counts`, `post_topic_counts`
 - Storage bucket: `orbis-media`
 - RLS is enabled on application tables. The private account lookup, comments and rate-limit data are not directly accessible to browser roles.
-- The browser only receives the Supabase publishable key. The service-role key remains in Edge Function secrets.
+- The browser only receives the Supabase publishable key. The service-role key remains in Edge Function secrets. The `account_lookup` table is server-only and maps usernames to email addresses for password login.
 
 ## Required owner configuration before live use
 
-1. Enable **Anonymous Sign-Ins** in Supabase Authentication → Sign In / Providers. This is required for no-registration guest entry.
+1. Ensure the **Email** provider is enabled in Supabase Authentication → Sign In / Providers.
 2. Confirm `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are available to the Edge Function runtime; never expose the service-role key in browser code.
 3. Confirm the `orbis-media` Storage bucket exists and is configured for public media URLs. The API validates each upload and stores it under the guest user's UUID.
 4. Confirm the `ORBIS_KV` namespace ID in `wrangler.toml`.
@@ -47,7 +48,7 @@ ORBIS is a guest-first social network with a cinematic orbital identity.
 ## Known limits
 
 - A GitHub commit does not automatically publish the site.
-- The database had no user profiles, posts or Stories at the last inspection; email registration, email confirmation and first real sign-in have not yet been verified.
+- The database currently has one profile and no posts or Stories. No real end-to-end registration, email confirmation, username login or media upload has yet been completed.
 - No complete browser E2E suite or load test has been completed.
 - Free-tier quotas can pause or throttle a project. Zero-budget operation is the target, not a guarantee of unlimited capacity.
 - A complete human moderation console, direct messages, notification center, clans, Stars/Premium and ad management are not yet implemented.
