@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f8fc">
-<meta name="description" content="ORBIS — цифровое пространство идей, публикаций и открытий. Проект Мехти Мурадлы.">
-<title>ORBIS — твой мир идей | Мехти Мурадлы</title>
+<meta name="theme-color" content="#090b18">
+<meta name="description" content="ORBIS — социальное пространство для публикаций, поиска идей и личных профилей.">
+<title>ORBIS — пространство идей</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
@@ -1600,6 +1600,109 @@ body{overflow-x:hidden}
 @media(max-width:650px){#orbisAppShell.shell{display:block;width:100%;min-height:100svh;padding:13px 12px 88px}#orbisAppShell .sidebar{display:none}#orbisAppShell .topbar{margin-bottom:14px;padding:13px 15px;min-height:68px}#orbisAppShell .hero{min-height:0;padding:23px 20px}#orbisAppShell .post{padding:17px}#orbisAppShell .right{display:none}}
 
 </style>
+
+<style id="orbis-final-polish">
+:root{color-scheme:dark;--bg:#080a16;--paper:#11152a;--ink:#f4f2ff;--muted:#9298b8;--line:#272d4c;--violet:#927cff;--violet2:#b59bff;--coral:#ff91b2;--mint:#65e2d0;--shadow:0 22px 70px #0007}
+html{scroll-behavior:smooth;background:#080a16}
+body{background:radial-gradient(ellipse at 12% 0%,#5d3c9b38,transparent 30%),radial-gradient(ellipse at 90% 12%,#1e6e8c25,transparent 28%),radial-gradient(ellipse at 50% 100%,#3c245e22,transparent 34%),#080a16;color:#f4f2ff}
+body:before{opacity:.3;background-image:radial-gradient(#a99bff2a 1px,transparent 1px)}
+#orbNebula{opacity:.35;pointer-events:none}
+#orbisParticles{opacity:.7}
+.shell{max-width:1500px;grid-template-columns:238px minmax(0,760px) 285px;gap:28px;padding:26px 24px}
+.sidebar{top:18px;height:calc(100dvh - 36px)}
+.brand{padding-bottom:32px}
+.brand-word{background:linear-gradient(90deg,#fff,#b5a4ff 52%,#72e8dc);background-clip:text;-webkit-background-clip:text;color:transparent}
+.nav button{color:#9da4c5;border:1px solid transparent}
+.nav button:hover{background:#ffffff0b;color:#fff;border-color:#34395e}
+.nav button.active{background:linear-gradient(105deg,#8d75ff25,#55d8ca10);color:#fff;border:1px solid #8d75ff45;box-shadow:inset 3px 0 #a28cff,0 12px 30px #0003}
+.nav .create{background:linear-gradient(105deg,#7658ef,#9b6cf4 55%,#e47ba7);border:0;color:white}
+.sidebar-foot{color:#747c9e}.sidebar-foot b{color:#b9b2e9}
+.topbar h1{background:linear-gradient(95deg,#fff 0%,#c3b4ff 55%,#7ce4dc 100%);background-clip:text;-webkit-background-clip:text;color:transparent}
+.kicker{color:#b5a1ff}
+.date-pill,.bell,.sound-toggle{background:#141a31;border:1px solid #2c3458;color:#bfc5e5}
+.bell:hover,.sound-toggle:hover{background:#22294a;color:white;border-color:#8c7af2}
+.hero{border:1px solid #ffffff24;background:linear-gradient(115deg,#33236d 0%,#6043b8 42%,#5a438e 72%,#1b6471 125%);box-shadow:0 25px 75px #41258b45}
+.hero p{color:#e1dcff}
+.hero-tag{border-color:#ffffff38;background:#ffffff12}
+.discovery-panel,.stories,.composer,.post,.side-card,.profile-screen-card,.navigator-feature,.navigator-topic,.dialog{background:linear-gradient(145deg,#151a32f2,#101528f2);border:1px solid #2b3355;color:#f4f2ff;box-shadow:0 18px 55px #0004}
+.discovery-panel{border-radius:24px}
+.discovery-copy p,.side-copy,.post-body,.section-head span,.filter-row span,.hint{color:#a6aecb}
+.discovery-tags span{background:#ffffff0a;border:1px solid #343b60;color:#c9c2ff}
+.composer{background:linear-gradient(120deg,#171a35,#12182d)}
+.compose-open{background:#0d1225;border:1px solid #30385b;color:#a8afce}
+.compose-open:hover{background:#171d38;border-color:#8b79f5}
+.tiny,.topic-filter button,.secondary{background:#151b33;border:1px solid #30385b;color:#b7bfdc}
+.tiny:hover,.secondary:hover,.topic-filter button:hover{background:#24294b;color:#fff;border-color:#8b79f5}
+.topic-filter button.active{background:linear-gradient(100deg,#6e56d8,#267f83);border-color:#8f7cf4;color:#fff}
+.post{background:linear-gradient(145deg,#171b34,#11162a);border-color:#2b3354}
+.post:hover,.side-card:hover{border-color:#7665d7;box-shadow:0 22px 65px #0006}
+.post-title{color:#f8f6ff}
+.post-body{color:#c1c7df}
+.topic{background:#7f6be626;border:1px solid #9c89ff44;color:#c4b8ff}
+.post-actions{border-top-color:#2b3150}
+.post-actions button{color:#9fa8c8}
+.post-actions button:hover{background:#ffffff0d;color:#fff}
+.side-card{background:linear-gradient(145deg,#171b34,#111629)}
+.topic-item{border-top-color:#2a3150}
+.topic-item small,.profile-preview small{color:#8992b4}
+.topic-dot{box-shadow:0 0 0 5px #a18aff15,0 0 20px #8d79ff55}
+.stat-line{border-top-color:#2a3150;color:#a8afca}.stat-line b{color:#b9a9ff}
+.modal{background:#030511c9}
+.dialog{background:linear-gradient(145deg,#1b203b,#11162a);border-color:#41456b}
+.dialog .sub{color:#9ca5c6}
+.dialog input,.dialog textarea,.profile-edit-grid input,.profile-edit-grid textarea{background:#0c1225;border:1px solid #30385b;color:#f6f3ff}
+.dialog input:focus,.dialog textarea:focus,.profile-edit-grid input:focus,.profile-edit-grid textarea:focus{border-color:#9a86ff;box-shadow:0 0 0 3px #9a86ff22}
+.primary,.auth-submit{background:linear-gradient(105deg,#7658ef,#986df0 55%,#df79a8);color:#fff;box-shadow:0 12px 28px #7755e944}
+.primary:hover,.auth-submit:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.toast{background:linear-gradient(100deg,#242044,#4b3b91);border:1px solid #8b79f555;color:#fff}
+.mobile-nav{background:#0b1022eF;border-top:1px solid #2a3150;backdrop-filter:blur(22px);box-shadow:0 -15px 40px #0006}
+.mobile-nav button{color:#8f99bd}.mobile-nav button.active{background:#8d79f52b;color:#fff}
+.orbis-screen{color:#f4f2ff}
+.screen-heading p,.screen-eyebrow{color:#9da7cc}
+.navigator-section-title{color:#e9e5ff}
+.navigator-section-title small{color:#929cbd}
+.navigator-grid{gap:13px}
+.navigator-topic{min-height:150px;position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+.navigator-topic:hover{transform:translateY(-4px);border-color:#8d79f5;box-shadow:0 20px 50px #0005}
+.navigator-topic-name{color:#f7f4ff}.navigator-topic-sub{color:#aab2d0}
+.orbis-search input{background:#0d1327!important;border-color:#343b60!important;color:#fff!important}
+.profile-cover{background:linear-gradient(110deg,#46338e,#6b50b7 55%,#247e83)!important}
+.profile-identity,.profile-edit-grid{color:#f4f2ff}
+.profile-only-note{color:#a3abcd}
+.auth-gateway{background:#080a16;color:#f5f2ff}
+.auth-card{background:linear-gradient(145deg,#171c35f5,#0d1327f7)!important;border:1px solid #41446b!important;box-shadow:0 35px 110px #000a!important}
+.auth-heading h2{color:#fff}.auth-heading p,.auth-legal{color:#a1a9c9}
+.auth-field>span:first-child{color:#aab2d3}
+.auth-input-wrap{background:#0c1226!important;border:1px solid #30385b!important}
+.auth-input-wrap input{color:#fff!important;background:transparent!important}
+.auth-tabs{background:#0b1124!important;border:1px solid #30385b!important}
+.auth-tabs button{color:#9da6c7}.auth-tabs button.active{color:#fff}
+.auth-tab-glider{background:linear-gradient(100deg,#7658ef,#9b6cf4)!important}
+.auth-demo{background:#ffffff08!important;border:1px solid #343b60!important;color:#c2c9e5!important}
+.auth-back-landing{background:#151a32!important;border:1px solid #333b5e!important;color:#fff!important}
+#orbisLanding{background:#080a16!important;color:#f4f2ff!important}
+#orbisLanding .land-hero,#orbisLanding .land-about,#orbisLanding .land-features,#orbisLanding .land-creator,#orbisLanding .land-roadmap,#orbisLanding .land-faq,#orbisLanding .land-download{color:#f4f2ff}
+#orbisLanding .land-hero{background:radial-gradient(ellipse at 75% 40%,#7153c955,transparent 40%),linear-gradient(120deg,#11162b,#0b1021)!important}
+#orbisLanding .land-grid article,#orbisLanding .roadmap-card,#orbisLanding .faq-list details,#orbisLanding .land-download{background:linear-gradient(145deg,#171c35,#101529)!important;border:1px solid #2e3658!important;color:#f4f2ff!important}
+#orbisLanding p,#orbisLanding .faq-list p{color:#aab2cf}
+#orbisLanding h1,#orbisLanding h2,#orbisLanding h3{color:#f6f3ff}
+#orbisLanding em,#orbisLanding .land-kicker{color:#b4a1ff}
+#orbisLanding a{color:#d2c7ff}
+#orbisLanding .land-footer{background:#080a16;border-top:1px solid #252d4b;color:#8f99bb}
+#orbisLanding #downloadCTA{background:linear-gradient(105deg,#7658ef,#9b6cf4 60%,#dc79a8);color:#fff}
+#orbisLanding .land-art{filter:drop-shadow(0 25px 50px #0008)}
+.profile-logout{width:100%;margin-top:10px}
+.is-loading{animation:orbSpin .8s linear infinite}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+#orbisProgress{background:linear-gradient(90deg,#927cff,#65e2d0,#ff91b2)!important;box-shadow:0 0 14px #927cff88}
+button,input,textarea{transition:background-color .2s,border-color .2s,color .2s,transform .2s,box-shadow .2s}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #a995ff;outline-offset:3px}
+[hidden]{display:none!important}
+@media(max-width:1080px){.shell{grid-template-columns:210px minmax(0,1fr);gap:18px}}
+@media(max-width:650px){.shell{padding:12px 11px 92px}.topbar h1{font-size:26px}.hero{padding:20px}.hero h2{font-size:22px}.discovery-panel{padding:18px}.post{border-radius:18px}.mobile-nav{padding-bottom:calc(9px + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+
 </head>
 <body>
 <div class="orbis-intro" id="orbisIntro" role="dialog" aria-label="Космическое приветствие ORBIS" aria-modal="true">
@@ -1656,18 +1759,18 @@ body{overflow-x:hidden}
 <section class="land-roadmap" id="land-roadmap">
  <div class="roadmap-heading"><small class="land-kicker">ПУТЬ ORBIS</small><h2>От первой идеи<br><em>к большому пространству.</em></h2><p>ORBIS развивается поэтапно. Мы показываем, что уже является демонстрацией, а что ещё предстоит подключить.</p></div>
  <div class="roadmap-grid">
-  <article class="roadmap-card is-current"><span class="roadmap-index">01</span><span class="roadmap-state">ТЕКУЩИЙ ЭТАП</span><h3>Визуальная основа</h3><p>Главная страница, знакомство с проектом, экран доступа и демонстрация интерфейса социальной сети.</p><div class="roadmap-line"><i></i></div><small>УЖЕ ПОДГОТОВЛЕНО</small></article>
-  <article class="roadmap-card"><span class="roadmap-index">02</span><span class="roadmap-state">СЛЕДУЮЩИЙ ЭТАП</span><h3>Аккаунты и публикации</h3><p>Безопасная регистрация, вход, сохранение профиля и публикаций на сервере.</p><div class="roadmap-line"><i></i></div><small>В РАЗРАБОТКЕ ПЛАНА</small></article>
-  <article class="roadmap-card"><span class="roadmap-index">03</span><span class="roadmap-state">ДАЛЬШЕ</span><h3>Подготовка к запуску</h3><p>Проверка на устройствах, защита данных, тестирование и постепенное открытие доступа.</p><div class="roadmap-line"><i></i></div><small>ПОСЛЕ ПОДКЛЮЧЕНИЯ ОСНОВЫ</small></article>
+  <article class="roadmap-card is-current"><span class="roadmap-index">01</span><span class="roadmap-state">ОСНОВА</span><h3>Интерфейс и структура</h3><p>Три главных раздела: Лента, Навигатор и Профиль. Адаптивный интерфейс для компьютера и телефона.</p><div class="roadmap-line"><i></i></div><small>ПОДГОТОВЛЕНО</small></article>
+  <article class="roadmap-card is-current"><span class="roadmap-index">02</span><span class="roadmap-state">СЕРВЕРНЫЕ ФУНКЦИИ</span><h3>Аккаунты и публикации</h3><p>Регистрация, вход, профили, публикации, поиск, реакции, ответы и загрузка медиа подключены в коде.</p><div class="roadmap-line"><i></i></div><small>КОД ПОДГОТОВЛЕН · НУЖЕН DEPLOY И ТЕСТ</small></article>
+  <article class="roadmap-card"><span class="roadmap-index">03</span><span class="roadmap-state">ПЕРЕД ОТКРЫТЫМ ЗАПУСКОМ</span><h3>Проверка и укрепление</h3><p>Проверка всех сценариев, защита от злоупотреблений, модерация, резервирование и тестирование нагрузки.</p><div class="roadmap-line"><i></i></div><small>СЛЕДУЮЩИЙ ЭТАП</small></article>
  </div>
- <div class="roadmap-disclaimer"><span>✦</span><p><b>Важно:</b> сейчас ORBIS — демонстрационный прототип. Регистрация, публикации и хранение данных пока не подключены. Мы не выдаём макет за готовый сервис.</p></div>
+ <div class="roadmap-disclaimer"><span>✦</span><p><b>Статус проекта:</b> интерфейс связан с API для аккаунтов, профилей, публикаций, поиска, реакций, ответов и медиа. Реальная работа зависит от успешного развёртывания Worker и подключения KV, R2 и Telegram-архива.</p></div>
 </section>
 <section class="land-faq" id="faq">
  <div class="faq-heading"><small class="land-kicker">ВОПРОСЫ И ОТВЕТЫ</small><h2>Знакомство с <em>ORBIS.</em></h2><p>Коротко о том, что представляет собой проект сегодня.</p></div>
  <div class="faq-list">
   <details><summary>Что такое ORBIS?<span>＋</span></summary><p>Это цифровое пространство для публикаций, тематического поиска и личных профилей. Главная идея — оставить три понятных направления: Лента, Навигатор и Профиль.</p></details>
-  <details><summary>Можно ли уже создать настоящий аккаунт?<span>＋</span></summary><p>Пока нет. Экран входа и регистрации сейчас демонстрационный. Настоящая авторизация появится после подключения и проверки серверной части.</p></details>
-  <details><summary>Сохраняются ли публикации между устройствами?<span>＋</span></summary><p>Пока нет: демонстрационные действия могут сохраняться только в браузере. Общая база публикаций и профилей ещё не подключена.</p></details>
+  <details><summary>Можно ли создать настоящий аккаунт?<span>＋</span></summary><p>Да, когда Worker развёрнут и подключён к KV. Регистрация и вход используют серверный API; пароль хранится в виде PBKDF2-хеша, а сессия — в защищённой HttpOnly-cookie.</p></details>
+  <details><summary>Сохраняются ли публикации между устройствами?<span>＋</span></summary><p>Публикации и профили сохраняются в Cloudflare KV, а публикации дополнительно отправляются в Telegram-архив. Фото и видео хранятся в R2. Это заработает после подключения всех ресурсов и успешного Deploy.</p></details>
   <details><summary>Можно ли открыть ORBIS на телефоне?<span>＋</span></summary><p>Да, текущую веб-страницу можно открыть в мобильном браузере. Отдельное приложение пока не выпущено.</p></details>
  </div>
 </section>
@@ -1710,10 +1813,10 @@ body{overflow-x:hidden}
  <div class="sidebar-foot">ТВОЁ ПРОСТРАНСТВО<br><b>Идей. Людей. Открытий.</b></div>
 </aside>
 <main>
- <header class="topbar"><div><div class="kicker">ОДНА ЛЕНТА — МНОГО МИРОВ</div><h1 id="pageTitle">Твоя лента</h1></div><div class="top-actions"><span class="date-pill">✦ ORBIS COMMUNITY</span><button class="bell" aria-label="Уведомления">♧</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">♫ Звук: выкл.</button></div></header>
+ <header class="topbar"><div><div class="kicker">ОДНА ЛЕНТА — МНОГО МИРОВ</div><h1 id="pageTitle">Твоя лента</h1></div><div class="top-actions"><span class="date-pill">✦ ORBIS COMMUNITY</span><button class="bell" id="refreshFeed" type="button" aria-label="Обновить ленту" title="Обновить ленту">↻</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">♫ Звук: выкл.</button></div></header>
  <section class="hero"><div class="hero-visual" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-spark">✦</div><div class="hero-planet">✳</div></div><div class="hero-label">WELCOME TO ORBIS</div><h2>Место, где идеи находят своё место.</h2><p>Открывай интересное, делись мыслями и следи за тем, что происходит в мире вокруг тебя.</p><span class="hero-tag">✦ Твой поток начинается здесь</span></section>
  <section class="discovery-panel"><div class="discovery-orbit" aria-hidden="true"><i></i><b></b><span>✦</span></div><div class="discovery-copy"><div class="discovery-kicker">ORBIS EXPLORER · 01</div><h2>Твоя следующая большая идея — ближе, чем кажется.</h2><p>Исследуй темы, открывай новые взгляды и находи своё направление.</p><div class="discovery-tags"><span>✦ Идеи</span><span>◈ Открытия</span><span>⌁ Сообщество</span></div></div></section>
- <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button></div><span class="hint">1 пост в день</span></div></section>
+ <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button></div><span class="hint">Твои идеи — в одном потоке</span></div></section>
  <div class="filter-row"><strong>Сейчас в ORBIS</strong><span>Новые мысли и знакомые темы</span></div>
  <div class="topic-filter" id="topicFilter"><button class="active">Все темы</button><button>Новости</button><button>Технологии</button><button>Бизнес</button><button>Общество</button><button>Наука</button><button>Идеи</button></div>
  <section id="feed">
@@ -1737,7 +1840,17 @@ body{overflow-x:hidden}
 const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand()}
 const $=id=>document.getElementById(id),modal=$("modal"),toast=$("toast");let toastTimer;
 function notify(s){toast.textContent=s;toast.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.style.display="none",2800)}
-function openComposer(){$("dialogTitle").textContent="Новая публикация";modal.classList.add("open");$("postTitle").focus()}
+function openComposer(){
+ if(!window.orbisUser){
+  const landing=$("orbisLanding"),gateway=$("authGateway");
+  if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;
+  document.body.classList.add("orbis-auth-open");
+  document.querySelector('[data-auth-mode="signup"]')?.click();
+  notify("Сначала создай аккаунт или войди в ORBIS.");
+  return;
+ }
+ $("dialogTitle").textContent="Новая публикация";modal.classList.add("open");$("postTitle").focus();
+}
 ["openComposer","openComposer2","newText","mobileCreate"].forEach(id=>$(id).addEventListener("click",openComposer));
 
 $("cancel").addEventListener("click",()=>modal.classList.remove("open"));
@@ -1815,7 +1928,7 @@ function setOrbisScreen(view){
   }));
  }else if(view==="Профиль"){
   const profile=(()=>{try{return JSON.parse(localStorage.getItem("orbis-profile-v1")||"{}")}catch(e){return{}}})();
-  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Настрой свою личную страницу.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Гость ORBIS</h3><span id="profileHandlePreview">@guest</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username"></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave">Сохранить профиль</button><p class="profile-only-note" id="profileSaveNote">Профиль сохраняется только в этом браузере.</p></div></div>';
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Настрой свою личную страницу.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Гость ORBIS</h3><span id="profileHandlePreview">@guest</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username"></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button">Выйти из аккаунта</button><p class="profile-only-note" id="profileSaveNote">Изменения профиля сохраняются на сервере ORBIS.</p></div></div>';
   const nameInput=$("profileNameInput"),handleInput=$("profileHandleInput"),bioInput=$("profileBioInput");
   nameInput.value=profile.name||"Гость ORBIS";handleInput.value=profile.username||"guest";bioInput.value=profile.bio||"";
   $("profileNamePreview").textContent=nameInput.value;$("profileHandlePreview").textContent="@"+handleInput.value;$("profileAvatarPreview").textContent=nameInput.value.slice(0,1).toUpperCase();
@@ -2237,6 +2350,11 @@ document.addEventListener("click",event=>{
  document.addEventListener("click",async event=>{
   const target=event.target.closest("button");if(!target)return;
   if(target.id==="orbisSearchButton"){event.preventDefault();runSearch();return}
+  if(target.id==="refreshFeed"){event.preventDefault();target.classList.add("is-loading");try{await loadFeed();window.notify?.("Лента обновлена.")}finally{target.classList.remove("is-loading")}return}
+  if(target.id==="profileLogout"){
+   event.preventDefault();target.disabled=true;
+   try{await api("/api/auth/logout",{method:"POST",body:"{}"});window.orbisUser=null;const shell=$("orbisAppShell"),gateway=$("authGateway"),landing=$("orbisLanding");if(shell)shell.hidden=true;if(gateway)gateway.hidden=false;if(landing)landing.hidden=true;document.body.classList.add("orbis-auth-open");document.querySelector('[data-auth-mode="login"]')?.click();window.notify?.("Ты вышел из ORBIS.")}catch(error){window.notify?.(error.message)}finally{target.disabled=false}return;
+  }
   if(target.dataset.action==="like"){
    event.preventDefault();event.stopImmediatePropagation();
    const article=target.closest("[data-post-id]");if(!article)return;
@@ -2322,6 +2440,8 @@ document.addEventListener("click",event=>{
    },100);
   }
  },true);
+ const searchInput=$("orbisSearchInput");
+ document.addEventListener("keydown",event=>{if(event.key==="Enter"&&event.target===$("orbisSearchInput")){event.preventDefault();runSearch()}});
  window.addEventListener("orbis:login",()=>{loadFeed()});
  api("/api/auth/me").then(data=>{window.orbisUser=data.user;$("authDemo")?.click();loadFeed()}).catch(()=>{});
 })();
