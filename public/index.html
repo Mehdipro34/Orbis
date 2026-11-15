@@ -2066,7 +2066,7 @@ function setOrbisScreen(view){
   orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SAVED IDEAS</span><h2>Закладки</h2><p>Публикации, которые ты сохранил, всегда под рукой.</p></div><div id="orbisBookmarksList" aria-live="polite"><div class="post">Загружаем сохранённые публикации…</div></div>';
   api("/api/bookmarks").then(data=>{const list=$("orbisBookmarksList");if(!list)return;list.replaceChildren();if(!data.posts.length){const empty=document.createElement("div");empty.className="post";empty.textContent="Здесь пока пусто. Сохраняй интересные публикации из ленты.";list.append(empty)}else data.posts.forEach(item=>list.append(card(item))) }).catch(error=>{const list=$("orbisBookmarksList");if(list){list.textContent=error.message}});
  }else if(view==="Профиль"){
-  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button" hidden>Выйти из гостевого режима</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button">Выйти из аккаунта</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
  }else if(view==="Реклама"){
   orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">ORBIS · AD CENTER</span><h2>Центр рекламы</h2><p>Создавай объявления, отправляй их на проверку и следи за результатами кампаний.</p></div><div class="adcenter-intro"><div><span class="adcenter-kicker">КАБИНЕТ РЕКЛАМОДАТЕЛЯ</span><h3>Продвигай свои проекты в ORBIS</h3><p>Создай кампанию с заголовком, описанием и ссылкой на свой сайт.</p></div><div class="adcenter-mark">▣</div></div><div class="adcenter-notice"><b>Важно:</b> новые кампании сначала проходят проверку и пока не показываются в ленте. Оплата и списание средств не подключены — поле бюджета не является платежом.</div><form id="orbisAdForm" class="adcenter-form"><h3>Новая кампания</h3><label>Название кампании<input name="name" maxlength="80" required minlength="2" placeholder="Например, мой проект"></label><label>Заголовок объявления<input name="headline" maxlength="90" required minlength="2" placeholder="Короткий заголовок"></label><label>Описание<textarea name="body" maxlength="240" required minlength="2" placeholder="Расскажи, что предлагаешь"></textarea></label><label>Ссылка назначения<input name="destinationUrl" type="url" required placeholder="https://example.com"></label><label>Изображение (необязательно)<input name="imageUrl" type="url" placeholder="https://..."></label><button class="primary" type="submit">Создать кампанию</button><p class="adcenter-note" id="orbisAdFormNote">Кампания сохранится в твоём кабинете со статусом «На проверке».</p></form><div class="adcenter-list-head"><div><h3>Мои кампании</h3><p>Статистика обновляется из базы ORBIS.</p></div><button class="secondary" id="orbisAdsRefresh" type="button">↻ Обновить</button></div><div id="orbisAdsList" aria-live="polite"><div class="post">Загружаем кампании…</div></div>';
   window.orbisLoadAdsCenter?.();
@@ -2489,9 +2489,13 @@ document.addEventListener("click",event=>{
    await window.orbisSupabaseReady;
    let result;
    if(mode==="signup"){
-    // Create the Auth account directly. The server creates the matching profile
-    // after the user has a valid session; this avoids blocking registration on a
-    // separate username-check request to the API.
+    const availability=await api("/api/username-available?username="+encodeURIComponent(username));
+    if(!availability.available){
+     note.textContent="Этот username уже занят. Выбери другой.";
+     note.className="auth-form-note error";
+     if(submit)submit.disabled=false;
+     return;
+    }
     result=await window.orbisSupabase.auth.signUp({
      email,password,
      options:{
@@ -2515,6 +2519,8 @@ document.addEventListener("click",event=>{
    note.textContent="Добро пожаловать в ORBIS!";
    window.orbisEnterApp?.();
    await loadFeed();
+   await loadCurrentProfile();
+   await openSharedPostFromHash();
   }catch(error){
    const message=String(error?.message||"Не удалось выполнить вход.");
    note.className="auth-form-note error";
