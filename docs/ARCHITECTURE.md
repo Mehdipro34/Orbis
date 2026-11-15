@@ -1,6 +1,6 @@
 # ORBIS — current product and technical architecture
 
-Status: active implementation with deployed Supabase Edge Functions. Public launch and end-to-end Telegram registration are not yet verified.
+Status: active implementation with deployed Supabase Edge Functions. Telegram Mini App auth and browser OIDC code paths are deployed, but live Telegram credentials, public hosting rollout and end-to-end registration/posting are not yet verified.
 
 ## Product
 
@@ -8,13 +8,13 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity. Regi
 
 ## User-facing features in the current build
 
-- **Telegram account:** server verifies Telegram Mini App `initData`, creates or recovers a Supabase Auth user, creates a profile and issues a Supabase session.
+- **Telegram account:** Mini App login verifies Telegram `initData`; browser login uses Telegram OIDC Authorization Code + PKCE with server-side ID-token signature/claim checks. Both map the Telegram ID to the same Supabase Auth user and ORBIS profile.
 - **Feed:** server-paginated posts, up to 20 per page, topic filters and refresh.
 - **Posts:** title, topic, text, up to four media files, daily per-account publication quota.
 - **Reactions:** likes stored separately and toggled by the signed-in user.
 - **Comments:** separate `post_comments` table; 20 comments per request; owners can remove their own comments.
 - **Post replies:** a reply is a separate post linked by `reply_to`, distinct from a short comment.
-- **Profiles:** display name, username, short bio, own posts and follow/unfollow.
+- **Profiles:** display name, username, short bio, own posts with author name and `@username` visible on each profile post, and follow/unfollow.
 - **Stories:** text or one photo/video; visible only while unexpired; one Story per account per UTC day.
 - **Bookmarks:** private per-user saved posts.
 - **Navigator:** people/posts search, topic counts and attributed RSS headlines from the Worker.
@@ -26,7 +26,7 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity. Regi
 ### Client
 - `public/index.html` is the responsive web and Telegram Mini App client.
 - The browser contains only the Supabase publishable key.
-- Telegram `initData` is sent to `orbis-telegram-auth`; Telegram IDs supplied by the browser are never accepted as proof of identity.
+- Telegram Mini App `initData` or a browser OIDC authorization code is sent to `orbis-telegram-auth`; Telegram IDs supplied by the browser are never accepted as proof of identity.
 - API requests go directly to Supabase Edge Functions, not through a second Worker social API.
 
 ### Supabase
@@ -93,7 +93,7 @@ Do not show these as available product features until they are actually implemen
 
 ## Launch blockers
 
-1. Owner must set `TELEGRAM_BOT_TOKEN` in Supabase Edge Function secrets.
+1. Owner must set `TELEGRAM_BOT_TOKEN` in Supabase Edge Function secrets for Mini App auth. For browser OIDC, also set `TELEGRAM_LOGIN_CLIENT_ID`, `TELEGRAM_LOGIN_CLIENT_SECRET` and the exact HTTPS `TELEGRAM_LOGIN_REDIRECT_URI` in Supabase Edge Function secrets; Cloudflare Worker secrets are separate.
 2. Owner must set the official Telegram bot's Mini App URL to the deployed HTTPS Worker URL.
 3. Owner must remove the stale Cloudflare `ORBIS_MEDIA` R2 binding from Worker Settings → Bindings.
 4. Deploy the Worker and confirm the new build lists only `ASSETS` and `ORBIS_KV`.
