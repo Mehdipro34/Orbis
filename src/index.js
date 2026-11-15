@@ -310,28 +310,37 @@ async function api(request, env, url) {
     const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString(), replyTo: replyTo || null, replyToTitle: parentPost?.title || null, media };
     const mediaLinks = media.map(item => url.origin + item.url).join("\n");
     const archiveText = ("ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + (mediaLinks ? "\n\nМедиа:\n" + mediaLinks : "") + "\n\nID: " + post.id).slice(0, 4000);
+    // Persist the publication first. Telegram is a secondary archive, so a temporary
+    // Telegram outage must never destroy a user's successfully submitted post.
+    const storageKey = "post:" + Date.now().toString().padStart(13, "0") + ":" + post.id;
+    post.telegramMediaMessageIds = [];
+    post.mediaArchived = media.length === 0;
+    post.archived = false;
+    await env.ORBIS_KV.put(storageKey, JSON.stringify(post));
+    await env.ORBIS_KV.put("postid:" + post.id, storageKey);
+    await env.ORBIS_KV.put("poststats:" + post.id, JSON.stringify({ likes: 0 }));
     try {
       const archived = await telegram("sendMessage", env, { chat_id: env.POSTS_CHANNEL_ID, text: archiveText, disable_web_page_preview: true });
       post.telegramMessageId = archived.result.message_id;
       post.archived = true;
       const mediaChannel = env.MEDIA_CHANNEL_ID || env.POSTS_CHANNEL_ID;
-      post.telegramMediaMessageIds = [];
       for (const item of media) {
         const mediaUrl = url.origin + item.url;
         const caption = ("ORBIS · @" + user.username + "\n" + title + "\n" + post.id).slice(0, 900);
         const method = item.type === "image/gif" ? "sendAnimation" : item.type.startsWith("video/") ? "sendVideo" : "sendPhoto";
         const field = item.type === "image/gif" ? "animation" : item.type.startsWith("video/") ? "video" : "photo";
-        try { const mediaResult = await telegram(method, env, { chat_id: mediaChannel, [field]: mediaUrl, caption }); post.telegramMediaMessageIds.push(mediaResult.result.message_id); }
-        catch (mediaError) { post.mediaArchiveWarning = "Файл доступен по ссылке, но Telegram не смог скопировать его в медиаканал: " + mediaError.message; }
+        try {
+          const mediaResult = await telegram(method, env, { chat_id: mediaChannel, [field]: mediaUrl, caption });
+          post.telegramMediaMessageIds.push(mediaResult.result.message_id);
+        } catch (mediaError) {
+          post.mediaArchiveWarning = "Медиа доступно в ORBIS, но Telegram не смог скопировать его в медиаканал: " + mediaError.message;
+        }
       }
       post.mediaArchived = post.telegramMediaMessageIds.length === media.length;
     } catch (error) {
-      return json({ error: "Не удалось сохранить публикацию в Telegram: " + error.message }, 502);
+      post.archiveWarning = "Публикация сохранена в ORBIS, но Telegram-архив временно недоступен: " + error.message;
     }
-    const storageKey = "post:" + Date.now().toString().padStart(13, "0") + ":" + post.id;
     await env.ORBIS_KV.put(storageKey, JSON.stringify(post));
-    await env.ORBIS_KV.put("postid:" + post.id, storageKey);
-    await env.ORBIS_KV.put("poststats:" + post.id, JSON.stringify({ likes: 0 }));
     if (env.INDEX_CHANNEL_ID) {
       try {
         await telegram("sendMessage", env, { chat_id: env.INDEX_CHANNEL_ID, text: "ORBIS_INDEX\n" + post.createdAt + "\n@" + post.username + "\n" + post.topic + "\n" + post.id, disable_web_page_preview: true });
@@ -339,7 +348,7 @@ async function api(request, env, url) {
         await env.ORBIS_KV.put(storageKey, JSON.stringify(post));
       } catch { post.indexed = false; }
     }
-    return json({ ok: true, post: await postView(env, post, user), mediaArchived: post.mediaArchived !== false, archiveWarning: post.mediaArchiveWarning || null }, 201);
+    return json({ ok: true, post: await postView(env, post, user), mediaArchived: post.mediaArchived !== false, archiveWarning: post.archiveWarning || post.mediaArchiveWarning || null }, 201);
   }
   if (request.method === "PUT" && path === "/api/profile") {
     const user = await currentUser(request, env);
