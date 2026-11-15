@@ -133,6 +133,26 @@ async function api(request, env, url) {
     if (!user) return json({ authenticated: false }, 401);
     return json({ authenticated: true, user: { username: user.username, name: user.name, bio: user.bio, createdAt: user.createdAt } });
   }
+  if (request.method === "POST" && path === "/api/media") {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Войди, чтобы загружать медиа." }, 401);
+    if (!env.ORBIS_MEDIA) return json({ error: "Хранилище медиа ещё не подключено. Нужен R2 bucket ORBIS_MEDIA." }, 503);
+    const form = await request.formData();
+    const files = form.getAll("files").filter(value => value && typeof value === "object" && typeof value.size === "number");
+    if (!files.length || files.length > 4) return json({ error: "Выбери от 1 до 4 файлов." }, 400);
+    const allowed = { "image/jpeg":"jpg", "image/png":"png", "image/webp":"webp", "image/gif":"gif", "video/mp4":"mp4", "video/webm":"webm" };
+    const uploaded = [];
+    for (const file of files) {
+      const ext = allowed[file.type];
+      const max = file.type.startsWith("video/") ? 50 * 1024 * 1024 : 12 * 1024 * 1024;
+      if (!ext) return json({ error: "Поддерживаются JPG, PNG, WebP, GIF, MP4 и WebM." }, 415);
+      if (file.size <= 0 || file.size > max) return json({ error: "Файл слишком большой. Фото — до 12 МБ, видео — до 50 МБ." }, 413);
+      const key = user.username + "/" + crypto.randomUUID() + "." + ext;
+      await env.ORBIS_MEDIA.put(key, file.stream(), { httpMetadata: { contentType: file.type, cacheControl: "public, max-age=31536000, immutable" }, customMetadata: { owner: user.username } });
+      uploaded.push({ key, url: "/media/" + key, type: file.type, size: file.size });
+    }
+    return json({ ok: true, media: uploaded }, 201);
+  }
   if (request.method === "GET" && path === "/api/posts") {
     const user = await currentUser(request, env);
     const topic = String(url.searchParams.get("topic") || "").trim().toLocaleLowerCase("ru");
@@ -219,14 +239,20 @@ async function api(request, env, url) {
     const topic = String(body.topic || "").trim().slice(0, 48);
     const text = String(body.body || "").trim().slice(0, 4000);
     if (!title || !topic || !text) return json({ error: "Заполни название, тему и текст публикации." }, 400);
+    const media = Array.isArray(body.media) ? body.media.slice(0, 4) : [];
+    if (body.media && (!Array.isArray(body.media) || body.media.length > 4)) return json({ error: "Можно прикрепить не более 4 файлов." }, 400);
+    for (const item of media) {
+      if (!item || typeof item.key !== "string" || !item.key.startsWith(user.username + "/") || !await env.ORBIS_MEDIA?.head(item.key)) return json({ error: "Один из медиафайлов не найден или недоступен." }, 400);
+    }
     const replyTo = String(body.replyTo || "").trim();
     let parentPost = null;
     if (replyTo) {
       parentPost = await findPost(env, replyTo);
       if (!parentPost) return json({ error: "Исходная публикация не найдена." }, 404);
     }
-    const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString(), replyTo: replyTo || null, replyToTitle: parentPost?.title || null };
-    const archiveText = "ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + "\n\nID: " + post.id;
+    const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString(), replyTo: replyTo || null, replyToTitle: parentPost?.title || null, media };
+    const mediaLinks = media.map(item => url.origin + item.url).join("\n");
+    const archiveText = "ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + (mediaLinks ? "\n\nМедиа:\n" + mediaLinks : "") + "\n\nID: " + post.id;
     try {
       const archived = await telegram("sendMessage", env, { chat_id: env.POSTS_CHANNEL_ID, text: archiveText, disable_web_page_preview: true });
       post.telegramMessageId = archived.result.message_id;
@@ -274,6 +300,21 @@ async function api(request, env, url) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/media/")) {
+      try {
+        if (!env.ORBIS_MEDIA) return new Response("Media storage is not configured", { status: 503 });
+        const key = decodeURIComponent(url.pathname.slice("/media/".length));
+        if (!/^[a-z0-9_.-]{3,24}\/[a-f0-9-]+\.(jpg|png|webp|gif|mp4|webm)$/i.test(key)) return new Response("Not found", { status: 404 });
+        const object = await env.ORBIS_MEDIA.get(key);
+        if (!object) return new Response("Not found", { status: 404 });
+        const headers = new Headers();
+        object.writeHttpMetadata(headers);
+        headers.set("etag", object.httpEtag);
+        headers.set("cache-control", "public, max-age=31536000, immutable");
+        headers.set("x-content-type-options", "nosniff");
+        return new Response(request.method === "HEAD" ? null : object.body, { headers });
+      } catch (error) { return new Response("Media unavailable", { status: 500 }); }
+    }
     if (url.pathname.startsWith("/api/")) {
       try {
         return await api(request, env, url);
