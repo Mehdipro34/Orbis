@@ -7,7 +7,7 @@ const cors = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
 };
 const out = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
-const safeProfile = (p: any) => p ? ({ username:p.username, name:p.display_name, bio:p.bio||"", avatar_url:p.avatar_url||null, createdAt:p.created_at }) : null;
+const safeProfile = (p: any) => p ? ({ username:p.username, name:p.display_name, bio:p.bio||"", avatar_url:p.avatar_url||null, publicNumber:p.public_number==null?null:String(p.public_number), createdAt:p.created_at }) : null;
 
 function basicTextGuard(value:string){
   const text=String(value||"").trim();
@@ -67,6 +67,24 @@ async function verifyGuestToken(token:string,secret:string){
     if(typeof payload.sub!=="string"||! /^[0-9a-f-]{36}$/i.test(payload.sub)||!Number.isFinite(payload.exp)||payload.exp<Date.now())return null;
     return payload.sub as string;
   }catch{return null}
+}
+
+async function enrichPolls(admin:any,uid:string,rows:any[]){
+  const ids=rows.filter((p:any)=>Array.isArray(p.poll_options)&&p.poll_options.length>=2).map((p:any)=>p.id);
+  if(!ids.length)return rows;
+  const [{data:counts},{data:mine}]=await Promise.all([
+    admin.from("post_poll_counts").select("post_id,option_index,vote_count").in("post_id",ids),
+    admin.from("post_poll_votes").select("post_id,option_index").eq("user_id",uid).in("post_id",ids)
+  ]);
+  const map=new Map<string,number[]>();
+  for(const row of counts||[]){const values=map.get(row.post_id)||[];values[Number(row.option_index)]=Number(row.vote_count)||0;map.set(row.post_id,values)}
+  const mineMap=new Map((mine||[]).map((x:any)=>[x.post_id,Number(x.option_index)]));
+  return rows.map((p:any)=>{
+    if(!Array.isArray(p.poll_options)||p.poll_options.length<2)return p;
+    const values=map.get(p.id)||[];
+    const counts=p.poll_options.map((_:any,i:number)=>values[i]||0);
+    return {...p,poll:{options:p.poll_options,counts,total:counts.reduce((x:number,y:number)=>x+y,0),myVote:mineMap.has(p.id)?mineMap.get(p.id):null,endsAt:p.poll_ends_at||null}};
+  });
 }
 
 async function notifyUser(admin:any, recipientId:string, actorId:string, kind:string, entityId:string|null, body:string){
@@ -163,28 +181,45 @@ Deno.serve(async (req: Request) => {
   if (!me) return out({error:"Профиль ORBIS не найден. Обнови страницу, чтобы восстановить гостевую сессию."},401);
 
   if (req.method==="GET" && path==="/api/posts") {
-    const rawOffset=Number(u.searchParams.get("offset")||0),rawLimit=Number(u.searchParams.get("limit")||20);
-    const offset=Number.isSafeInteger(rawOffset)?Math.max(0,Math.min(rawOffset,1000000)):0;
-    const limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
-    let q=admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url)").eq("status","published").is("reply_to",null).order("created_at",{ascending:false}).range(offset,offset+limit-1);
-    const topic=u.searchParams.get("topic"); if(topic) q=q.ilike("topic",topic);
-    const {data,error}=await q; if(error)return out({error:error.message},400);
-    const ids=(data||[]).map((p:any)=>p.id);
+    if(await isRateLimited(admin,uid,"feed_read",120,60))return out({error:"Слишком много запросов к ленте. Подожди немного."},429);
+    const rawLimit=Number(u.searchParams.get("limit")||20),limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
+    const cursorRaw=u.searchParams.get("cursor")||"";
+    let cursor:any=null;
+    if(cursorRaw){
+      try{cursor=JSON.parse(new TextDecoder().decode(base64UrlToBytes(cursorRaw)))}catch{return out({error:"Некорректный курсор ленты."},400)}
+      if(!cursor||typeof cursor.createdAt!=="string"||!Number.isFinite(Date.parse(cursor.createdAt))||typeof cursor.id!=="string"||! /^[0-9a-f-]{36}$/i.test(cursor.id))return out({error:"Некорректный курсор ленты."},400);
+    }
+    let q=admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
+      .eq("status","published").is("reply_to",null).order("created_at",{ascending:false}).order("id",{ascending:false});
+    const topic=u.searchParams.get("topic");if(topic)q=q.ilike("topic",topic);
+    const mode=String(u.searchParams.get("mode")||"for-you");
+    if(mode==="following"){
+      const {data:follows,error:followError}=await admin.from("follows").select("following_id").eq("follower_id",uid).limit(5000);
+      if(followError)return out({error:"Не удалось загрузить подписки."},400);
+      const ids=(follows||[]).map((x:any)=>x.following_id);
+      if(!ids.length)return out({posts:[],hasMore:false,nextCursor:null});
+      q=q.in("author_id",ids);
+    }
+    if(cursor)q=q.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");
+    const {data,error}=await q.limit(limit+1);
+    if(error)return out({error:error.message},400);
+    let rows=data||[];const hasMore=rows.length>limit;if(hasMore)rows=rows.slice(0,limit);
+    const enriched=await enrichPolls(admin,uid,rows),ids=enriched.map((p:any)=>p.id);
     const [{data:likes},{data:mine},{data:bookmarks}]=await Promise.all([
       ids.length?admin.from("post_like_counts").select("post_id,like_count").in("post_id",ids):Promise.resolve({data:[]}),
       ids.length?admin.from("post_likes").select("post_id").eq("user_id",uid).in("post_id",ids):Promise.resolve({data:[]}),
       ids.length?admin.from("bookmarks").select("post_id").eq("user_id",uid).in("post_id",ids):Promise.resolve({data:[]})
     ]);
     const counts=new Map((likes||[]).map((x:any)=>[x.post_id,Number(x.like_count)||0]));
-    const liked=new Set((mine||[]).map((x:any)=>x.post_id));
-    const saved=new Set((bookmarks||[]).map((x:any)=>x.post_id));
-    const posts=(data||[]).map((p:any)=>({id:p.id,title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,avatar_url:p.profiles?.avatar_url,createdAt:p.created_at,replyTo:p.reply_to,media:p.media||[],likes:counts.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
-    return out({posts,hasMore:posts.length===limit,nextOffset:offset+posts.length});
+    const liked=new Set((mine||[]).map((x:any)=>x.post_id)),saved=new Set((bookmarks||[]).map((x:any)=>x.post_id));
+    const posts=enriched.map((p:any)=>({id:p.id,postNumber:String(p.post_number),title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,authorNumber:p.profiles?.public_number==null?null:String(p.profiles.public_number),avatar_url:p.profiles?.avatar_url,createdAt:p.created_at,replyTo:p.reply_to,media:p.media||[],poll:p.poll||null,likes:counts.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
+    const last=rows[rows.length-1],nextCursor=last?bytesToBase64Url(encoder.encode(JSON.stringify({createdAt:last.created_at,id:last.id}))):null;
+    return out({posts,hasMore,nextCursor});
   }
   const singlePost=path.match(/^\/api\/posts\/([0-9a-f-]+)$/i);
   if(req.method==="GET"&&singlePost){
     const {data:p,error}=await admin.from("posts")
-      .select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url)")
+      .select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
       .eq("id",singlePost[1]).eq("status","published").maybeSingle();
     if(error)return out({error:error.message},400);
     if(!p)return out({error:"Публикация не найдена."},404);
@@ -196,31 +231,28 @@ Deno.serve(async (req: Request) => {
     return out({post:{
       id:p.id,title:p.title,topic:p.topic,body:p.body,
       username:p.profiles?.username,author:p.profiles?.display_name,avatar_url:p.profiles?.avatar_url,
-      createdAt:p.created_at,replyTo:p.reply_to,media:p.media||[],
-      likes:Number(likes?.like_count)||0,liked:!!mine,saved:!!saved
+      createdAt:p.created_at,postNumber:String(p.post_number),authorNumber:p.profiles?.public_number==null?null:String(p.profiles.public_number),replyTo:p.reply_to,media:p.media||[],
+      likes:Number(likes?.like_count)||0,liked:!!mine,saved:!!saved,poll:(await enrichPolls(admin,uid,[p]))[0]?.poll||null
     }});
   }
   if (req.method==="POST" && path==="/api/posts") {
-    const text=String(body.body||"").trim().slice(0,4000);
-    const media=Array.isArray(body.media)?body.media:[];
-    if (body.media && (!Array.isArray(body.media)||body.media.length>4)) return out({error:"Можно прикрепить не более 4 файлов."},400);
-    if(!text&&!media.length)return out({error:"Добавь текст или фото/видео."},400);
-    const titleInput=String(body.title||"").trim().slice(0,120);
-    const topicInput=String(body.topic||"").trim().slice(0,48);
+    if(await isRateLimited(admin,uid,"post_create",12,3600))return out({error:"Лимит публикаций — 12 постов в час. Попробуй позже."},429);
+    const text=String(body.body||"").trim().slice(0,4000),media=Array.isArray(body.media)?body.media:[];
+    if(body.media&&(!Array.isArray(body.media)||body.media.length>4))return out({error:"Можно прикрепить не более 4 файлов."},400);
+    const options=Array.isArray(body.pollOptions)?body.pollOptions.map((x:any)=>String(x||"").trim().slice(0,90)).filter(Boolean):[];
+    if(options.length!==0&&(options.length<2||options.length>6))return out({error:"В опросе должно быть от 2 до 6 вариантов."},400);
+    if(!text&&!media.length&&!options.length)return out({error:"Добавь текст, фото/видео или опрос."},400);
+    const titleInput=String(body.title||"").trim().slice(0,120),topic=String(body.topic||"").trim().slice(0,48)||"Без темы";
     const mediaLabel=media.length===1?(String(media[0]?.type||"").startsWith("video/")?"Видео":"Фото"):"Медиа-публикация";
-    const title=titleInput||(text.split("\n")[0].slice(0,80)||mediaLabel);
-    const topic=topicInput||"Без темы";
-    const postText=text||mediaLabel;
+    const title=titleInput||(text.split("\n")[0].slice(0,80)||(options.length?"Опрос":mediaLabel));
+    const postText=text||(options.length?title:mediaLabel);
     const moderation=basicTextGuard(title+" "+postText);if(moderation)return out({error:moderation},422);
     const mediaBase="https://wdwvcvpgovvkoodozbxf.supabase.co/storage/v1/object/public/orbis-media/";
-    if (media.some((item:any)=>!item||typeof item.key!=="string"||!item.key.startsWith(uid+"/")||typeof item.url!=="string"||item.url!==mediaBase+item.key)) return out({error:"Один из файлов не принадлежит этому аккаунту."},400);
-    const {data:post,error}=await admin.from("posts").insert({author_id:uid,title,topic,body:postText,reply_to:body.replyTo||null,media}).select("*").single();
-    if(error)return out({error:error.code==="23505"?"Сегодня ты уже опубликовал пост. По правилам ORBIS — одна публикация в день.":error.message},error.code==="23505"?409:400);
-    return out({ok:true,post:{
-      ...post,username:me.username,author:me.display_name,
-      createdAt:post.created_at,replyTo:post.reply_to,
-      likes:0,liked:false,saved:false,
-    }},201);
+    if(media.some((item:any)=>!item||typeof item.key!=="string"||!item.key.startsWith(uid+"/")||typeof item.url!=="string"||item.url!==mediaBase+item.key))return out({error:"Один из файлов не принадлежит этому гостевому профилю."},400);
+    const duration=Number(body.pollDurationHours||24),pollEndsAt=options.length?new Date(Date.now()+Math.max(1,Math.min(168,Number.isFinite(duration)?duration:24))*3600000).toISOString():null;
+    const {data:post,error}=await admin.from("posts").insert({author_id:uid,title,topic,body:postText,reply_to:body.replyTo||null,media,poll_options:options,poll_ends_at:pollEndsAt}).select("*").single();
+    if(error)return out({error:error.message},400);
+    return out({ok:true,post:{...post,postNumber:String(post.post_number),username:me.username,author:me.display_name,authorNumber:me.public_number==null?null:String(me.public_number),createdAt:post.created_at,replyTo:post.reply_to,media:post.media||[],poll:options.length?{options,counts:options.map(()=>0),total:0,myVote:null,endsAt:pollEndsAt}:null,likes:0,liked:false,saved:false}},201);
   }
   const like=path.match(/^\/api\/posts\/([0-9a-f-]+)\/like$/i);
   if(req.method==="POST"&&like){
@@ -231,6 +263,24 @@ Deno.serve(async (req: Request) => {
     if(!exists){const {data:postOwner}=await admin.from("posts").select("author_id").eq("id",postId).maybeSingle();if(postOwner)await notifyUser(admin,postOwner.author_id,uid,"like",postId,"Пользователю понравилась твоя публикация.");}
     const {count}=await admin.from("post_likes").select("*",{count:"exact",head:true}).eq("post_id",postId);
     return out({ok:true,liked:!exists,likes:count||0});
+  }
+  const pollVote=path.match(/^\/api\/posts\/([0-9a-f-]{36})\/vote$/i);
+  if(req.method==="POST"&&pollVote){
+    if(await isRateLimited(admin,uid,"poll_vote",60,60))return out({error:"Слишком много голосований. Подожди немного."},429);
+    const {data:post,error:postError}=await admin.from("posts").select("id,poll_options,poll_ends_at,status").eq("id",pollVote[1]).maybeSingle();
+    if(postError||!post||post.status!=="published")return out({error:"Опрос не найден."},404);
+    const options=Array.isArray(post.poll_options)?post.poll_options:[],optionIndex=Number(body.optionIndex);
+    if(options.length<2||!Number.isInteger(optionIndex)||optionIndex<0||optionIndex>=options.length)return out({error:"Выбери один из вариантов опроса."},400);
+    if(post.poll_ends_at&&Date.parse(post.poll_ends_at)<=Date.now())return out({error:"Опрос уже завершён."},409);
+    const {error}=await admin.from("post_poll_votes").upsert({post_id:post.id,user_id:uid,option_index:optionIndex},{onConflict:"post_id,user_id"});
+    if(error)return out({error:"Не удалось сохранить голос."},400);
+    const [{data:counts},{data:mine}]=await Promise.all([
+      admin.from("post_poll_counts").select("option_index,vote_count").eq("post_id",post.id),
+      admin.from("post_poll_votes").select("option_index").eq("post_id",post.id).eq("user_id",uid).maybeSingle()
+    ]);
+    const countMap=new Map((counts||[]).map((x:any)=>[Number(x.option_index),Number(x.vote_count)||0]));
+    const values=options.map((_:any,i:number)=>countMap.get(i)||0);
+    return out({ok:true,poll:{options,counts:values,total:values.reduce((x:number,y:number)=>x+y,0),myVote:mine?Number(mine.option_index):null,endsAt:post.poll_ends_at||null}});
   }
   const replies=path.match(/^\/api\/posts\/([0-9a-f-]+)\/replies$/i);
   if(req.method==="GET"&&replies){
@@ -310,6 +360,22 @@ Deno.serve(async (req: Request) => {
     return out({ok:true,story:data},201);
   }
 
+  if(req.method==="GET"&&path==="/api/ads/feed"){
+    const {data,error}=await admin.from("ad_campaigns").select("id,name,headline,body,destination_url,image_url").eq("status","approved").order("updated_at",{ascending:false}).limit(24);
+    if(error)return out({ad:null});
+    const rows=data||[];return out({ad:rows.length?rows[Math.floor(Math.random()*rows.length)]:null});
+  }
+  if(req.method==="POST"&&path==="/api/ads/events"){
+    const campaignId=String(body.campaignId||""),eventType=String(body.eventType||"");
+    if(!/^[0-9a-f-]{36}$/i.test(campaignId)||!["impression","click"].includes(eventType))return out({error:"Некорректное рекламное событие."},400);
+    if(await isRateLimited(admin,uid,"ad_event",120,60))return out({error:"Слишком много рекламных событий."},429);
+    const {data:campaign}=await admin.from("ad_campaigns").select("id").eq("id",campaignId).eq("status","approved").maybeSingle();
+    if(!campaign)return out({error:"Рекламная кампания не активна."},404);
+    const digest=new Uint8Array(await crypto.subtle.digest("SHA-256",encoder.encode(uid)));
+    const visitorHash=bytesToBase64Url(digest);
+    const {error}=await admin.from("ad_events").insert({campaign_id:campaignId,event_type:eventType,visitor_hash:visitorHash});
+    return error?out({error:"Не удалось записать событие."},400):out({ok:true},201);
+  }
   if(req.method==="GET"&&path==="/api/ads/campaigns"){
     const {data:campaigns,error}=await admin.from("ad_campaigns")
       .select("id,name,headline,body,destination_url,image_url,daily_budget,status,created_at,updated_at")
