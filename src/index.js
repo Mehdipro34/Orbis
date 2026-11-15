@@ -47,8 +47,20 @@ async function telegram(method, env, payload) {
   return result;
 }
 async function allPosts(env, limit = 100) {
-  const listed = await env.ORBIS_KV.list({ prefix: "post:", limit: 1000 });
-  const keys = listed.keys.map(x => x.name).sort().reverse().slice(0, limit);
+  // KV list is paginated. Walk pages so older posts do not hide newer ones
+  // after the first 1,000 keys. Cap one request at 10 pages for predictable cost.
+  const names = [];
+  let cursor;
+  let pages = 0;
+  do {
+    const options = { prefix: "post:", limit: 1000 };
+    if (cursor) options.cursor = cursor;
+    const listed = await env.ORBIS_KV.list(options);
+    names.push(...listed.keys.map(x => x.name));
+    cursor = listed.list_complete ? undefined : listed.cursor;
+    pages += 1;
+  } while (cursor && pages < 10);
+  const keys = names.sort().reverse().slice(0, limit);
   const values = await Promise.all(keys.map(key => env.ORBIS_KV.get(key, "json")));
   return values.filter(Boolean);
 }
@@ -105,7 +117,7 @@ async function api(request, env, url) {
     const body = await request.json();
     const title = String(body.title || "").trim().slice(0, 120);
     const topic = String(body.topic || "").trim().slice(0, 48);
-    const text = String(body.body || "").trim().slice(0, 3000);
+    const text = String(body.body || "").trim().slice(0, 4000);
     if (!title || !topic || !text) return json({ error: "Заполни название, тему и текст публикации." }, 400);
     const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString() };
     const archiveText = "ORBIS · НОВАЯ ПУБЛИКАЦИЯ\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + "\n\n" + text + "\n\nID: " + post.id;
