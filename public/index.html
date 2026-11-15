@@ -2843,7 +2843,7 @@ document.addEventListener("click",event=>{
   if(!form)return;
   const recoveryPanel=document.getElementById("authRecoveryFields");
   const recoverySave=document.getElementById("authRecoverySave");
-  const regularFields=[...form.querySelectorAll(".auth-field")];
+  const regularFields=[...form.querySelectorAll(".auth-field")].filter(field=>!recoveryPanel?.contains(field));
   const normalSubmit=form.querySelector(".auth-submit[type='submit']");
   const authTabs=document.querySelector(".auth-tabs");
   const showRecovery=()=>{
