@@ -5,6 +5,7 @@
 - PostgreSQL schema: profiles, account_lookup, posts, post_likes, post_comments, follows, bookmarks, stories, post_reports, api_rate_limits
 - RLS enabled on all ten application tables
 - Direct client reads of `profiles` are column-restricted: legacy Telegram identifiers are only readable by the server-side service role
+- `account_lookup` stores the username/email mapping and is blocked from direct `anon` and `authenticated` client access
 - Edge Function: `orbis-api` (the legacy Telegram auth function is unused)
 - Frontend: Supabase client + email/password authentication + API routing to Edge Functions
 
@@ -23,7 +24,7 @@
 - Never expose the Supabase service-role key in frontend JavaScript. Only the publishable key belongs in the browser.
 
 ## Account model
-Supabase Auth stores email/password credentials and issues persistent sessions. On the first authenticated request, `orbis-api` validates the access token, reads the username/display name metadata created during signup, and inserts the matching `profiles` row using the server-side service-role client. Passwords are never stored in the public profile table.
+Supabase Auth stores email/password credentials and issues persistent sessions. A database trigger creates the profile and a private username/email lookup row at signup. Login accepts email or username; username login is resolved inside `orbis-api`, which returns the Supabase session without exposing the account email. Passwords are never stored in public tables.
 
 ## Current end-to-end checks
 - Frontend inline JavaScript blocks were syntax-compiled successfully.
