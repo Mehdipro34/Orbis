@@ -2244,9 +2244,10 @@ document.addEventListener("click",event=>{
   mode=tab.dataset.authMode;tabs.forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active))});
   tabWrap.classList.toggle("signup",mode==="signup");
   title.textContent=mode==="login"?"С возвращением":"Создай аккаунт";
-  subtitle.textContent=mode==="login"?"Войди и продолжай.":"Выбери username и пароль.";
+  subtitle.textContent=mode==="login"?"Войди по электронной почте и паролю.":"Создай username и защити аккаунт паролем.";
   confirmField.hidden=mode!=="signup";confirmInput.required=mode==="signup";
-  emailField.hidden=mode!=="signup";
+  usernameField.hidden=mode!=="signup";username.required=mode==="signup";
+  emailField.hidden=false;email.required=true;
   password.autocomplete=mode==="login"?"current-password":"new-password";
   submitText.textContent=mode==="login"?"Войти":"Создать аккаунт";
   note.className="auth-form-note";note.textContent="";
@@ -2422,6 +2423,8 @@ document.addEventListener("click",event=>{
    await window.orbisSupabaseReady;
    let result;
    if(mode==="signup"){
+    const availability=await api("/api/username-available?username="+encodeURIComponent(username));
+    if(!availability.available)throw new Error(availability.error||"Этот username уже занят. Выбери другой.");
     result=await window.orbisSupabase.auth.signUp({
      email,password,
      options:{
@@ -2922,9 +2925,6 @@ document.addEventListener("click",event=>{
 #modal .dialog input,#modal .dialog textarea{background:#0b1427;border:1px solid #ffffff1c;color:#f6f4ff;border-radius:13px}
 #modal .dialog input:focus,#modal .dialog textarea:focus{outline:0;border-color:#a795ff;box-shadow:0 0 0 4px #a795ff20}
 #modal .dialog .sub{color:#aab5ce}
-#orbisTelegramLogin{position:relative;overflow:hidden;background:linear-gradient(110deg,#7561f2,#a06fe9 58%,#ef8fa9);background-size:200% 200%;animation:buttonGradient 5s ease infinite;box-shadow:0 15px 38px #8068e855}
-#orbisTelegramLogin:hover{transform:translateY(-2px);box-shadow:0 19px 42px #8068e877}
-#orbisTelegramHelp{color:#aebbd5}
 @media(max-width:1080px){#orbisAppShell .sidebar{min-height:calc(100svh - 40px)}}
 @media(max-width:650px){
  #orbisAppShell.shell{padding:10px 10px calc(100px + env(safe-area-inset-bottom))}
