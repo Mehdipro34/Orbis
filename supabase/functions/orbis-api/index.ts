@@ -112,6 +112,11 @@ Deno.serve(async (req: Request) => {
     if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(deviceId))
       return out({error:"Некорректный идентификатор устройства."},400);
     if(uid&&uid!==deviceId)return out({error:"Идентификатор устройства не совпадает с текущей сессией."},403);
+    const requestIp=(req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||req.headers.get("x-forwarded-for")||"").split(",")[0].trim();
+    if(requestIp&&await isRateLimited(admin,"guest-ip:"+requestIp,"guest_session_ip",40,60))
+      return out({error:"Слишком много новых гостевых сессий с этого подключения. Попробуй позже."},429);
+    if(await isRateLimited(admin,deviceId,"guest_session_device",12,60))
+      return out({error:"Слишком частые запросы гостевой сессии. Подожди минуту."},429);
     const {data:existing,error:loadError}=await admin.from("profiles").select("*").eq("id",deviceId).maybeSingle();
     if(loadError)return out({error:"Не удалось загрузить гостевой профиль."},500);
     let profile=existing;
