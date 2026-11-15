@@ -1760,7 +1760,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .orbital-shuttle i{position:absolute;left:0;top:10px;width:25px;height:4px;background:linear-gradient(90deg,transparent,#ffb5a3,#fff2c0);filter:blur(2px)}
 .orbital-shuttle.shuttle-two{top:65%;animation:shuttleTraverseTwo 17s linear infinite;animation-delay:-8s;transform:scale(.72)}
 .orbital-asteroid-belt{position:absolute;left:50%;top:44%;width:clamp(340px,45vw,540px);aspect-ratio:1;transform:translate(-50%,-50%);border:1px dashed #c7c4ff1b;border-radius:50%;z-index:1;animation:asteroidSpin 95s linear infinite}
-.orbital-asteroid-belt span{position:absolute;left:50%;top:50%;width:var(--size,4px);height:var(--size,4px);border-radius:50%;background:linear-gradient(135deg,#fff0c8,#b7a6ff);box-shadow:0 0 9px #c3b5ff99;transform:rotate(var(--angle)) translateX(var(--radius)) rotate(calc(var(--angle)*-1))}
+.orbital-asteroid-belt span{position:absolute;left:50%;top:50%;width:var(--size,4px);height:var(--size,4px);border-radius:50%;background:linear-gradient(135deg,#fff0c8,#b7a6ff);box-shadow:0 0 9px #c3b5ff99;transform:rotate(var(--angle)) translateX(var(--radius))}
 .orbital-meteor{position:absolute;width:150px;height:2px;z-index:6;opacity:0;background:linear-gradient(90deg,transparent,#bdeaff,#fff,transparent);filter:drop-shadow(0 0 7px #a7dfff);transform:rotate(-28deg);animation:meteorFly 5.5s linear infinite}
 .orbital-meteor.meteor-one{top:18%;left:12%}.orbital-meteor.meteor-two{top:58%;right:7%;animation-delay:-2.7s;transform:rotate(148deg) scale(.65)}
 .orbital-meteor.meteor-three{top:34%;right:24%;animation-delay:-4.1s;transform:rotate(155deg) scale(.48)}
@@ -2215,7 +2215,7 @@ document.addEventListener("click",event=>{
  const back=document.getElementById("authBackLanding");if(back)back.addEventListener("click",()=>{if(gateway)gateway.hidden=true;if(landing)landing.hidden=false;document.body.classList.remove("orbis-auth-open");window.scrollTo({top:0,behavior:"smooth"})});
  const download=document.getElementById("downloadCTA");if(download)download.addEventListener("click",()=>{const n=document.getElementById("downloadNote");if(n)n.textContent="Отдельная мобильная сборка ещё готовится. Пока ORBIS доступен в браузере.";});
  if(skip)skip.addEventListener("click",showAccess);
- if(intro){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)showAccess();else window.setTimeout(showAccess,8200)}
+ if(intro){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)showAccess();else window.setTimeout(showAccess,6500)}
  tabs.forEach(tab=>tab.addEventListener("click",()=>{
   mode=tab.dataset.authMode;tabs.forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active))});
   tabWrap.classList.toggle("signup",mode==="signup");
