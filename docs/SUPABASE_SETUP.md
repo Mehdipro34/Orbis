@@ -29,7 +29,7 @@ Supabase Auth stores email/password credentials and issues persistent sessions. 
 - Frontend inline JavaScript blocks were syntax-compiled successfully.
 - HTML document tags and CSS brace pairs were checked.
 - Supabase project reports ACTIVE_HEALTHY.
-- Both Edge Functions are ACTIVE; `orbis-api` is deployed at version 19. The legacy Telegram auth function is not called by the current frontend.
+- The `orbis-api` Edge Function is ACTIVE at version 19. The legacy Telegram auth function is not called by the current frontend.
 - Security Advisor currently returns no findings.
 - All ten application tables have RLS enabled. The latest Security Advisor run returned no findings.
 - Database currently has zero profiles, posts and Stories; no live user registration has yet been verified.
@@ -38,8 +38,8 @@ Supabase Auth stores email/password credentials and issues persistent sessions. 
 
 
 ## Profile privacy hardening
-The `profiles` table contains Telegram identifiers for server-side account matching. Direct `anon` and `authenticated` table-wide SELECT was revoked; only safe profile columns are granted. Legacy `telegram_id` and `telegram_username` fields are not used by the email-first frontend and are not exposed through the browser Data API. Do not add these fields to public profile responses.
+The `profiles` table retains nullable legacy Telegram identifier columns from the previous account model. They are not used by the email-first frontend. Direct `anon` and `authenticated` table-wide SELECT was revoked; only safe profile columns are granted. Do not add legacy identifier fields to public profile responses.
 
 
 ## Installable app
-ORBIS includes a web app manifest, SVG app icon and service worker; installation is available through the browser menu on supported devices. The service worker caches only the static app shell; account, feed and media actions still require a network connection. The site must be served over HTTPS for browser installation. The visible landing-page CTA opens Telegram sign-in; installation remains available through the browser menu.
+ORBIS includes a web app manifest, SVG app icon and service worker; installation is available through the browser menu on supported devices. The service worker caches only the static app shell; account, feed and media actions still require a network connection. The site must be served over HTTPS for browser installation. The landing-page CTA opens the email/password sign-in flow; installation remains available through the browser menu.
