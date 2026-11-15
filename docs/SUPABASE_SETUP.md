@@ -2,8 +2,8 @@
 
 ## What is deployed
 - Supabase project: `Orbis` (`wdwvcvpgovvkoodozbxf`)
-- PostgreSQL schema: profiles, account_lookup, posts, post_likes, follows, bookmarks, stories, post_reports
-- RLS enabled on every public table\n- Direct client reads of `profiles` are column-restricted: Telegram identifiers are only readable by the server-side service role
+- PostgreSQL schema: profiles, account_lookup, posts, post_likes, post_comments, follows, bookmarks, stories, post_reports, api_rate_limits
+- RLS enabled on all ten application tables\n- Direct client reads of `profiles` are column-restricted: Telegram identifiers are only readable by the server-side service role
 - Edge Functions: `orbis-telegram-auth` and `orbis-api`
 - Frontend: Supabase client + Telegram Mini App authentication + API routing to Edge Functions
 
@@ -16,9 +16,9 @@
 
 ## Important current limitations
 - The Telegram bot token and hosting URL must be supplied/configured by the project owner; neither is embedded in the repository.
-- The `orbis-media` Supabase Storage bucket exists. The API uploads through the server-side service-role client; the bucket is public-read for media URLs. Confirm the bucket configuration before production use.
+- The `orbis-media` Supabase Storage bucket exists. The API uploads through the server-side service-role client; the bucket is public-read for media URLs. Confirm the bucket configuration before production use. Cloudflare R2 is not required.
 - The RSS news pages still use the existing Worker endpoints; their KV binding must remain configured or those pages will fail.
-- Stories and bookmarks have UI and API routes. Stories support text plus one photo/video and expire after 24 hours; one Story per author per UTC day is enforced by a unique index.
+- Stories, bookmarks and comments have UI and API routes. Stories support text plus one photo/video and expire after 24 hours; one Story per author per UTC day is enforced by a unique index. Comments are paginated at 20 per request and stored separately from posts.
 - No load test has been run. Free-tier capacity is not a promise of support for 10,000 concurrent users.
 - Never expose the Supabase service-role key in frontend JavaScript. Only the publishable key belongs in the browser.
 
@@ -29,9 +29,9 @@ Telegram Mini App initData is verified server-side using the bot token. A corres
 - Frontend inline JavaScript blocks were syntax-compiled successfully.
 - HTML document tags and CSS brace pairs were checked.
 - Supabase project reports ACTIVE_HEALTHY.
-- Both Edge Functions are ACTIVE; `orbis-api` is deployed at version 4.
+- Both Edge Functions are ACTIVE; `orbis-telegram-auth` is deployed at version 4 and `orbis-api` at version 10.
 - Security Advisor currently returns no findings.
-- All eight application tables have RLS enabled.
+- All ten application tables have RLS enabled. The latest Security Advisor run returned no findings.
 - Database currently has zero profiles, posts and Stories; no live user registration has yet been verified.
 - A real Telegram sign-in cannot be tested until the owner sets the bot token secret and configures the official Mini App URL.
 - The Cloudflare Worker remains responsible for RSS/news only. Core social/auth endpoints are disabled there to prevent a second KV-based account store.
@@ -42,4 +42,4 @@ The `profiles` table contains Telegram identifiers for server-side account match
 
 
 ## Installable app
-ORBIS now includes a web app manifest, SVG app icon, service worker and an install action. The service worker caches only the static app shell; account, feed and media actions still require a network connection. The site must be served over HTTPS for browser installation.
+ORBIS now includes a web app manifest, SVG app icon, service worker and an install action. The service worker caches only the static app shell; account, feed and media actions still require a network connection. The site must be served over HTTPS for browser installation. The visible landing-page CTA opens Telegram sign-in; installation remains available through the browser menu.
