@@ -2609,54 +2609,45 @@ document.addEventListener("click",event=>{
 })();
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style id="orbis-supabase-auth-ui">
-#orbisAuthForm{display:grid;gap:12px}
-#authRecoveryFields{display:grid;gap:12px}
-#authRecoveryFields[hidden]{display:none!important}
-.auth-tabs{display:flex}
-.auth-legal{display:block}
-.auth-reset-button{justify-self:start;border:0;background:transparent;color:#b9adff;font:inherit;font-size:11px;padding:2px 0;cursor:pointer}
-.auth-reset-button:hover{text-decoration:underline;color:#fff}
-.auth-reset-button:disabled{opacity:.55;cursor:wait}
-</style>
 <script>
 (function(){
  const SUPABASE_URL="https://wdwvcvpgovvkoodozbxf.supabase.co";
  const SUPABASE_KEY="sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx";
  const EDGE_API=SUPABASE_URL+"/functions/v1/orbis-api";
+ const DEVICE_KEY="orbis_guest_device_v1";
+ const TOKEN_KEY="orbis_guest_token_v1";
  const nativeFetch=window.fetch.bind(window);
- let client=null,session=null;
- window.orbisSupabaseReady=(async()=>{
-  if(!window.supabase?.createClient)throw new Error("Не удалось загрузить Supabase SDK.");
-  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
-   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"implicit"}
+ let guestToken=localStorage.getItem(TOKEN_KEY)||"";
+ function getDeviceId(){
+  let id=localStorage.getItem(DEVICE_KEY)||"";
+  if(!/^[0-9a-f-]{36}$/i.test(id)){id=crypto.randomUUID();localStorage.setItem(DEVICE_KEY,id);}
+  return id;
+ }
+ async function createGuestSession(){
+  const headers={"apikey":SUPABASE_KEY,"content-type":"application/json"};
+  if(guestToken)headers.Authorization="Bearer "+guestToken;
+  const response=await nativeFetch(EDGE_API+"/api/guest/session",{
+   method:"POST",headers,body:JSON.stringify({deviceId:getDeviceId()}),credentials:"omit",cache:"no-store"
   });
-  const current=await client.auth.getSession();session=current.data.session;
-  client.auth.onAuthStateChange((event,next)=>{session=next;if(event==="PASSWORD_RECOVERY"){window.orbisRecoveryRequested=true;window.dispatchEvent(new Event("orbis:password-recovery"));}});
-  window.orbisSupabase=client;
-  return client;
- })();
+  let data={};try{data=await response.json()}catch{}
+  if(!response.ok)throw new Error(data.error||"Не удалось создать гостевой профиль.");
+  if(!data.token||!data.user)throw new Error("Сервер не вернул гостевую сессию.");
+  guestToken=data.token;localStorage.setItem(TOKEN_KEY,guestToken);return data.user;
+ }
  window.fetch=async function(input,init){
   const raw=typeof input==="string"?input:(input&&input.url)||"";
   let parsed;try{parsed=new URL(raw,location.href)}catch{return nativeFetch(input,init)}
   if(!parsed.pathname.startsWith("/api/")||parsed.pathname==="/api/news"||parsed.pathname==="/api/news/sources")return nativeFetch(input,init);
   try{
-   await window.orbisSupabaseReady;
-   const current=await client.auth.getSession();session=current.data.session;
    const headers=new Headers(init?.headers||((input instanceof Request)?input.headers:undefined));
    headers.set("apikey",SUPABASE_KEY);
-   if(session?.access_token)headers.set("Authorization","Bearer "+session.access_token);
-   else headers.delete("Authorization");
+   if(guestToken)headers.set("Authorization","Bearer "+guestToken);else headers.delete("Authorization");
    let body=init?.body;if(input instanceof Request&&!init)body=input.body;
    return await nativeFetch(EDGE_API+parsed.pathname+parsed.search,{
-    ...init,method:init?.method||((input instanceof Request)?input.method:"GET"),
-    headers,body,credentials:"omit"
+    ...init,method:init?.method||((input instanceof Request)?input.method:"GET"),headers,body,credentials:"omit"
    });
   }catch(error){
-   return new Response(JSON.stringify({error:error.message||"Ошибка соединения с ORBIS."}),{
-    status:503,headers:{"content-type":"application/json"}
-   });
+   return new Response(JSON.stringify({error:error.message||"Ошибка соединения с ORBIS."}),{status:503,headers:{"content-type":"application/json"}});
   }
  };
  document.addEventListener("DOMContentLoaded",async()=>{
@@ -2680,35 +2671,19 @@ document.addEventListener("click",event=>{
   };
   const startGuestSession=async()=>{
    try{
-    await window.orbisSupabaseReady;
-    let current=await window.orbisSupabase.auth.getSession();
-    if(!current.data.session){
-     const created=await window.orbisSupabase.auth.signInAnonymously();
-     if(created.error)throw created.error;
-     current=await window.orbisSupabase.auth.getSession();
-    }
-    if(!current.data.session)throw new Error("Не удалось создать гостевую сессию.");
-    const data=await api("/api/auth/me");
-    window.orbisUser=data.user;syncUserUI(data.user);
-    window.orbisEnterApp?.();
+    const user=await createGuestSession();
+    window.orbisUser=user;syncUserUI(user);window.orbisEnterApp?.();
     if(intro)intro.remove();
     document.getElementById("orbisGuestStartError")?.remove();
     await loadFeed();await loadCurrentProfile();await openSharedPostFromHash();
-   }catch(error){
-    console.error("ORBIS guest session:",error);
-    const raw=String(error?.message||"");
-    const message=/anonymous|disabled|not enabled|sign.?in/i.test(raw)
-     ?"В Supabase нужно включить Anonymous Sign-Ins. После этого ORBIS будет открываться автоматически."
-     :"Не удалось создать гостевой профиль. Проверь подключение и попробуй ещё раз.";
-    showStartError(message);
-   }
+   }catch(error){console.error("ORBIS guest session:",error);showStartError("Не удалось открыть гостевой режим. Проверь подключение и попробуй ещё раз.");}
   };
   await startGuestSession();
  });
 })();
 </script>
 
-<style id="orbis-auth-and-layout-fix">
+
 #orbisLanding,#authGateway{display:none!important}
 #orbisLanding[hidden],#authGateway[hidden]{display:none!important}
 
