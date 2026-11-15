@@ -2311,7 +2311,7 @@ document.addEventListener("click",event=>{
   if(target.id==="refreshFeed"){event.preventDefault();target.classList.add("is-loading");try{await loadFeed();window.notify?.("Лента обновлена.")}finally{target.classList.remove("is-loading")}return}
   if(target.id==="profileLogout"){
    event.preventDefault();target.disabled=true;
-   try{await api("/api/auth/logout",{method:"POST",body:"{}"});window.orbisUser=null;const shell=$("orbisAppShell"),gateway=$("authGateway"),landing=$("orbisLanding");if(shell)shell.hidden=true;if(gateway)gateway.hidden=false;if(landing)landing.hidden=true;document.body.classList.remove("orbis-app-open","orbis-demo-open");document.body.classList.add("orbis-auth-open");document.querySelector('[data-auth-mode="login"]')?.click();window.notify?.("Ты вышел из ORBIS.")}catch(error){window.notify?.(error.message)}finally{target.disabled=false}return;
+   try{if(window.orbisSupabase?.auth){const signedOut=await window.orbisSupabase.auth.signOut();if(signedOut.error)throw signedOut.error;}window.orbisUser=null;const shell=$("orbisAppShell"),gateway=$("authGateway"),landing=$("orbisLanding");if(shell)shell.hidden=true;if(gateway)gateway.hidden=false;if(landing)landing.hidden=true;document.body.classList.remove("orbis-app-open","orbis-demo-open");document.body.classList.add("orbis-auth-open");document.querySelector('[data-auth-mode="login"]')?.click();window.notify?.("Ты вышел из ORBIS.")}catch(error){window.notify?.(error.message)}finally{target.disabled=false}return;
   }
   if(target.dataset.action==="like"){
    const article=target.closest("[data-post-id]");if(!article)return;
@@ -2521,7 +2521,6 @@ document.addEventListener("click",event=>{
 })();
 </script>
 
-</body></html>
 <style id="orbis-auth-and-layout-fix">
 /* Keep the signed-in experience balanced and centered on wide displays. */
 #orbisAppShell.shell{width:min(100%,1760px);margin-inline:auto;grid-template-columns:minmax(215px,250px) minmax(0,1fr) minmax(250px,300px);justify-content:center;gap:clamp(18px,2vw,32px);padding-inline:clamp(16px,2vw,30px)}
@@ -2535,4 +2534,95 @@ document.addEventListener("click",event=>{
 @media(max-width:1080px){#orbisAppShell.shell{grid-template-columns:205px minmax(0,1fr);width:100%}#orbisAppShell>main{max-width:100%}}
 @media(max-width:650px){#orbisAppShell.shell{display:block;width:100%;padding:12px 12px calc(90px + env(safe-area-inset-bottom))}#orbisAppShell>main{width:100%}}
 @media(prefers-reduced-motion:reduce){#orbisAppShell *{scroll-behavior:auto!important}}
+</style><style id="orbis-2026-premium-polish">
+:root{--orb-surface:#111a2d;--orb-surface-2:#151f36;--orb-border:#ffffff16;--orb-text:#f4f3ff;--orb-muted:#9ba8c4;--orb-lilac:#a795ff;--orb-aqua:#72e2d1}
+#orbisAppShell{isolation:isolate;position:relative}
+#orbisAppShell:before{content:"";position:fixed;z-index:-1;inset:0;pointer-events:none;background:radial-gradient(ellipse at 72% 8%,#8e7aff13,transparent 32%),radial-gradient(ellipse at 18% 85%,#62d9cf0c,transparent 30%)}
+#orbisAppShell .sidebar{background:linear-gradient(165deg,#121b30f5,#0d1527f5);border:1px solid #a795ff22;box-shadow:0 24px 65px #0003,inset 0 1px #ffffff0d;backdrop-filter:blur(22px)}
+#orbisAppShell .brand{padding-bottom:27px!important}
+#orbisAppShell .brand-word{letter-spacing:3.4px;font-weight:950}
+#orbisAppShell .nav{gap:8px}
+#orbisAppShell .nav button{position:relative;border:1px solid transparent;color:#a8b3cf;transition:background .24s,border-color .24s,transform .24s,color .24s}
+#orbisAppShell .nav button.active{color:#e8e3ff;background:linear-gradient(100deg,#8c79ff25,#ff9fbd0b);border-color:#a795ff26;box-shadow:inset 3px 0 #a795ff,0 8px 24px #0002}
+#orbisAppShell .nav button:not(.create):hover{background:#ffffff0b;border-color:#ffffff12;color:#fff;transform:translateX(4px)}
+#orbisAppShell .topbar{background:linear-gradient(115deg,#111a2df2,#171d35e8);border:1px solid #ffffff13;box-shadow:0 14px 38px #0002,inset 0 1px #ffffff0b;backdrop-filter:blur(18px)}
+#orbisAppShell .topbar h1{color:#f6f4ff;letter-spacing:-1.35px}
+#orbisAppShell .kicker{color:#b4a6ff}
+#orbisAppShell .date-pill,#orbisAppShell .bell{background:#ffffff08;border-color:#ffffff16;color:#b5bfd8}
+#orbisAppShell .hero{border:1px solid #ffffff35;background:linear-gradient(112deg,#5749c9 0%,#7965e9 50%,#a46cc8 100%);box-shadow:0 22px 55px #725de943,inset 0 1px #ffffff35}
+#orbisAppShell .hero:before{border-color:#ffffff42}
+#orbisAppShell .stories,#orbisAppShell .composer,#orbisAppShell .post{border:1px solid #ffffff16;background:linear-gradient(145deg,#151f35f5,#10182bf7);box-shadow:0 16px 42px #0002,inset 0 1px #ffffff0a}
+#orbisAppShell .stories{position:relative;overflow:hidden}
+#orbisAppShell .stories:after{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:linear-gradient(180deg,#a795ff,#72e2d1,#ff9fbd);opacity:.8}
+#orbisAppShell .stories .section-head h2,#orbisAppShell .composer .hint{color:#e7e8fb}
+#orbisAppShell .story-ring{filter:drop-shadow(0 4px 12px #8d79f333)}
+#orbisAppShell .story-ring>div{background:linear-gradient(145deg,#202a45,#171e35);border-color:#121a2c;color:#c7bcff}
+#orbisAppShell .story small{color:#aab5ce}
+#orbisAppShell .compose-open{background:linear-gradient(100deg,#ffffff09,#a795ff0b);border-color:#ffffff18;color:#aeb8d0}
+#orbisAppShell .compose-open:hover{background:#a795ff12;border-color:#a795ff65;color:#e8e3ff}
+#orbisAppShell .tiny{background:#ffffff08;border-color:#ffffff16;color:#b4bfd8}
+#orbisAppShell .post{position:relative;overflow:hidden}
+#orbisAppShell .post:before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:linear-gradient(180deg,#a795ff,#72e2d1);opacity:0;transition:opacity .25s}
+#orbisAppShell .post:hover{transform:translateY(-3px);border-color:#a795ff55;box-shadow:0 22px 55px #0004,0 0 28px #8c79ff0d}
+#orbisAppShell .post:hover:before{opacity:1}
+#orbisAppShell .post-actions button{border:1px solid #ffffff12;border-radius:11px;padding:8px 10px;background:#ffffff06}
+#orbisAppShell .post-actions button:hover{background:#a795ff18;border-color:#a795ff44;color:#e7e1ff}
+#orbisAppShell .topic{background:#9c88ff1c;color:#c5baff;border:1px solid #a795ff2b}
+#orbisAppShell .right .side-card{border:1px solid #ffffff15;background:linear-gradient(145deg,#151f35f5,#10182bf7);box-shadow:0 18px 44px #0003,inset 0 1px #ffffff0b}
+#orbisAppShell .profile-preview .avatar{border:1px solid #ffffff30}
+#orbisScreen{min-height:55vh}
+#orbisScreen:not([hidden]){animation:orbisScreenEnter .48s cubic-bezier(.2,.8,.2,1) both}
+@keyframes orbisScreenEnter{from{opacity:0;transform:translateY(13px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+#orbisScreen .screen-heading{animation:orbisFadeUp .55s .03s both}
+#orbisScreen .navigator-feature,#orbisScreen .profile-screen-card{animation:orbisFadeUp .6s .08s both}
+@keyframes orbisFadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+#orbisScreen .profile-screen-card{overflow:hidden;border:1px solid #a795ff28;border-radius:25px;background:linear-gradient(145deg,#151f35,#10182b);box-shadow:0 25px 60px #0003}
+#orbisScreen .profile-cover{background:radial-gradient(circle at 75% 25%,#b4a1ff5c,transparent 23%),linear-gradient(110deg,#5144b7,#7965e9 55%,#a66ab9)}
+#orbisScreen .profile-name-block h3{color:#f7f5ff}
+#orbisScreen .profile-name-block span{color:#aab5ce}
+#orbisScreen .profile-edit-grid label{color:#b6c0d8}
+#orbisScreen .profile-edit-grid input,#orbisScreen .profile-edit-grid textarea{background:#0c1528;border-color:#ffffff1b;color:#f4f3ff}
+#orbisScreen .profile-edit-grid input:focus,#orbisScreen .profile-edit-grid textarea:focus{border-color:#a795ff;box-shadow:0 0 0 4px #a795ff1c}
+#orbisScreen .navigator-section-title b{color:#f4f3ff}
+#orbisScreen .navigator-section-title small{color:#98a7c6}
+#orbisScreen .news-toolbar select{background:#101a2e;color:#e9e9ff;border-color:#ffffff1a}
+#orbisScreen .news-card{border-color:#ffffff16;background:linear-gradient(145deg,#151f35,#10182b)}
+#orbisScreen .news-card h3{color:#f1efff}
+#orbisScreen .news-card p{color:#a8b4d0}
+#orbisAppShell .mobile-nav{background:#0b1325ef;border:1px solid #ffffff18;border-bottom:0;box-shadow:0 -12px 42px #0005;backdrop-filter:blur(24px) saturate(1.4)}
+#orbisAppShell .mobile-nav button{color:#98a5c4;border-radius:15px;min-width:52px;min-height:45px}
+#orbisAppShell .mobile-nav button.active{color:#d9d0ff;background:linear-gradient(145deg,#9b87ff2d,#ffffff08);box-shadow:inset 0 0 0 1px #a795ff33,0 5px 18px #0002}
+#orbisAppShell .mobile-nav #mobileCreate{color:white;background:linear-gradient(130deg,#9c88ff,#7058e8 58%,#ef91ad);box-shadow:0 8px 25px #8068e866;transform:translateY(-8px);border:3px solid #10182b;border-radius:17px}
+#orbisAppShell .toast{background:linear-gradient(110deg,#28234d,#3c326d);border:1px solid #ffffff24;box-shadow:0 16px 40px #0005;color:#fff;backdrop-filter:blur(18px)}
+#modal{backdrop-filter:blur(12px);background:#070b18b8}
+#modal .dialog{background:linear-gradient(145deg,#19233a,#10182a);border:1px solid #a795ff35;box-shadow:0 32px 100px #0009;color:#f4f3ff}
+#modal .dialog input,#modal .dialog textarea{background:#0b1427;border:1px solid #ffffff1c;color:#f6f4ff;border-radius:13px}
+#modal .dialog input:focus,#modal .dialog textarea:focus{outline:0;border-color:#a795ff;box-shadow:0 0 0 4px #a795ff20}
+#modal .dialog .sub{color:#aab5ce}
+#orbisTelegramLogin{position:relative;overflow:hidden;background:linear-gradient(110deg,#7561f2,#a06fe9 58%,#ef8fa9);background-size:200% 200%;animation:buttonGradient 5s ease infinite;box-shadow:0 15px 38px #8068e855}
+#orbisTelegramLogin:hover{transform:translateY(-2px);box-shadow:0 19px 42px #8068e877}
+#orbisTelegramHelp{color:#aebbd5}
+@media(max-width:1080px){#orbisAppShell .sidebar{min-height:calc(100svh - 40px)}}
+@media(max-width:650px){
+ #orbisAppShell.shell{padding:10px 10px calc(100px + env(safe-area-inset-bottom))}
+ #orbisAppShell .topbar{border-radius:17px;padding:12px 14px}
+ #orbisAppShell .hero{border-radius:22px;min-height:190px;padding:23px 19px}
+ #orbisAppShell .stories{border-radius:18px;padding:13px 14px}
+ #orbisAppShell .composer{border-radius:18px;padding:14px}
+ #orbisAppShell .post{border-radius:19px;padding:16px;margin-bottom:13px}
+ #orbisAppShell .post-title{font-size:19px}
+ #orbisAppShell .post-actions{display:flex;flex-wrap:wrap;gap:6px}
+ #orbisAppShell .post-actions button{font-size:10px;padding:7px 8px}
+ #orbisAppShell .mobile-nav{padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-radius:19px 19px 0 0}
+ #orbisAppShell .mobile-nav button{font-size:21px}
+ #orbisScreen .screen-heading h2{font-size:28px}
+ #orbisScreen .navigator-feature{padding:20px;min-height:170px}
+ #orbisScreen .navigator-feature>div:first-child{max-width:76%}
+ #orbisScreen .navigator-feature h3{font-size:19px}
+ #orbisScreen .navigator-galaxy{right:-18px;opacity:.72;transform:scale(.82)}
+}
+@media(prefers-reduced-motion:reduce){
+ #orbisAppShell:before,#orbisScreen:not([hidden]),#orbisScreen .screen-heading,#orbisScreen .navigator-feature,#orbisScreen .profile-screen-card{animation:none!important}
+}
 </style>
+
