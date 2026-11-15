@@ -1931,34 +1931,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 </section>
 <section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере и устанавливай на главный экран через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS <b>↗</b></button><small id="downloadNote">Открывай ORBIS без регистрации.</small></div></section></main>
 <footer class="land-footer"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><span>ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</span><span>© 2026 ORBIS · Мехти Мурадлы</span></footer></section>
-<section class="auth-gateway auth-minimal" id="authGateway" hidden aria-label="Вход в ORBIS">
- <button class="auth-back-landing" id="authBackLanding" type="button" aria-label="Назад">←</button>
- <div class="auth-backdrop" aria-hidden="true"><div class="auth-nebula n-one"></div><div class="auth-nebula n-two"></div><div class="auth-orbit o-one"><i></i></div><div class="auth-orbit o-two"><i></i></div><div class="auth-orbit o-three"><i></i></div><span class="auth-star s-one">✦</span><span class="auth-star s-two">✧</span><span class="auth-star s-three">✦</span><span class="auth-star s-four">·</span><div class="auth-planet"></div></div>
- <div class="auth-minimal-layout">
-  <div class="auth-orb-stage" aria-hidden="true"><div class="auth-orb-halo"></div><div class="auth-orb-ring ring-a"></div><div class="auth-orb-ring ring-b"></div><div class="auth-orb-ring ring-c"></div><div class="auth-orb-sphere"><span>✳</span></div><div class="auth-orb-word">ORBIS</div><div class="auth-orb-caption">YOUR WORLD OF IDEAS</div><i class="auth-orb-spark spark-a">✦</i><i class="auth-orb-spark spark-b">✧</i></div>
-  <div class="auth-card-wrap"><div class="auth-card auth-card-compact">
-   <div class="auth-card-top"><span class="auth-mini-logo">✳</span><span class="auth-secure">● ORBIS ACCESS</span></div>
-   <div class="auth-heading"><div class="auth-eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h2 id="authTitle">С возвращением</h2><p id="authSubtitle">Войди и продолжай.</p></div>
-   <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
-   <form id="orbisAuthForm" novalidate>
-    <label class="auth-field auth-username-field" id="authUsernameField" hidden><span>ИМЯ ПОЛЬЗОВАТЕЛЯ</span><span class="auth-input-wrap"><i>@</i><input id="authUsername" type="text" autocomplete="username" placeholder="Твой username" minlength="3" maxlength="24"></span></label>
-    <label class="auth-field auth-email-field" id="authEmailField"><span>EMAIL ИЛИ USERNAME</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="text" autocomplete="username" placeholder="Email или username" required></span></label>
-    <label class="auth-field"><span>ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authPassword" type="password" autocomplete="current-password" placeholder="Твой пароль" minlength="8" required><button class="auth-eye" id="authEye" type="button" aria-label="Показать пароль">◉</button></span></label>
-    <label class="auth-field auth-confirm-field" id="authConfirmField" hidden><span>ПОВТОРИ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Ещё раз пароль"></span></label>
-    <div class="auth-form-note" id="authFormNote" aria-live="polite"> </div>
-    <button id="authResetButton" class="auth-reset-button" type="button">Забыли пароль?</button>
-    <div id="authRecoveryFields" hidden>
-     <label class="auth-field"><span>НОВЫЙ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Минимум 8 символов"></span></label>
-     <label class="auth-field"><span>ПОВТОРИ НОВЫЙ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authNewPasswordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="Ещё раз новый пароль"></span></label>
-     <button id="authRecoverySave" class="auth-submit" type="button"><span>Сохранить новый пароль</span><b>↗</b></button>
-    </div>
-    <button class="auth-submit" type="submit"><span id="authSubmitText">Войти</span><b>↗</b></button>
-   </form>
-   
-   <div class="auth-legal">Создай аккаунт по электронной почте или войди в существующий. Для некоторых аккаунтов потребуется подтверждение адреса.</div>
-  </div></div>
- </div>
- <div class="auth-copyright">© 2026 ORBIS</div>
 </section>
 
 <div class="shell" id="orbisAppShell" hidden>
@@ -2060,7 +2032,7 @@ function setOrbisScreen(view){
   orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SAVED IDEAS</span><h2>Закладки</h2><p>Публикации, которые ты сохранил, всегда под рукой.</p></div><div id="orbisBookmarksList" aria-live="polite"><div class="post">Загружаем сохранённые публикации…</div></div>';
   window.orbisApi("/api/bookmarks").then(data=>{const list=$("orbisBookmarksList");if(!list)return;list.replaceChildren();if(!data.posts.length){const empty=document.createElement("div");empty.className="post";empty.textContent="Здесь пока пусто. Сохраняй интересные публикации из ленты.";list.append(empty)}else data.posts.forEach(item=>list.append(card(item))) }).catch(error=>{const list=$("orbisBookmarksList");if(list){list.textContent=error.message}});
  }else if(view==="Профиль"){
-  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button">Выйти из аккаунта</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
  }else if(view==="Сообщения"){
   orbisScreen.innerHTML='<div class="screen-heading"><h2>Сообщения</h2><p>Личные диалоги ORBIS.</p></div><form id="orbisNewDmForm" class="orbis-feature-form"><input name="username" required minlength="3" maxlength="24" placeholder="Username участника"><button class="primary" type="submit">Открыть диалог</button><p id="orbisDmNote"></p></form><div class="orbis-feature-columns"><section><h3>Диалоги</h3><div id="orbisConversationList"></div></section><section id="orbisChatPanel"><p>Выбери диалог.</p></section></div>';
   window.orbisShowMessages?.();
@@ -2597,10 +2569,6 @@ document.addEventListener("click",event=>{
   if(target.closest("#topicFilter")){event.preventDefault();event.stopImmediatePropagation();const buttons=target.closest("#topicFilter").querySelectorAll("button");buttons.forEach(x=>x.classList.toggle("active",x===target));loadFeed(true,target.textContent.trim()==="Все темы"?"":target.textContent.trim());return}
   if(target.id==="newsRefresh"){event.preventDefault();loadNews($("newsSourceSelect")?.value||"bbc-ru");return}
   if(target.id==="refreshFeed"){event.preventDefault();target.classList.add("is-loading");try{await loadFeed();window.notify?.("Лента обновлена.")}finally{target.classList.remove("is-loading")}return}
-  if(target.id==="profileLogout"){
-   event.preventDefault();target.disabled=true;
-   try{if(window.orbisSupabase?.auth){const signedOut=await window.orbisSupabase.auth.signOut();if(signedOut.error)throw signedOut.error;}window.orbisUser=null;const shell=$("orbisAppShell"),gateway=$("authGateway"),landing=$("orbisLanding");if(shell)shell.hidden=true;if(gateway)gateway.hidden=false;if(landing)landing.hidden=true;document.body.classList.remove("orbis-app-open","orbis-demo-open");document.body.classList.add("orbis-auth-open");document.querySelector('[data-auth-mode="login"]')?.click();window.notify?.("Ты вышел из ORBIS.")}catch(error){window.notify?.(error.message)}finally{target.disabled=false}return;
-  }
   if(target.dataset.action==="bookmark"){
    const article=target.closest("[data-post-id]");if(!article)return;
    target.disabled=true;
@@ -2720,18 +2688,6 @@ document.addEventListener("click",event=>{
   if(window.orbisUser)syncUserUI(window.orbisUser);
   loadFeed().then(openSharedPostFromHash);
  });
- // Wait until the Supabase client and fetch bridge exist before restoring a saved session.
- window.addEventListener("DOMContentLoaded",async()=>{
-  try{
-   await window.orbisSupabaseReady;
-   const data=await api("/api/auth/me");
-   window.orbisUser=data.user;syncUserUI(data.user);
-   window.orbisEnterApp?.();
-   await loadFeed();await openSharedPostFromHash();
-  }catch(error){
-   // A 401 means this visitor has not signed in yet; keep the public landing/auth screen.
-  }
- });
 })();
 </script>
 
@@ -2786,91 +2742,56 @@ document.addEventListener("click",event=>{
   }
  };
  document.addEventListener("DOMContentLoaded",async()=>{
-  const form=document.getElementById("orbisAuthForm");
-  const note=document.getElementById("authFormNote");
-  const resetButton=document.getElementById("authResetButton");
-  if(!form)return;
-  const recoveryPanel=document.getElementById("authRecoveryFields");
-  const recoverySave=document.getElementById("authRecoverySave");
-  const regularFields=[...form.querySelectorAll(".auth-field")].filter(field=>!recoveryPanel?.contains(field));
-  const normalSubmit=form.querySelector(".auth-submit[type='submit']");
-  const authTabs=document.querySelector(".auth-tabs");
-  const showRecovery=()=>{
-   if(authTabs)authTabs.hidden=true;
-   regularFields.forEach(field=>field.hidden=true);
-   if(resetButton)resetButton.hidden=true;
-   if(normalSubmit)normalSubmit.hidden=true;
-   if(recoveryPanel)recoveryPanel.hidden=false;
-   const heading=document.getElementById("authTitle");if(heading)heading.textContent="Новый пароль";
-   const subtitle=document.getElementById("authSubtitle");if(subtitle)subtitle.textContent="Придумай новый пароль для своего аккаунта.";
-   if(note){note.className="auth-form-note";note.textContent="Ссылка подтверждена. Укажи новый пароль."}
-   document.getElementById("authNewPassword")?.focus();
+  const intro=document.getElementById("orbisIntro");
+  const showStartError=(message)=>{
+   if(intro)intro.remove();
+   let panel=document.getElementById("orbisGuestStartError");
+   if(!panel){
+    panel=document.createElement("div");panel.id="orbisGuestStartError";
+    panel.style.cssText="position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:24px;background:#080b18;color:#f4f2ff;font-family:Inter,system-ui,sans-serif";
+    const card=document.createElement("div");card.style.cssText="width:min(440px,100%);padding:28px;border:1px solid #ffffff24;border-radius:22px;background:#141b30;text-align:center;box-shadow:0 25px 80px #0008";
+    const logo=document.createElement("div");logo.textContent="✳ ORBIS";logo.style.cssText="font-size:28px;font-weight:900;letter-spacing:2px;margin-bottom:14px";
+    const title=document.createElement("h2");title.textContent="Не удалось открыть ORBIS";title.style.cssText="font-size:21px;margin:0 0 10px";
+    const detail=document.createElement("p");detail.id="orbisGuestStartDetail";detail.style.cssText="color:#b8c2dc;font-size:13px;line-height:1.6;margin:0 0 18px";
+    const retry=document.createElement("button");retry.id="orbisGuestRetry";retry.type="button";retry.textContent="Повторить";retry.style.cssText="width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(105deg,#7968f2,#aa79e9);color:white;font-weight:800;cursor:pointer";
+    card.append(logo,title,detail,retry);panel.append(card);document.body.append(panel);
+    retry.addEventListener("click",async()=>{retry.disabled=true;retry.textContent="Подключаемся…";await startGuestSession();});
+   }
+   const detail=panel.querySelector("#orbisGuestStartDetail");if(detail)detail.textContent=message;
+   const retry=panel.querySelector("#orbisGuestRetry");if(retry){retry.disabled=false;retry.textContent="Повторить";}
   };
-  window.addEventListener("orbis:password-recovery",showRecovery);
-  if(window.orbisRecoveryRequested)showRecovery();
-  try{
-   await window.orbisSupabaseReady;
-   if(recoverySave)recoverySave.addEventListener("click",async()=>{
-    const first=document.getElementById("authNewPassword")?.value||"";
-    const second=document.getElementById("authNewPasswordConfirm")?.value||"";
-    if(first.length<8){if(note){note.className="auth-form-note error";note.textContent="Новый пароль должен содержать не менее 8 символов."}return}
-    if(first!==second){if(note){note.className="auth-form-note error";note.textContent="Пароли не совпадают."}return}
-    recoverySave.disabled=true;
-    if(note){note.className="auth-form-note";note.textContent="Сохраняем новый пароль…"}
-    try{
-     const result=await window.orbisSupabase.auth.updateUser({password:first});
-     if(result.error)throw result.error;
-     await window.orbisSupabase.auth.signOut();
-     window.orbisRecoveryRequested=false;
-     if(recoveryPanel)recoveryPanel.hidden=true;
-     if(authTabs)authTabs.hidden=false;
-     regularFields.forEach(field=>field.hidden=false);
-     if(normalSubmit)normalSubmit.hidden=false;
-     if(resetButton)resetButton.hidden=false;
-     document.getElementById("authPassword").value="";
-     document.getElementById("authNewPassword").value="";
-     document.getElementById("authNewPasswordConfirm").value="";
-     document.querySelector('[data-auth-mode="login"]')?.click();
-     if(note){note.className="auth-form-note success";note.textContent="Пароль обновлён. Теперь войди с новым паролем."}
-    }catch(error){if(note){note.className="auth-form-note error";note.textContent=error.message||"Не удалось обновить пароль."}}
-    finally{recoverySave.disabled=false}
-   });
-   if(resetButton)resetButton.addEventListener("click",async()=>{
-    const email=document.getElementById("authEmail")?.value.trim().toLowerCase()||"";
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){if(note){note.className="auth-form-note error";note.textContent="Сначала введи электронную почту, на которую зарегистрирован аккаунт."}return}
-    resetButton.disabled=true;
-    if(note){note.className="auth-form-note";note.textContent="Отправляем письмо для восстановления…"}
-    try{
-     const result=await window.orbisSupabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
-     if(result.error)throw result.error;
-     if(note){note.className="auth-form-note success";note.textContent="Если аккаунт с таким адресом существует, письмо для восстановления уже отправлено. Проверь входящие и папку «Спам»."}
-    }catch(error){if(note){note.className="auth-form-note error";note.textContent=error.message||"Не удалось отправить письмо."}}
-    finally{resetButton.disabled=false}
-   });
-  }catch(error){if(note)note.textContent=error.message||"Не удалось подключить авторизацию.";return}
-  try{
-   await window.orbisSupabaseReady;
-   const current=await window.orbisSupabase.auth.getSession();
-   if(current.data.session){
+  const startGuestSession=async()=>{
+   try{
+    await window.orbisSupabaseReady;
+    let current=await window.orbisSupabase.auth.getSession();
+    if(!current.data.session){
+     const created=await window.orbisSupabase.auth.signInAnonymously();
+     if(created.error)throw created.error;
+     current=await window.orbisSupabase.auth.getSession();
+    }
+    if(!current.data.session)throw new Error("Не удалось создать гостевую сессию.");
     const data=await api("/api/auth/me");
     window.orbisUser=data.user;syncUserUI(data.user);
     window.orbisEnterApp?.();
+    if(intro)intro.remove();
+    document.getElementById("orbisGuestStartError")?.remove();
     await loadFeed();await loadCurrentProfile();await openSharedPostFromHash();
-   }else{
-    const landing=document.getElementById("orbisLanding");
-    if(landing)landing.hidden=false;
+   }catch(error){
+    console.error("ORBIS guest session:",error);
+    const raw=String(error?.message||"");
+    const message=/anonymous|disabled|not enabled|sign.?in/i.test(raw)
+     ?"В Supabase нужно включить Anonymous Sign-Ins. После этого ORBIS будет открываться автоматически."
+     :"Не удалось создать гостевой профиль. Проверь подключение и попробуй ещё раз.";
+    showStartError(message);
    }
-  }catch(error){
-   console.error("ORBIS session restore:",error);
-   const landing=document.getElementById("orbisLanding");
-   if(landing)landing.hidden=false;
-   if(note){note.className="auth-form-note error";note.textContent="Не удалось восстановить сессию. Войди в аккаунт или создай новый."}
-  }
+  };
+  await startGuestSession();
  });
 })();
 </script>
 
 <style id="orbis-auth-and-layout-fix">
+#orbisLanding,#authGateway{display:none!important}
 #orbisLanding[hidden],#authGateway[hidden]{display:none!important}
 
 
@@ -3122,32 +3043,6 @@ if("serviceWorker" in navigator){
 @media(max-width:600px){.adcenter-intro{padding:18px}.adcenter-mark{flex-basis:48px;height:48px}.adcenter-list-head{align-items:flex-start}}
 </style>
 
-<script id="orbis-entry-hotfix">
-(function(){
-  const css=document.createElement("style");
-  css.textContent="#orbisIntro #introSkip{pointer-events:auto!important;z-index:2147483647!important;position:absolute!important}";
-  document.head.appendChild(css);
-  function continueToOrbis(event){
-    const target=event && event.target && event.target.closest ? event.target.closest("#introSkip") : null;
-    if(!target)return;
-    if(event){event.preventDefault();event.stopPropagation();if(event.stopImmediatePropagation)event.stopImmediatePropagation();}
-    const intro=document.getElementById("orbisIntro");
-    const landing=document.getElementById("orbisLanding");
-    const gateway=document.getElementById("authGateway");
-    if(intro){intro.classList.add("hide");window.setTimeout(()=>intro.remove(),900);}
-    if(landing)landing.hidden=true;
-    if(gateway)gateway.hidden=false;
-    document.body.classList.add("orbis-auth-open");
-    document.body.classList.remove("orbis-app-open");
-    const login=document.querySelector('[data-auth-mode="login"]');
-    if(login && !login.classList.contains("active"))login.click();
-    const email=document.getElementById("authEmail");
-    if(email)window.setTimeout(()=>email.focus({preventScroll:true}),180);
-  }
-  document.addEventListener("click",continueToOrbis,true);
-  const button=document.getElementById("introSkip");
-  if(button){button.style.pointerEvents="auto";button.addEventListener("click",continueToOrbis,true);}
-})();
 </script>
 <style id="orbis-social-ui">
 .orbis-feature-form{display:grid;grid-template-columns:1fr auto;gap:10px;padding:16px;margin:14px 0;border:1px solid #ffffff1c;border-radius:18px;background:#111a2d}
