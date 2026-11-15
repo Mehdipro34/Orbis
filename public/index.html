@@ -6,7 +6,33 @@
 <meta name="theme-color" content="#f7f8fc">
 <meta name="description" content="ORBIS — пространство идей, историй и открытий.">
 <title>ORBIS — твой мир идей</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js">
+/* Motion enhancements: tactile ripple and scroll reveals */
+document.querySelectorAll("button").forEach(button=>{
+  if(!button.querySelector(".orb-sheen")){const sheen=document.createElement("span");sheen.className="orb-sheen";button.appendChild(sheen)}
+});
+document.addEventListener("pointerdown",event=>{
+  const button=event.target.closest("button");
+  if(!button||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const rect=button.getBoundingClientRect(),size=Math.max(rect.width,rect.height)*1.8;
+  const ripple=document.createElement("span");
+  ripple.className="orb-ripple";
+  ripple.style.width=size+"px";ripple.style.height=size+"px";
+  ripple.style.left=(event.clientX-rect.left-size/2)+"px";
+  ripple.style.top=(event.clientY-rect.top-size/2)+"px";
+  button.appendChild(ripple);
+  ripple.addEventListener("animationend",()=>ripple.remove(),{once:true});
+});
+const revealTargets=document.querySelectorAll(".post,.side-card,.stories,.composer");
+if("IntersectionObserver" in window&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  revealTargets.forEach(el=>el.classList.add("reveal-on-scroll"));
+  const revealObserver=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("is-visible");revealObserver.unobserve(entry.target)}});
+  },{threshold:.08});
+  revealTargets.forEach(el=>revealObserver.observe(el));
+}else{revealTargets.forEach(el=>el.classList.add("is-visible"))}
+
+</script>
 <style>
 :root{color-scheme:light;--bg:#f6f7fb;--paper:#fff;--ink:#20243a;--muted:#858ba2;--line:#e9ebf3;--violet:#6958e8;--violet2:#8b7cf6;--coral:#ff8c79;--mint:#5bc9b3;--shadow:0 14px 40px #34365c0c}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0%,#eeeaff 0,transparent 34%),radial-gradient(ellipse at 0% 35%,#fff0ed 0,transparent 28%),var(--bg);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea{font:inherit}button{cursor:pointer}.shell{max-width:1390px;margin:auto;min-height:100dvh;display:grid;grid-template-columns:245px minmax(0,700px) 300px;gap:28px;padding:26px 28px}.sidebar{position:sticky;top:24px;height:calc(100dvh - 48px);display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:12px;padding:3px 9px 36px;font-size:23px;font-weight:950;letter-spacing:3px}.brandmark{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;color:white;font-size:22px;background:linear-gradient(145deg,#8879ff,#6554df 60%,#ff9c91);box-shadow:0 9px 22px #7565e83b}.nav{display:grid;gap:7px}.nav button{border:0;background:transparent;color:#777e96;text-align:left;padding:13px 15px;border-radius:15px;display:flex;align-items:center;gap:14px;font-weight:680;transition:.2s}.nav button:hover{background:#fff;color:var(--violet);transform:translateX(2px)}.nav button.active{background:#eeecff;color:var(--violet);box-shadow:inset 3px 0 var(--violet)}.nav-icon{font-size:20px;width:24px;text-align:center}.nav .create{margin-top:17px;justify-content:center;color:white;background:linear-gradient(110deg,#7969f2,#5e50dc);box-shadow:0 12px 24px #7565e83b}.nav .create:hover{color:white;transform:translateY(-2px);background:linear-gradient(110deg,#8879ff,#6657e6)}.sidebar-foot{margin-top:auto;padding:15px 10px;color:#a1a5b7;font-size:11px}.sidebar-foot b{color:#6f7290}
@@ -88,6 +114,36 @@ body:after{content:"";position:fixed;z-index:-2;inset:-20%;pointer-events:none;b
 @media(max-width:800px){.hero-visual{right:-43px;opacity:.65;transform:translateY(-50%) scale(.78)}.hero h2,.hero p,.hero-label,.hero-tag{max-width:75%}}
 @media(max-width:520px){.hero{min-height:225px}.hero-visual{right:-76px;opacity:.38;transform:translateY(-50%) scale(.68)}.hero h2,.hero p,.hero-label,.hero-tag{max-width:88%}.brandmark{width:43px;height:43px}.orbit-ring{width:56px;height:21px}}
 @media(prefers-reduced-motion:reduce){body:after,.brandmark,.brandmark:after,.orbit-core,.orbit-ring,.orbit-dot,.hero-planet,.hero-orbit,.hero-spark,.hero:before,.hero:after,.hero-tag,.nav .create:after{animation:none!important}}
+
+/* ORBIS interaction motion — buttons, cards, and transitions */
+button{position:relative;isolation:isolate;overflow:hidden;-webkit-tap-highlight-color:transparent;transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,border-color .22s,background-color .22s,color .22s,filter .22s}
+button:not(:disabled):active{transform:scale(.955)!important;filter:saturate(1.25)}
+button:focus-visible{outline:3px solid #a99bff;outline-offset:3px}
+.nav button:not(.create):hover,.mobile-nav button:hover{transform:translateY(-3px) scale(1.025);box-shadow:0 8px 20px #7966ef17}
+.nav .create:hover,.primary:hover{transform:translateY(-3px) scale(1.025);box-shadow:0 15px 30px #8068e866;filter:saturate(1.16)}
+.bell:hover,.tiny:hover,.secondary:hover,.post-actions button:hover,.topic-filter button:hover{transform:translateY(-2px);box-shadow:0 7px 17px #7866ec18}
+.topic-filter button.active{box-shadow:0 6px 18px #8068e82b;transform:translateY(-2px)}
+button .orb-ripple{position:absolute;z-index:-1;border-radius:50%;pointer-events:none;transform:scale(0);background:radial-gradient(circle,#ffffffb8 0%,#ffffff4d 42%,transparent 72%);animation:orbRipple .65s ease-out forwards}
+@keyframes orbRipple{to{transform:scale(1);opacity:0}}
+button .orb-sheen{position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(110deg,transparent 20%,#ffffff35 48%,transparent 72%);transform:translateX(-130%);transition:transform .65s ease}
+button:hover .orb-sheen{transform:translateX(130%)}
+.post,.side-card,.stories,.composer{transition:transform .32s cubic-bezier(.2,.8,.2,1),box-shadow .32s,border-color .32s}
+.post:hover,.side-card:hover,.stories:hover,.composer:hover{transform:translateY(-4px);box-shadow:0 22px 48px #5946a31b}
+.story{transition:transform .25s}.story:hover{transform:translateY(-5px)}
+.story:hover small{color:#6855ed}
+.avatar{transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}.avatar:hover{transform:rotate(-7deg) scale(1.09);box-shadow:0 10px 24px #7866ec55}
+.hero{animation:heroArrive .85s cubic-bezier(.2,.8,.2,1) both}
+@keyframes heroArrive{from{opacity:0;transform:translateY(15px) scale(.985);filter:saturate(.65)}to{opacity:1;transform:translateY(0) scale(1);filter:saturate(1)}}
+.modal.open .dialog{animation:dialogPop .42s cubic-bezier(.18,.9,.25,1.25) both}
+@keyframes dialogPop{from{opacity:0;transform:translateY(20px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal.open{animation:modalFade .2s ease both}
+@keyframes modalFade{from{opacity:0}to{opacity:1}}
+.toast{animation:toastPop .35s cubic-bezier(.18,.9,.25,1.2) both}
+@keyframes toastPop{from{opacity:0;transform:translate(-50%,14px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.reveal-on-scroll{opacity:0;transform:translateY(18px) scale(.99);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.8,.2,1)}
+.reveal-on-scroll.is-visible{opacity:1;transform:translateY(0) scale(1)}
+@media(prefers-reduced-motion:reduce){button,button:active,.post,.side-card,.stories,.composer,.story,.avatar,.reveal-on-scroll{transition:none!important;transform:none!important}.orb-ripple,.orb-sheen{display:none!important}.hero,.modal.open .dialog,.modal.open,.toast{animation:none!important}}
+
 </style>
 </head>
 <body>
