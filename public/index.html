@@ -1435,6 +1435,66 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .land-reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}.land-reveal.land-visible{opacity:1;transform:translateY(0)}
 @media(max-width:850px){.roadmap-grid{grid-template-columns:1fr}.roadmap-card{min-height:0}.roadmap-card p{min-height:0}.land-roadmap,.land-faq{padding:64px 22px}}
 @media(prefers-reduced-motion:reduce){.land-reveal{opacity:1;transform:none;transition:none}.roadmap-card,.faq-list details,.faq-list summary span{transition:none}}
+
+/* ORBIS premium visual refresh — landing and orbit-first access */
+.orbis-landing{background:#070b18;color:#f5f4ff}
+.landing-nav{backdrop-filter:blur(22px);background:#080d1bdc;border-bottom:1px solid #ffffff12}
+.landing-logo{letter-spacing:2px}.landing-logo b{color:#a997ff;text-shadow:0 0 20px #9b83ff}
+.land-hero{min-height:min(820px,calc(100svh - 70px));padding-top:clamp(80px,11vh,130px);padding-bottom:85px}
+.land-copy h1{font-size:clamp(54px,7.5vw,100px);letter-spacing:-.075em;line-height:.99;text-wrap:balance}
+.land-copy h1 em{background:linear-gradient(100deg,#c9bcff 5%,#8b7aff 50%,#72e9dc 95%);background-clip:text;-webkit-background-clip:text;color:transparent}
+.land-copy>p{max-width:510px;color:#aab4ce;font-size:15px;line-height:1.85}
+.land-actions button,.land-login,.land-signup{transition:transform .25s,box-shadow .25s,filter .25s}
+.land-actions button:hover,.land-login:hover,.land-signup:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 12px 35px #8272ef45}
+.land-art{filter:drop-shadow(0 25px 70px #6e60e52a)}
+.land-core{box-shadow:0 0 45px #8e7aff45,0 0 130px #7b6af52b,inset 0 0 30px #ffffff16}
+.land-orbit.outer{border-color:#a89aff66;box-shadow:0 0 24px #8e7aff24}
+.land-orbit.middle{border-color:#68e9dc66}.land-orbit.inner{border-color:#ffffff30}
+.land-chip{border:1px solid #ffffff24;background:linear-gradient(135deg,#1a2440dc,#10182cdd);box-shadow:0 15px 45px #0006;backdrop-filter:blur(16px)}
+.land-about,.land-features,.land-creator{position:relative}
+.land-features{background:radial-gradient(ellipse at 50% 0,#28245a66,transparent 55%),#0a1020}
+.land-grid article{border:1px solid #ffffff17;background:linear-gradient(145deg,#171f38,#0e1528);border-radius:23px;transition:transform .3s,border-color .3s,box-shadow .3s}
+.land-grid article:hover{transform:translateY(-8px);border-color:#8c7cf0;box-shadow:0 25px 60px #0005,0 0 30px #8675ef18}
+.feature-symbol{filter:drop-shadow(0 0 16px #a38eff77)}
+.land-creator{background:linear-gradient(120deg,#11162c,#15132c 65%,#10222d);border:1px solid #ffffff0d;border-radius:30px;margin:40px auto;max-width:1250px}
+.land-footer{border-top:1px solid #ffffff12}
+.auth-minimal{padding:24px;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 48%,#1c2550 0%,#0b1024 45%,#050812 100%)}
+.auth-minimal .auth-backdrop{opacity:.7}
+.auth-minimal-layout{position:relative;z-index:2;width:min(1060px,100%);min-height:min(760px,calc(100svh - 80px));display:grid;grid-template-columns:1fr minmax(360px,430px);align-items:center;gap:clamp(35px,8vw,110px);margin:auto}
+.auth-orb-stage{position:relative;min-height:520px;display:grid;place-items:center;isolation:isolate}
+.auth-orb-halo{position:absolute;width:min(38vw,440px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#8272f044 0,#4d56b222 36%,transparent 70%);filter:blur(15px);animation:authHaloPulse 5s ease-in-out infinite}
+@keyframes authHaloPulse{50%{transform:scale(1.18);opacity:.65}}
+.auth-orb-ring{position:absolute;width:min(36vw,420px);height:min(15vw,175px);border:1px solid #b6aaff62;border-radius:50%;box-shadow:0 0 25px #9582ff1d,inset 0 0 20px #8d7bff13}
+.auth-orb-ring.ring-a{transform:rotate(-28deg);animation:authRingSpin 17s linear infinite}
+.auth-orb-ring.ring-b{width:min(42vw,500px);height:min(19vw,215px);border-color:#68e8dc55;transform:rotate(52deg);animation:authRingSpin 23s linear infinite reverse}
+.auth-orb-ring.ring-c{width:min(31vw,360px);height:min(26vw,300px);border-style:dashed;border-color:#ffffff24;transform:rotate(70deg);animation:authRingSpin 38s linear infinite}
+@keyframes authRingSpin{to{rotate:360deg}}
+.auth-orb-sphere{position:relative;z-index:1;width:145px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 32% 25%,#f4efff,#b0a0ff 13%,#6557c8 42%,#22275d 76%,#0a1029);box-shadow:inset -22px -24px 38px #080d2c,0 0 45px #8b7aff88,0 0 115px #7e6bff4a;animation:authSphereFloat 6s ease-in-out infinite}
+.auth-orb-sphere:after{content:"";position:absolute;inset:-18px;border:1px solid #c4baff55;border-radius:50%;box-shadow:0 0 30px #8c7bff30}
+.auth-orb-sphere span{font-size:54px;color:#fff;text-shadow:0 0 24px #fff}
+@keyframes authSphereFloat{50%{transform:translateY(-12px) rotate(8deg)}}
+.auth-orb-word{position:absolute;top:calc(50% + 115px);font-size:30px;font-weight:950;letter-spacing:9px;color:#fff;text-shadow:0 0 25px #9c8bff85}
+.auth-orb-caption{position:absolute;top:calc(50% + 157px);font-size:8px;letter-spacing:4px;color:#9eabd0}
+.auth-orb-spark{position:absolute;color:#d8d0ff;text-shadow:0 0 20px #a99aff;animation:authTwinkle 3s ease-in-out infinite}
+.auth-orb-spark.spark-a{left:16%;top:24%;font-size:25px}.auth-orb-spark.spark-b{right:15%;bottom:24%;font-size:32px;animation-delay:-1.5s}
+.auth-card-compact{padding:30px 30px 23px;border-radius:26px;background:linear-gradient(145deg,#1a2440ed,#0b1428f5);border-color:#ffffff2a;box-shadow:0 40px 120px #0009,0 0 65px #8372ff20,inset 0 1px #ffffff27}
+.auth-card-compact .auth-card-top{margin-bottom:23px}
+.auth-card-compact .auth-heading h2{font-size:29px;margin:8px 0 4px}
+.auth-card-compact .auth-heading p{font-size:11px}
+.auth-card-compact .auth-tabs{margin:20px 0}
+.auth-card-compact .auth-field{margin-bottom:13px}
+.auth-card-compact .auth-input-wrap{height:50px}
+.auth-card-compact .auth-form-note{min-height:17px;margin:0 0 9px}
+.auth-card-compact .auth-legal{margin-top:13px}
+.auth-quick-demo{margin-top:11px;height:43px;border-color:#77dedc35;background:#5bded20b}
+.auth-quick-demo b{margin-left:auto;color:#7fe4d8;font-size:16px}
+.quick-orbit-icon{color:#a99aff;text-shadow:0 0 13px #a99aff}
+.auth-back-landing{position:fixed;z-index:10;top:22px;left:24px;width:42px;height:42px;display:grid;place-items:center;border:1px solid #ffffff25;border-radius:14px;background:#ffffff0b;color:#e5e2ff;font-size:19px;backdrop-filter:blur(12px);transition:all .2s}
+.auth-back-landing:hover{background:#ffffff18;transform:translateX(-3px)}
+.auth-minimal .auth-copyright{left:0;right:0;bottom:14px;text-align:center}
+@media(max-width:760px){.auth-minimal{padding:74px 16px 52px;overflow:auto}.auth-minimal-layout{display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:calc(100svh - 130px);width:min(440px,100%)}.auth-orb-stage{min-height:230px;width:100%;margin-top:-8px}.auth-orb-halo{width:220px}.auth-orb-ring{width:230px!important;height:95px!important}.auth-orb-ring.ring-b{width:270px!important;height:120px!important}.auth-orb-ring.ring-c{width:210px!important;height:170px!important}.auth-orb-sphere{width:82px}.auth-orb-sphere span{font-size:34px}.auth-orb-word{top:calc(50% + 69px);font-size:21px}.auth-orb-caption{top:calc(50% + 99px);font-size:7px}.auth-orb-spark.spark-a{left:18%;top:17%}.auth-orb-spark.spark-b{right:17%;bottom:14%}.auth-card-wrap{width:100%;max-width:430px}.auth-card-compact{padding:23px 21px 19px}.auth-card-compact .auth-card-top{margin-bottom:17px}.auth-card-compact .auth-tabs{margin:16px 0}.auth-minimal .auth-copyright{bottom:9px}.auth-back-landing{top:14px;left:14px}}
+@media(max-width:380px){.auth-orb-stage{min-height:190px}.auth-card-compact{padding:20px 17px}.auth-minimal{padding-inline:12px}}
+@media(prefers-reduced-motion:reduce){.auth-orb-halo,.auth-orb-ring,.auth-orb-sphere{animation:none!important}}
 </style>
 </head>
 <body>
@@ -1490,35 +1550,28 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 </section>
 <section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS на компьютере или смартфоне. Отдельная мобильная сборка готовится.</p></div><div><button id="downloadCTA">↓ Скачать приложение <b>↗</b></button><small id="downloadNote">Веб-версия доступна сейчас · мобильная версия готовится</small><button class="download-login" data-open-auth="login">У меня уже есть аккаунт →</button></div></section></main>
 <footer class="land-footer"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><span>ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</span><span>© 2026 ORBIS · Мехти Мурадлы</span></footer></section>
-<section class="auth-gateway" id="authGateway" hidden aria-label="Вход в ORBIS"><button class="auth-back-landing" id="authBackLanding" type="button">← На главную</button>
+<section class="auth-gateway auth-minimal" id="authGateway" hidden aria-label="Вход в ORBIS">
+ <button class="auth-back-landing" id="authBackLanding" type="button" aria-label="Назад">←</button>
  <div class="auth-backdrop" aria-hidden="true"><div class="auth-nebula n-one"></div><div class="auth-nebula n-two"></div><div class="auth-orbit o-one"><i></i></div><div class="auth-orbit o-two"><i></i></div><div class="auth-orbit o-three"><i></i></div><span class="auth-star s-one">✦</span><span class="auth-star s-two">✧</span><span class="auth-star s-three">✦</span><span class="auth-star s-four">·</span><div class="auth-planet"></div></div>
- <div class="auth-layout">
-  <div class="auth-showcase">
-   <div class="auth-brand"><span class="auth-brand-symbol">✳<i></i></span><span>ORBIS</span><small>YOUR WORLD OF IDEAS</small></div>
-   <div class="auth-showcase-copy"><span class="auth-overline"><i></i> ТВОЁ ПРОСТРАНСТВО УЖЕ ЖДЁТ</span><h1>Мир идей.<br><em>Без границ.</em></h1><p>Открывай новые взгляды, находи вдохновение и делись тем, что действительно важно.</p></div>
-   <div class="auth-orbit-caption"><span class="caption-dot"></span> ONE UNIVERSE · INFINITE IDEAS</div><div class="auth-creator-line">ПРОЕКТ МЕХТИ МУРАДЛЫ</div>
-   <div class="auth-showcase-foot"><span>01 / 03</span><span>ИССЛЕДУЙ · СОЗДАВАЙ · ОТКРЫВАЙ</span></div>
-  </div>
-  <div class="auth-card-wrap">
-   <div class="auth-card">
-    <div class="auth-card-top"><span class="auth-mini-logo">✳</span><span class="auth-secure">● ORBIS ACCESS</span></div>
-    <div class="auth-heading"><div class="auth-eyebrow">РАДЫ ТЕБЯ ВИДЕТЬ</div><h2 id="authTitle">С возвращением</h2><p id="authSubtitle">Войди в свой аккаунт и продолжай открывать новое.</p></div>
-    <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
-    <form id="orbisAuthForm" novalidate>
-     <label class="auth-field"><span>ЭЛЕКТРОННАЯ ПОЧТА</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com" required></span></label>
-     <label class="auth-field"><span>ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authPassword" type="password" autocomplete="current-password" placeholder="Не менее 8 символов" minlength="8" required><button class="auth-eye" id="authEye" type="button" aria-label="Показать пароль">◉</button></span></label>
-     <label class="auth-field auth-confirm-field" id="authConfirmField" hidden><span>ПОВТОРИ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Введи пароль ещё раз"></span></label>
-     <div class="auth-form-note" id="authFormNote" aria-live="polite">Твои данные будут защищены после подключения системы авторизации.</div>
-     <button class="auth-submit" type="submit"><span id="authSubmitText">Войти в ORBIS</span><b>↗</b></button>
-    </form>
-    <div class="auth-divider"><span></span> ИЛИ <span></span></div>
-    <button class="auth-demo" id="authDemo" type="button">Посмотреть демоверсию <span>→</span></button>
-    <div class="auth-legal">Продолжая, ты принимаешь <a href="#" id="authTerms">условия использования</a> и <a href="#" id="authPrivacy">политику конфиденциальности</a>.</div>
-   </div>
-   <div class="auth-bottom-note"><span>✦</span> ТВОЯ СЛЕДУЮЩАЯ ИДЕЯ НАЧИНАЕТСЯ ЗДЕСЬ</div>
-  </div>
+ <div class="auth-minimal-layout">
+  <div class="auth-orb-stage" aria-hidden="true"><div class="auth-orb-halo"></div><div class="auth-orb-ring ring-a"></div><div class="auth-orb-ring ring-b"></div><div class="auth-orb-ring ring-c"></div><div class="auth-orb-sphere"><span>✳</span></div><div class="auth-orb-word">ORBIS</div><div class="auth-orb-caption">YOUR WORLD OF IDEAS</div><i class="auth-orb-spark spark-a">✦</i><i class="auth-orb-spark spark-b">✧</i></div>
+  <div class="auth-card-wrap"><div class="auth-card auth-card-compact">
+   <div class="auth-card-top"><span class="auth-mini-logo">✳</span><span class="auth-secure">● ORBIS ACCESS</span></div>
+   <div class="auth-heading"><div class="auth-eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h2 id="authTitle">С возвращением</h2><p id="authSubtitle">Войди и продолжай.</p></div>
+   <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
+   <form id="orbisAuthForm" novalidate>
+    <label class="auth-field"><span>ИМЯ ПОЛЬЗОВАТЕЛЯ</span><span class="auth-input-wrap"><i>@</i><input id="authUsername" type="text" autocomplete="username" placeholder="Твой username" minlength="3" maxlength="24" required></span></label>
+    <label class="auth-field auth-email-field" id="authEmailField" hidden><span>ПОЧТА · НЕОБЯЗАТЕЛЬНО</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com"></span></label>
+    <label class="auth-field"><span>ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authPassword" type="password" autocomplete="current-password" placeholder="Твой пароль" minlength="8" required><button class="auth-eye" id="authEye" type="button" aria-label="Показать пароль">◉</button></span></label>
+    <label class="auth-field auth-confirm-field" id="authConfirmField" hidden><span>ПОВТОРИ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Ещё раз пароль"></span></label>
+    <div class="auth-form-note" id="authFormNote" aria-live="polite"> </div>
+    <button class="auth-submit" type="submit"><span id="authSubmitText">Войти</span><b>↗</b></button>
+   </form>
+   <button class="auth-demo auth-quick-demo" id="authDemo" type="button"><span class="quick-orbit-icon">✳</span> Быстрый просмотр ORBIS <b>→</b></button>
+   <div class="auth-legal">Демонстрационный вход не создаёт аккаунт.</div>
+  </div></div>
  </div>
- <div class="auth-copyright">© 2026 ORBIS <span>•</span> BUILT FOR CURIOUS MINDS</div>
+ <div class="auth-copyright">© 2026 ORBIS</div>
 </section>
 
 <div class="shell" id="orbisAppShell" hidden>
@@ -1809,41 +1862,42 @@ document.addEventListener("click",event=>{
 })();
 
 
-/* ORBIS access screen interactions — visual prototype; no account service connected yet. */
+/* ORBIS access screen interactions — streamlined username flow; server auth is not connected. */
 (function(){
  const intro=document.getElementById("orbisIntro"),gateway=document.getElementById("authGateway"),shell=document.getElementById("orbisAppShell");
  const skip=document.getElementById("introSkip"),form=document.getElementById("orbisAuthForm"),demo=document.getElementById("authDemo");
- const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs");
+ const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs"),username=document.getElementById("authUsername"),emailField=document.getElementById("authEmailField"),email=document.getElementById("authEmail");
  let mode="login";
  function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}}
  function enterDemo(){if(gateway)gateway.hidden=true;const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(shell)shell.hidden=false;document.body.classList.add("orbis-demo-open")}
  const landing=document.getElementById("orbisLanding");
- function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;if(nextMode){const target=document.querySelector(`[data-auth-mode="${nextMode}"]`);if(target)target.click()}window.scrollTo({top:0,behavior:"smooth"})}
+ function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>username&&username.focus({preventScroll:true}),220);window.scrollTo({top:0,behavior:"smooth"})}
  document.querySelectorAll("[data-open-auth]").forEach(button=>button.addEventListener("click",()=>openAuth(button.dataset.openAuth)));
- const back=document.getElementById("authBackLanding");if(back)back.addEventListener("click",()=>{if(gateway)gateway.hidden=true;if(landing)landing.hidden=false;window.scrollTo({top:0,behavior:"smooth"})});
- const download=document.getElementById("downloadCTA");if(download)download.addEventListener("click",()=>{const note=document.getElementById("downloadNote");if(note)note.textContent="Отдельная мобильная сборка ещё готовится. Пока ORBIS можно открыть в браузере.";notify("Мобильная версия готовится — сейчас доступна веб-версия.");});
+ const back=document.getElementById("authBackLanding");if(back)back.addEventListener("click",()=>{if(gateway)gateway.hidden=true;if(landing)landing.hidden=false;document.body.classList.remove("orbis-auth-open");window.scrollTo({top:0,behavior:"smooth"})});
+ const download=document.getElementById("downloadCTA");if(download)download.addEventListener("click",()=>{const n=document.getElementById("downloadNote");if(n)n.textContent="Отдельная мобильная сборка ещё готовится. Пока ORBIS доступен в браузере.";});
  if(skip)skip.addEventListener("click",showAccess);
  if(intro){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)showAccess();else window.setTimeout(showAccess,8200)}
  tabs.forEach(tab=>tab.addEventListener("click",()=>{
   mode=tab.dataset.authMode;tabs.forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active))});
   tabWrap.classList.toggle("signup",mode==="signup");
-  title.textContent=mode==="login"?"С возвращением":"Создай свой аккаунт";
-  subtitle.textContent=mode==="login"?"Войди в свой аккаунт и продолжай открывать новое.":"Всего пара шагов — и твоё пространство ORBIS готово.";
+  title.textContent=mode==="login"?"С возвращением":"Создай аккаунт";
+  subtitle.textContent=mode==="login"?"Войди и продолжай.":"Выбери username и пароль.";
   confirmField.hidden=mode!=="signup";confirmInput.required=mode==="signup";
+  emailField.hidden=mode!=="signup";
   password.autocomplete=mode==="login"?"current-password":"new-password";
-  submitText.textContent=mode==="login"?"Войти в ORBIS":"Создать аккаунт";
-  note.className="auth-form-note";note.textContent="Авторизация пока не подключена. Это пока визуальный прототип.";
+  submitText.textContent=mode==="login"?"Войти":"Создать аккаунт";
+  note.className="auth-form-note";note.textContent="";
  }));
  const eye=document.getElementById("authEye");if(eye)eye.addEventListener("click",()=>{const reveal=password.type==="password";password.type=reveal?"text":"password";eye.textContent=reveal?"◎":"◉";eye.setAttribute("aria-label",reveal?"Скрыть пароль":"Показать пароль")});
  if(form)form.addEventListener("submit",e=>{
   e.preventDefault();note.className="auth-form-note error";
-  if(!document.getElementById("authEmail").validity.valid){note.textContent="Проверь адрес электронной почты.";return}
-  if(password.value.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";return}
-  if(mode==="signup"&&password.value!==confirmInput.value){note.textContent="Пароли не совпадают. Проверь оба поля.";return}
-  note.textContent="Экран готов, но вход и создание аккаунта заработают после подключения безопасного сервера авторизации.";
+  if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username.value.trim())){note.textContent="Username: 3–24 символа, латинские буквы, цифры, точка или _.";username.focus();return}
+  if(password.value.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";password.focus();return}
+  if(mode==="signup"&&email.value.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())){note.textContent="Проверь адрес почты или оставь поле пустым.";email.focus();return}
+  if(mode==="signup"&&password.value!==confirmInput.value){note.textContent="Пароли не совпадают.";confirmInput.focus();return}
+  note.textContent="Форма готова. Настоящий вход появится после подключения защищённой авторизации.";
  });
  if(demo)demo.addEventListener("click",enterDemo);
- ["authTerms","authPrivacy"].forEach(id=>{const a=document.getElementById(id);if(a)a.addEventListener("click",e=>{e.preventDefault();note.className="auth-form-note";note.textContent="Документы будут добавлены перед запуском регистрации."})});
 })();
 
 
