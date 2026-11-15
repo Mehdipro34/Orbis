@@ -2298,7 +2298,10 @@ document.addEventListener("click",event=>{
 (function(){
  const $=id=>document.getElementById(id);
  const api=async(path,options={})=>{
-  const response=await fetch(path,{credentials:"same-origin",...options,headers:{"content-type":"application/json",...(options.headers||{})}});
+  const headers=new Headers(options.headers||{});
+  const isForm=typeof FormData!=="undefined"&&options.body instanceof FormData;
+  if(options.body!==undefined&&options.body!==null&&!isForm&&!headers.has("content-type"))headers.set("content-type","application/json");
+  const response=await fetch(path,{credentials:"same-origin",...options,headers});
   const data=await response.json().catch(()=>({error:"Ответ сервера не распознан."}));
   if(!response.ok)throw new Error(data.error||"Ошибка запроса.");
   return data;
