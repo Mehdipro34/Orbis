@@ -2729,8 +2729,22 @@ document.addEventListener("click",event=>{
  },300000);
  const searchInput=$("orbisSearchInput");
  document.addEventListener("keydown",event=>{if(event.key==="Enter"&&event.target===$("orbisSearchInput")){event.preventDefault();runSearch()}});
- window.addEventListener("orbis:login",()=>{loadFeed().then(openSharedPostFromHash)});
- api("/api/auth/me").then(data=>{window.orbisUser=data.user;syncUserUI(data.user);window.orbisEnterApp?.();loadFeed().then(openSharedPostFromHash)}).catch(()=>{});
+ window.addEventListener("orbis:login",()=>{
+  if(window.orbisUser)syncUserUI(window.orbisUser);
+  loadFeed().then(openSharedPostFromHash);
+ });
+ // Wait until the Supabase client and fetch bridge exist before restoring a saved session.
+ window.addEventListener("DOMContentLoaded",async()=>{
+  try{
+   await window.orbisSupabaseReady;
+   const data=await api("/api/auth/me");
+   window.orbisUser=data.user;syncUserUI(data.user);
+   window.orbisEnterApp?.();
+   await loadFeed();await openSharedPostFromHash();
+  }catch(error){
+   // A 401 means this visitor has not signed in yet; keep the public landing/auth screen.
+  }
+ });
 })();
 </script>
 
