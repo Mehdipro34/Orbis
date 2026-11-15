@@ -1226,6 +1226,62 @@ button:focus-visible{outline:2px solid #a998ff;outline-offset:3px}
 @media(max-width:650px){.screen-heading h2{font-size:27px}.navigator-feature{min-height:175px;padding:22px 19px}.navigator-feature h3{font-size:19px}.navigator-feature>div:first-child{max-width:72%}.navigator-galaxy{width:105px;height:105px;right:10px;top:35px}.navigator-galaxy i{left:34px;top:34px;width:35px;height:35px}.navigator-galaxy b{left:65px;top:9px}.navigator-grid{gap:9px}.navigator-topic{min-height:126px;padding:13px}.profile-cover{height:145px}}
 @media(prefers-reduced-motion:reduce){.orbis-screen,.navigator-topic{animation:none!important}.navigator-galaxy,.profile-cover:before,.profile-cover:after{animation:none!important}}
 
+
+/* ORBIS signature visual polish — cinematic depth, motion and responsive details */
+:root{--orbis-lilac:#a895ff;--orbis-cyan:#71e9df;--orbis-ink:#080d1b}
+body{background:radial-gradient(ellipse at 14% 5%,#382c7045,transparent 32%),radial-gradient(ellipse at 88% 28%,#12616a26,transparent 34%),linear-gradient(145deg,#080d1b 0%,#0b1020 48%,#080d18 100%);background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.2;background-image:radial-gradient(1px 1px at 12% 18%,#fff 99%,transparent),radial-gradient(1px 1px at 77% 32%,#a9caff 99%,transparent),radial-gradient(1px 1px at 43% 72%,#fff 99%,transparent),radial-gradient(1px 1px at 91% 84%,#a9caff 99%,transparent);background-size:190px 190px,270px 270px,230px 230px,310px 310px;animation:orbisStarDrift 55s linear infinite}
+@keyframes orbisStarDrift{to{background-position:190px 380px,-270px 270px,230px -230px,-310px 310px}}
+.shell{position:relative}
+.sidebar{background:linear-gradient(180deg,#11182beF,#0b1221f5)!important;border-color:#ffffff12!important;box-shadow:14px 0 55px #0003,inset -1px 0 #ffffff08;backdrop-filter:blur(22px)}
+.brand{padding-bottom:23px!important}
+.brandmark{box-shadow:0 0 0 5px #9b88ff0d,0 0 30px #8c75ff55!important;animation:orbisBrandPulse 4s ease-in-out infinite}
+@keyframes orbisBrandPulse{50%{box-shadow:0 0 0 8px #9b88ff08,0 0 42px #8c75ff88}}
+.brand-word{letter-spacing:3px!important;text-shadow:0 0 22px #a18aff55}
+.nav{gap:8px!important}
+.nav button{position:relative;overflow:hidden;border:1px solid transparent!important;transition:transform .24s,border-color .24s,background .24s,box-shadow .24s!important}
+.nav button:not(.create):hover{transform:translateX(4px);background:#ffffff0a!important;border-color:#ffffff12!important}
+.nav button.active:not(.create){background:linear-gradient(100deg,#8e78ff25,#4bd8d019)!important;border-color:#a695ff48!important;box-shadow:inset 3px 0 #a895ff,0 8px 25px #0002}
+.nav button.active:not(.create):after{content:"";position:absolute;right:13px;width:5px;height:5px;border-radius:50%;background:#83eee2;box-shadow:0 0 12px #83eee2}
+.nav button.create{background:linear-gradient(110deg,#8268ed,#5a79df 58%,#279f9c)!important;box-shadow:0 10px 28px #6d62db35,inset 0 1px #ffffff4a!important;transition:transform .25s,filter .25s,box-shadow .25s!important}
+.nav button.create:hover{transform:translateY(-3px);filter:brightness(1.12);box-shadow:0 15px 34px #6d62db55!important}
+.topbar{backdrop-filter:blur(18px);background:linear-gradient(90deg,#0c1323e8,#111a2de8)!important;border:1px solid #ffffff10!important;box-shadow:0 12px 35px #0002}
+.hero{position:relative;overflow:hidden;border:1px solid #9b8bff35!important;background:radial-gradient(ellipse at 78% 48%,#806bff28,transparent 36%),radial-gradient(ellipse at 18% 100%,#28c5b51b,transparent 38%),linear-gradient(120deg,#171c3b 0%,#171b36 48%,#102b3c 100%)!important;box-shadow:0 25px 65px #0005,inset 0 1px #ffffff18!important}
+.hero:before{content:"";position:absolute;inset:-1px;pointer-events:none;background:linear-gradient(115deg,transparent 20%,#ffffff0b 45%,transparent 68%);transform:translateX(-100%);animation:orbisHeroShine 9s ease-in-out infinite}
+@keyframes orbisHeroShine{0%,55%{transform:translateX(-100%)}78%,100%{transform:translateX(100%)}}
+.hero-label{letter-spacing:2.8px!important;color:#9deee4!important}
+.hero h1,.hero h2{letter-spacing:-1.5px;text-shadow:0 5px 30px #0004}
+.hero-visual{filter:drop-shadow(0 12px 30px #8b79ff30)}
+.hero-planet{box-shadow:0 0 45px #a18bff88,inset -12px -10px 24px #201b5e!important}
+.hero-orbit{border-color:#a99aff80!important;box-shadow:0 0 18px #9d8bff22}
+.discovery-panel{border:1px solid #75dcd52b!important;background:radial-gradient(ellipse at 85% 20%,#42cfc51a,transparent 35%),linear-gradient(125deg,#111f30,#11182b 65%,#142a35)!important;box-shadow:0 18px 45px #0003,inset 0 1px #ffffff0c!important}
+.composer{border:1px solid #8c80d73b!important;background:linear-gradient(145deg,#151d32,#10182a)!important;box-shadow:0 18px 45px #0003,inset 0 1px #ffffff0d!important;transition:border-color .25s,box-shadow .25s}
+.composer:focus-within{border-color:#8e80ed88!important;box-shadow:0 0 0 3px #8e80ed12,0 20px 48px #0004!important}
+.avatar{box-shadow:0 0 0 3px #a18aff16,0 0 24px #7d70db2b!important}
+.topic-filter button{border:1px solid #ffffff12!important;background:#ffffff06!important;transition:all .22s!important}
+.topic-filter button:hover{border-color:#a895ff77!important;transform:translateY(-2px)}
+.topic-filter button.active{background:linear-gradient(110deg,#806ce044,#35bdb333)!important;border-color:#a895ff7a!important;box-shadow:0 5px 18px #7867d322,inset 0 1px #ffffff18}
+.post{position:relative;overflow:hidden;border:1px solid #ffffff13!important;background:linear-gradient(145deg,#141d31f5,#101728f5)!important;box-shadow:0 14px 38px #0002,inset 0 1px #ffffff09!important;transition:transform .28s,border-color .28s,box-shadow .28s!important}
+.post:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:2px;border-radius:3px;background:linear-gradient(180deg,#a58dff,#5ce1d3);opacity:0;transition:opacity .25s}
+.post:hover{transform:translateY(-4px);border-color:#8f83d84d!important;box-shadow:0 22px 48px #0004,0 0 30px #7867d30b!important}
+.post:hover:before{opacity:1}
+.post-title{letter-spacing:-.35px}
+.post-actions button{transition:background .2s,color .2s,transform .2s!important}
+.post-actions button:hover{transform:translateY(-2px);background:#a18aff18!important;color:#c8bcff!important}
+.side-card{border:1px solid #ffffff12!important;background:linear-gradient(145deg,#141d31,#101728)!important;box-shadow:0 14px 35px #0002!important;transition:transform .25s,border-color .25s}
+.side-card:hover{transform:translateY(-3px);border-color:#7ddecf4d!important}
+.navigator-topic{box-shadow:0 12px 30px #0002,inset 0 1px #ffffff0a}
+.navigator-topic:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,transparent 20%,#ffffff0b 50%,transparent 75%);transform:translateX(-120%);transition:transform .7s}
+.navigator-topic:hover:after{transform:translateX(120%)}
+.profile-screen-card{box-shadow:0 28px 65px #0005,inset 0 1px #ffffff12}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #91e8df!important;outline-offset:3px}
+.mobile-nav{backdrop-filter:blur(22px);background:#0b1222eF!important;border:1px solid #ffffff17!important;box-shadow:0 -12px 35px #0005,0 0 25px #7968d315}
+.mobile-nav button{transition:transform .2s,color .2s,background .2s!important}
+.mobile-nav button:active{transform:scale(.91)}
+@media(min-width:1100px){.shell{max-width:1500px}.right{padding-top:18px}}
+@media(max-width:760px){body{background-attachment:scroll}.hero{border-radius:21px!important}.post:hover,.side-card:hover,.navigator-topic:hover{transform:none}.hero:before{animation-duration:14s}}
+@media(prefers-reduced-motion:reduce){body:before,.brandmark,.hero:before{animation:none!important}.nav button,.post,.side-card,.navigator-topic,.mobile-nav button{transition:none!important}}
+
 </style>
 </head>
 <body>
