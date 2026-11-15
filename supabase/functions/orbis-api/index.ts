@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
 };
 const out = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const safeProfile = (p: any) => p ? ({ username:p.username, name:p.display_name, bio:p.bio||"", avatar_url:p.avatar_url||null, createdAt:p.created_at }) : null;
@@ -40,6 +40,13 @@ async function enrichPostCounts(admin:any, uid:string, rows:any[]){
   return rows.map((p:any)=>({...p,likes:likeMap.get(p.id)||0,comments:commentMap.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
 }
 
+
+async function notifyUser(admin:any, recipientId:string, actorId:string, kind:string, entityId:string|null, body:string){
+  if(!recipientId || recipientId===actorId)return;
+  const {error}=await admin.from("notifications").insert({recipient_id:recipientId,actor_id:actorId,kind,entity_id:entityId,body});
+  if(error)console.error("ORBIS notification:",error.message);
+}
+
 async function isRateLimited(admin:any, uid:string, action:string, limit:number, windowSeconds:number){
   const {data,error}=await admin.rpc("consume_orbis_rate_limit",{
     p_key:uid+":"+action,p_limit:limit,p_window_seconds:windowSeconds
@@ -57,7 +64,10 @@ Deno.serve(async (req: Request) => {
   let uid: string|null = null;
   let authUser:any = null;
   if (token) { const { data } = await admin.auth.getUser(token); authUser = data.user || null; uid = authUser?.id || null; }
-  const u = new URL(req.url), path = u.pathname.replace(/^\/functions\/v1\/orbis-api/,"") || "/";
+  const u = new URL(req.url);
+  const pathname = u.pathname;
+  const apiMarker = pathname.lastIndexOf("/api/");
+  const path = apiMarker >= 0 ? pathname.slice(apiMarker) : (pathname.endsWith("/health") ? "/health" : (pathname.replace(/^\/functions\/v1\/orbis-api/,"") || "/"));
   let body:any = {}, form:FormData|null=null;
   if (req.method==="POST" && path==="/api/media") { try { form=await req.formData(); } catch { return out({error:"Invalid form data"},400); } }
   else if (["POST","PUT","PATCH"].includes(req.method)) { try { body = await req.json(); } catch { return out({error:"Invalid JSON"},400); } }
@@ -70,14 +80,50 @@ Deno.serve(async (req: Request) => {
     if(error)return out({available:false,error:"Не удалось проверить username. Попробуй ещё раз."},503);
     return out({available:!data});
   }
+  if (req.method==="POST" && path==="/api/auth/login") {
+    const login=String(body.login||"").trim().toLowerCase();
+    const password=String(body.password||"");
+    if(!login || login.length>254 || password.length<8 || password.length>256)
+      return out({error:"Неверный email/username или пароль."},401);
+    const clientIp=req.headers.get("cf-connecting-ip")||req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||"unknown";
+    const ipDigest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(clientIp));
+    const ipHash=Array.from(new Uint8Array(ipDigest),b=>b.toString(16).padStart(2,"0")).join("");
+    if(await isRateLimited(admin,ipHash,"auth_login",12,600))
+      return out({error:"Слишком много попыток входа. Подожди 10 минут."},429);
+    let email=login;
+    if(!login.includes("@")) {
+      if(!/^[a-zA-Z0-9_.]{3,24}$/.test(login)) return out({error:"Неверный email/username или пароль."},401);
+      const {data:account,error}=await admin.from("account_lookup").select("email").eq("username",login).maybeSingle();
+      if(error || !account?.email) return out({error:"Неверный email/username или пароль."},401);
+      email=account.email;
+    } else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login)) {
+      return out({error:"Неверный email/username или пароль."},401);
+    }
+    const publishableKey=Deno.env.get("SUPABASE_ANON_KEY")||req.headers.get("apikey")||"";
+    if(!publishableKey)return out({error:"Сервис авторизации временно недоступен."},503);
+    let authResponse:any={};
+    try {
+      const response=await fetch(url+"/auth/v1/token?grant_type=password",{
+        method:"POST",headers:{"apikey":publishableKey,"Content-Type":"application/json"},
+        body:JSON.stringify({email,password})
+      });
+      authResponse=await response.json().catch(()=>({}));
+      if(!response.ok || !authResponse.access_token || !authResponse.refresh_token)
+        return out({error:"Неверный email/username или пароль. Если адрес ещё не подтверждён, проверь почту."},401);
+    } catch {
+      return out({error:"Не удалось подключиться к сервису авторизации. Попробуй ещё раз."},503);
+    }
+    return out({access_token:authResponse.access_token,refresh_token:authResponse.refresh_token,expires_in:authResponse.expires_in,token_type:authResponse.token_type||"bearer"});
+  }
+
   if (req.method==="GET" && path==="/api/auth/me") {
     if (!uid || !authUser) return out({authenticated:false},401);
     let {data:p}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
     if(!p){
       const metadata=authUser.user_metadata||{};
       const isAnonymous=authUser.is_anonymous===true;
-      const username=String(metadata.username||(isAnonymous?"guest_"+uid.replace(/-/g,"").slice(0,12):"")).trim().toLowerCase();
-      const displayName=String(metadata.display_name||(isAnonymous?"Гость":username||"ORBIS member")).trim().slice(0,32);
+      const username=String(metadata.username||(isAnonymous?"guest_"+uid.replace(/-/g,"").slice(0,12):"member_"+uid.replace(/-/g,"").slice(0,12))).trim().toLowerCase();
+      const displayName=String(metadata.display_name||(isAnonymous?"Гость":"Участник ORBIS")).trim().slice(0,32);
       if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username))return out({error:"Не удалось создать профиль. Повтори вход."},422);
       const created=await admin.from("profiles").insert({id:uid,username,display_name:displayName}).select("*").single();
       if(created.error){
@@ -181,6 +227,7 @@ Deno.serve(async (req: Request) => {
     const postId=like[1]; const {data:exists}=await admin.from("post_likes").select("post_id").eq("post_id",postId).eq("user_id",uid).maybeSingle();
     const r=exists?await admin.from("post_likes").delete().eq("post_id",postId).eq("user_id",uid):await admin.from("post_likes").insert({post_id:postId,user_id:uid});
     if(r.error)return out({error:r.error.message},400);
+    if(!exists){const {data:postOwner}=await admin.from("posts").select("author_id").eq("id",postId).maybeSingle();if(postOwner)await notifyUser(admin,postOwner.author_id,uid,"like",postId,"Пользователю понравилась твоя публикация.");}
     const {count}=await admin.from("post_likes").select("*",{count:"exact",head:true}).eq("post_id",postId);
     return out({ok:true,liked:!exists,likes:count||0});
   }
@@ -267,7 +314,7 @@ Deno.serve(async (req: Request) => {
     if(target.id===uid)return out({error:"Нельзя подписаться на себя."},400);
     const {data:exists}=await admin.from("follows").select("*").eq("follower_id",uid).eq("following_id",target.id).maybeSingle();
     const r=exists?await admin.from("follows").delete().eq("follower_id",uid).eq("following_id",target.id):await admin.from("follows").insert({follower_id:uid,following_id:target.id});
-    if(r.error)return out({error:r.error.message},400);return out({ok:true,following:!exists});
+    if(r.error)return out({error:r.error.message},400);if(!exists)await notifyUser(admin,target.id,uid,"follow",null,"Новый подписчик: @"+me.username);return out({ok:true,following:!exists});
   }
   if(req.method==="POST"&&path==="/api/search"){
     if(await isRateLimited(admin,uid,"search",30,60))return out({error:"Слишком много поисковых запросов. Попробуй позже."},429);
@@ -325,5 +372,203 @@ Deno.serve(async (req: Request) => {
     if(error)return out({error:error.code==="23505"?"Сегодня история уже опубликована.":error.message},400);
     return out({ok:true,story:data},201);
   }
+
+  if(req.method==="GET"&&path==="/api/ads/campaigns"){
+    const {data:campaigns,error}=await admin.from("ad_campaigns")
+      .select("id,name,headline,body,destination_url,image_url,daily_budget,status,created_at,updated_at")
+      .eq("owner_id",uid).order("created_at",{ascending:false}).limit(50);
+    if(error)return out({error:"Не удалось загрузить рекламные кампании."},400);
+    const rows=await Promise.all((campaigns||[]).map(async(c:any)=>{
+      const [{count:impressions},{count:clicks}]=await Promise.all([
+        admin.from("ad_events").select("id",{count:"exact",head:true}).eq("campaign_id",c.id).eq("event_type","impression"),
+        admin.from("ad_events").select("id",{count:"exact",head:true}).eq("campaign_id",c.id).eq("event_type","click")
+      ]);
+      return {...c,impressions:impressions||0,clicks:clicks||0};
+    }));
+    return out({campaigns:rows});
+  }
+  if(req.method==="POST"&&path==="/api/ads/campaigns"){
+    if(await isRateLimited(admin,uid,"ad_campaign_create",5,3600))return out({error:"Можно создать не более 5 кампаний в час."},429);
+    const name=String(body.name||"").trim().slice(0,80);
+    const headline=String(body.headline||"").trim().slice(0,90);
+    const description=String(body.body||"").trim().slice(0,240);
+    const destination=String(body.destinationUrl||"").trim();
+    let parsed:URL|null=null;
+    try{parsed=new URL(destination)}catch{}
+    if(name.length<2||headline.length<2||description.length<2||!parsed||parsed.protocol!=="https:"||parsed.username||parsed.password)
+      return out({error:"Заполни название, заголовок, описание и укажи корректную HTTPS-ссылку."},400);
+    const budget=Number(body.dailyBudget||0);
+    if(!Number.isFinite(budget)||budget<0||budget>100000)return out({error:"Проверь дневной лимит кампании."},400);
+    const imageUrl=String(body.imageUrl||"").trim()||null;
+    if(imageUrl){try{const image=new URL(imageUrl);if(image.protocol!=="https:")throw new Error()}catch{return out({error:"Ссылка на изображение должна начинаться с HTTPS."},400)}}
+    const guard=basicTextGuard(name+" "+headline+" "+description);
+    if(guard)return out({error:guard},422);
+    const {data,error}=await admin.from("ad_campaigns").insert({
+      owner_id:uid,name,headline,body:description,destination_url:parsed.href,
+      image_url:imageUrl,daily_budget:budget,status:"pending_review"
+    }).select("id,name,headline,body,destination_url,image_url,daily_budget,status,created_at,updated_at").single();
+    if(error)return out({error:"Не удалось сохранить кампанию: "+error.message},400);
+    return out({ok:true,campaign:{...data,impressions:0,clicks:0}},201);
+  }
+  const adCampaignId=path.startsWith("/api/ads/campaigns/")?path.slice("/api/ads/campaigns/".length):"";
+  if(req.method==="PATCH"&&/^[0-9a-f-]{36}$/i.test(adCampaignId)){
+    const {data:current,error:loadError}=await admin.from("ad_campaigns").select("*").eq("id",adCampaignId).eq("owner_id",uid).maybeSingle();
+    if(loadError)return out({error:"Не удалось загрузить кампанию."},400);
+    if(!current)return out({error:"Кампания не найдена."},404);
+    const nextStatus=String(body.status||current.status);
+    if(nextStatus!==current.status&&!((current.status==="approved"&&nextStatus==="paused")||(current.status==="paused"&&nextStatus==="pending_review")||(current.status==="draft"&&nextStatus==="pending_review")))
+      return out({error:"Это изменение статуса недоступно. Одобренные кампании можно приостановить; повторный запуск проходит проверку."},403);
+    const patch:any={status:nextStatus,updated_at:new Date().toISOString()};
+    if(body.name!==undefined)patch.name=String(body.name).trim().slice(0,80);
+    if(body.headline!==undefined)patch.headline=String(body.headline).trim().slice(0,90);
+    if(body.body!==undefined)patch.body=String(body.body).trim().slice(0,240);
+    if(body.destinationUrl!==undefined){
+      try{const dest=new URL(String(body.destinationUrl));if(dest.protocol!=="https:"||dest.username||dest.password)throw new Error();patch.destination_url=dest.href}
+      catch{return out({error:"Ссылка должна быть корректной HTTPS-ссылкой."},400)}
+    }
+    const {data,error}=await admin.from("ad_campaigns").update(patch).eq("id",adCampaignId).eq("owner_id",uid)
+      .select("id,name,headline,body,destination_url,image_url,daily_budget,status,created_at,updated_at").single();
+    if(error)return out({error:"Не удалось обновить кампанию: "+error.message},400);
+    return out({ok:true,campaign:data});
+  }
+
+  if(req.method==="GET"&&path==="/api/conversations"){
+    const {data:mine,error}=await admin.from("conversation_members").select("conversation_id,last_read_at").eq("user_id",uid);
+    if(error)return out({error:"Не удалось загрузить диалоги."},400);
+    const ids=(mine||[]).map((x:any)=>x.conversation_id);
+    if(!ids.length)return out({conversations:[]});
+    const [{data:members},{data:messages},{data:conversations}]=await Promise.all([
+      admin.from("conversation_members").select("conversation_id,user_id").in("conversation_id",ids),
+      admin.from("messages").select("id,conversation_id,sender_id,body,created_at").in("conversation_id",ids).order("created_at",{ascending:false}).limit(500),
+      admin.from("conversations").select("id,updated_at").in("id",ids)
+    ]);
+    const otherIds=[...new Set((members||[]).filter((m:any)=>m.user_id!==uid).map((m:any)=>m.user_id))];
+    const {data:profiles}=otherIds.length?await admin.from("profiles").select("id,username,display_name,avatar_url").in("id",otherIds):{data:[]};
+    const profileMap=new Map((profiles||[]).map((p:any)=>[p.id,p]));
+    const readMap=new Map((mine||[]).map((m:any)=>[m.conversation_id,m.last_read_at]));
+    const convMap=new Map((conversations||[]).map((c:any)=>[c.id,c]));
+    const result=ids.map((id:string)=>{
+      const other=(members||[]).find((m:any)=>m.conversation_id===id&&m.user_id!==uid);
+      const last=(messages||[]).find((m:any)=>m.conversation_id===id);
+      const readAt=readMap.get(id)||"1970-01-01T00:00:00Z";
+      const unread=(messages||[]).filter((m:any)=>m.conversation_id===id&&m.sender_id!==uid&&m.created_at>readAt).length;
+      return {id,updatedAt:convMap.get(id)?.updated_at||last?.created_at,other:profileMap.get(other?.user_id)||null,lastMessage:last?.body||"Начни разговор",lastMessageAt:last?.created_at||null,unread};
+    }).sort((a:any,b:any)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+    return out({conversations:result});
+  }
+  if(req.method==="POST"&&path==="/api/conversations"){
+    const username=String(body.username||"").trim().replace(/^@/,"").toLowerCase();
+    if(!/^[a-z0-9_.]{3,24}$/.test(username))return out({error:"Введи корректный username."},400);
+    const {data:target}=await admin.from("profiles").select("id,username,display_name").eq("username",username).maybeSingle();
+    if(!target)return out({error:"Пользователь не найден."},404);
+    if(target.id===uid)return out({error:"Нельзя начать диалог с самим собой."},400);
+    const directKey=[uid,target.id].sort().join(":");
+    let {data:conversation}=await admin.from("conversations").select("id").eq("direct_key",directKey).maybeSingle();
+    if(!conversation){
+      const created=await admin.from("conversations").insert({direct_key:directKey,created_by:uid}).select("id").single();
+      if(created.error){
+        const retry=await admin.from("conversations").select("id").eq("direct_key",directKey).maybeSingle();
+        if(!retry.data)return out({error:"Не удалось создать диалог."},400);
+        conversation=retry.data;
+      }else conversation=created.data;
+      const joined=await admin.from("conversation_members").upsert([{conversation_id:conversation.id,user_id:uid},{conversation_id:conversation.id,user_id:target.id}],{onConflict:"conversation_id,user_id"});
+      if(joined.error)return out({error:"Диалог создан, но не удалось добавить участников."},500);
+    }
+    return out({ok:true,conversationId:conversation.id,other:target},201);
+  }
+  const conversationMessages=path.match(/^\/api\/conversations\/([0-9a-f-]{36})\/messages$/i);
+  if(conversationMessages&&req.method==="GET"){
+    const conversationId=conversationMessages[1];
+    const {data:member}=await admin.from("conversation_members").select("conversation_id").eq("conversation_id",conversationId).eq("user_id",uid).maybeSingle();
+    if(!member)return out({error:"У тебя нет доступа к этому диалогу."},403);
+    const {data:rows,error}=await admin.from("messages").select("id,conversation_id,sender_id,body,created_at").eq("conversation_id",conversationId).order("created_at",{ascending:false}).limit(100);
+    if(error)return out({error:"Не удалось загрузить сообщения."},400);
+    const messages=(rows||[]).reverse();
+    const authorIds=[...new Set(messages.map((m:any)=>m.sender_id))];
+    const {data:authors}=authorIds.length?await admin.from("profiles").select("id,username,display_name").in("id",authorIds):{data:[]};
+    const authorMap=new Map((authors||[]).map((p:any)=>[p.id,p]));
+    await admin.from("conversation_members").update({last_read_at:new Date().toISOString()}).eq("conversation_id",conversationId).eq("user_id",uid);
+    return out({messages:messages.map((m:any)=>({id:m.id,body:m.body,createdAt:m.created_at,own:m.sender_id===uid,author:authorMap.get(m.sender_id)?.display_name||"Участник",username:authorMap.get(m.sender_id)?.username||"user"}))});
+  }
+  if(conversationMessages&&req.method==="POST"){
+    if(await isRateLimited(admin,uid,"message",30,60))return out({error:"Слишком много сообщений. Подожди немного."},429);
+    const conversationId=conversationMessages[1],text=String(body.body||"").trim();
+    if(!text||text.length>2000)return out({error:"Сообщение должно содержать от 1 до 2000 символов."},400);
+    const guard=basicTextGuard(text);if(guard)return out({error:guard},422);
+    const {data:members}=await admin.from("conversation_members").select("user_id").eq("conversation_id",conversationId);
+    if(!members||members.length!==2||!members.some((m:any)=>m.user_id===uid))return out({error:"Диалог не найден или доступ запрещён."},403);
+    const recipient=members.find((m:any)=>m.user_id!==uid)?.user_id;
+    const {data:message,error}=await admin.from("messages").insert({conversation_id:conversationId,sender_id:uid,body:text}).select("id,body,created_at").single();
+    if(error)return out({error:"Не удалось отправить сообщение."},400);
+    await admin.from("conversations").update({updated_at:new Date().toISOString()}).eq("id",conversationId);
+    if(recipient)await notifyUser(admin,recipient,uid,"message",conversationId,"Новое личное сообщение.");
+    return out({ok:true,message:{id:message.id,body:message.body,createdAt:message.created_at,own:true}},201);
+  }
+  if(req.method==="GET"&&path==="/api/notifications"){
+    const {data:rows,error}=await admin.from("notifications").select("id,actor_id,kind,entity_id,body,created_at,read_at").eq("recipient_id",uid).order("created_at",{ascending:false}).limit(60);
+    if(error)return out({error:"Не удалось загрузить уведомления."},400);
+    const actorIds=[...new Set((rows||[]).map((n:any)=>n.actor_id).filter(Boolean))];
+    const {data:actors}=actorIds.length?await admin.from("profiles").select("id,username,display_name,avatar_url").in("id",actorIds):{data:[]};
+    const actorMap=new Map((actors||[]).map((p:any)=>[p.id,p]));
+    return out({notifications:(rows||[]).map((n:any)=>({...n,actor:actorMap.get(n.actor_id)||null})),unread:(rows||[]).filter((n:any)=>!n.read_at).length});
+  }
+  if(req.method==="POST"&&path==="/api/notifications/read"){
+    const id=String(body.id||"");
+    let q=admin.from("notifications").update({read_at:new Date().toISOString()}).eq("recipient_id",uid).is("read_at",null);
+    if(id)q=q.eq("id",id);
+    const {error}=await q;
+    return error?out({error:"Не удалось отметить уведомления прочитанными."},400):out({ok:true});
+  }
+  if(req.method==="GET"&&path==="/api/clans"){
+    const [{data:clans,error},{data:members},{data:mine}]=await Promise.all([
+      admin.from("clans").select("id,slug,name,description,owner_id,created_at").order("created_at",{ascending:false}).limit(60),
+      admin.from("clan_members").select("clan_id,user_id,role"),
+      admin.from("clan_members").select("clan_id,role").eq("user_id",uid).maybeSingle()
+    ]);
+    if(error)return out({error:"Не удалось загрузить кланы."},400);
+    const rows=(clans||[]).map((c:any)=>({ ...c,memberCount:(members||[]).filter((m:any)=>m.clan_id===c.id).length,isMember:(members||[]).some((m:any)=>m.clan_id===c.id&&m.user_id===uid),role:mine?.clan_id===c.id?mine.role:null }));
+    rows.sort((a:any,b:any)=>b.memberCount-a.memberCount||a.name.localeCompare(b.name));
+    return out({clans:rows,myClan:mine?.clan_id||null});
+  }
+  if(req.method==="POST"&&path==="/api/clans"){
+    const name=String(body.name||"").trim(),description=String(body.description||"").trim().slice(0,240);
+    if(name.length<3||name.length>40)return out({error:"Название клана должно содержать от 3 до 40 символов."},400);
+    const {data:membership}=await admin.from("clan_members").select("clan_id").eq("user_id",uid).maybeSingle();
+    if(membership)return out({error:"Ты уже состоишь в одном клане. Сначала выйди из него."},409);
+    const slugBase=name.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,24)||"clan";
+    const slug=slugBase+"-"+crypto.randomUUID().slice(0,6);
+    const {data:clan,error}=await admin.from("clans").insert({slug,name,description,owner_id:uid}).select("*").single();
+    if(error)return out({error:"Не удалось создать клан: "+error.message},400);
+    const {error:joinError}=await admin.from("clan_members").insert({clan_id:clan.id,user_id:uid,role:"owner"});
+    if(joinError){await admin.from("clans").delete().eq("id",clan.id);return out({error:"Не удалось создать состав клана."},400);}
+    return out({ok:true,clan:{...clan,memberCount:1,isMember:true,role:"owner"}},201);
+  }
+  const clanRoute=path.match(/^\/api\/clans\/([a-z0-9-]+)$/i);
+  if(clanRoute&&req.method==="GET"){
+    const {data:clan}=await admin.from("clans").select("*").eq("slug",clanRoute[1]).maybeSingle();
+    if(!clan)return out({error:"Клан не найден."},404);
+    const {data:members}=await admin.from("clan_members").select("user_id,role,joined_at").eq("clan_id",clan.id).order("joined_at",{ascending:true}).limit(200);
+    const memberIds=(members||[]).map((m:any)=>m.user_id);
+    const {data:profiles}=memberIds.length?await admin.from("profiles").select("id,username,display_name,avatar_url").in("id",memberIds):{data:[]};
+    const profileMap=new Map((profiles||[]).map((p:any)=>[p.id,p]));
+    return out({clan,members:(members||[]).map((m:any)=>({...m,profile:profileMap.get(m.user_id)||null})),isMember:(members||[]).some((m:any)=>m.user_id===uid)});
+  }
+  const clanJoin=path.match(/^\/api\/clans\/([a-z0-9-]+)\/(join|leave)$/i);
+  if(clanJoin&&req.method==="POST"){
+    const {data:clan}=await admin.from("clans").select("id,slug,owner_id").eq("slug",clanJoin[1]).maybeSingle();
+    if(!clan)return out({error:"Клан не найден."},404);
+    const {data:existing}=await admin.from("clan_members").select("clan_id,role").eq("user_id",uid).maybeSingle();
+    if(clanJoin[2]==="join"){
+      if(existing?.clan_id===clan.id)return out({ok:true,joined:true});
+      if(existing)return out({error:"Можно состоять только в одном клане. Сначала выйди из текущего."},409);
+      const {error}=await admin.from("clan_members").insert({clan_id:clan.id,user_id:uid,role:"member"});
+      return error?out({error:"Не удалось вступить. Возможно, ты уже состоишь в другом клане."},409):out({ok:true,joined:true});
+    }
+    if(existing?.clan_id!==clan.id)return out({error:"Ты не состоишь в этом клане."},400);
+    if(existing.role==="owner")return out({error:"Создатель не может покинуть клан. Сначала передай управление другому участнику."},403);
+    const {error}=await admin.from("clan_members").delete().eq("clan_id",clan.id).eq("user_id",uid);
+    return error?out({error:"Не удалось покинуть клан."},400):out({ok:true,joined:false});
+  }
+
   return out({error:"API route not found."},404);
 });
