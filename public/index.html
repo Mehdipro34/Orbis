@@ -152,6 +152,42 @@ button .orb-ripple{position:absolute;z-index:1;border-radius:50%;pointer-events:
 .reveal-on-scroll.is-visible{opacity:1;transform:translateY(0) scale(1)}
 @media(prefers-reduced-motion:reduce){button,button:before,button .orb-sheen,.post,.side-card,.stories,.composer,.story,.reveal-on-scroll{animation:none!important;transition:none!important;transform:none!important}.orb-ripple{display:none!important}.hero,.modal.open,.modal.open .dialog,.toast{animation:none!important}}
 
+
+/* ORBIS signature motion */
+.brandmark{transform-style:preserve-3d;animation:brandFloat 4.8s ease-in-out infinite;will-change:transform}
+.brandmark .orbit-core{display:inline-block;animation:coreTurn 12s linear infinite,coreGlow 3.2s ease-in-out infinite}
+.brandmark .orbit-ring{position:absolute;inset:5px;border:1.5px solid #ffffffb8;border-radius:50%;transform:rotate(-28deg) scaleX(.72);animation:ringOrbit 7s linear infinite}
+.brandmark .orbit-dot{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;right:3px;top:7px;box-shadow:0 0 10px #fff,0 0 20px #ffd7ef;animation:dotPulse 2s ease-in-out infinite}
+@keyframes brandFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(2deg)}}
+@keyframes coreTurn{to{transform:rotate(360deg)}}
+@keyframes coreGlow{0%,100%{filter:drop-shadow(0 0 0 #fff)}50%{filter:drop-shadow(0 0 7px #fff)}}
+@keyframes ringOrbit{to{transform:rotate(332deg) scaleX(.72)}}
+@keyframes dotPulse{0%,100%{transform:scale(.8);opacity:.7}50%{transform:scale(1.45);opacity:1}}
+.hero{isolation:isolate}
+.hero-visual{animation:heroDrift 8s ease-in-out infinite;will-change:transform}
+.hero-orbit{animation:heroOrbit 18s linear infinite}
+.hero-orbit.orbit-b{animation-direction:reverse;animation-duration:13s}
+.hero-planet{animation:planetBob 3.6s ease-in-out infinite;filter:drop-shadow(0 9px 16px #34217d55)}
+.hero-spark{animation:sparkTwinkle 2.4s ease-in-out infinite}
+@keyframes heroDrift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-7px,-9px,0)}}
+@keyframes heroOrbit{to{transform:rotate(360deg)}}
+@keyframes planetBob{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-10px) rotate(7deg)}}
+@keyframes sparkTwinkle{0%,100%{opacity:.55;transform:scale(.8) rotate(0)}50%{opacity:1;transform:scale(1.3) rotate(24deg)}}
+.story-ring{position:relative;transition:filter .25s,transform .35s}
+.story:hover .story-ring{transform:scale(1.08) rotate(-5deg);filter:drop-shadow(0 8px 12px #9275f04a)}
+.story:hover .story-ring:after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid #a78bfa;animation:storyHalo .75s ease-out both}
+@keyframes storyHalo{from{opacity:.9;transform:scale(.88)}to{opacity:0;transform:scale(1.3)}}
+.post-actions button{transition:color .2s,background .2s,transform .2s,box-shadow .2s}
+.post-actions button:active{transform:scale(.88)}
+button.is-pressed{animation:buttonPop .38s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes buttonPop{0%{transform:scale(1)}45%{transform:scale(1.075)}100%{transform:scale(1)}}
+.nav button{position:relative}
+.nav button:not(.create):after{content:"";position:absolute;left:14px;bottom:5px;width:0;height:2px;border-radius:2px;background:linear-gradient(90deg,#7a67f2,#ff91a7);transition:width .28s ease}
+.nav button:not(.create):hover:after,.nav button.active:after{width:calc(100% - 28px)}
+.mobile-nav button{transition:transform .2s,color .2s,background .2s}
+.mobile-nav button.active{transform:translateY(-3px);box-shadow:0 5px 15px #7666e522}
+@media(prefers-reduced-motion:reduce){.brandmark,.brandmark .orbit-core,.brandmark .orbit-ring,.brandmark .orbit-dot,.hero-visual,.hero-orbit,.hero-planet,.hero-spark,.story:hover .story-ring:after,button.is-pressed{animation:none!important}.story:hover .story-ring,.mobile-nav button.active{transform:none!important}}
+
 </style>
 </head>
 <body>
@@ -250,6 +286,17 @@ if(tg?.initDataUnsafe?.user){const u=tg.initDataUnsafe.user;$("avatar").textCont
     document.querySelectorAll(".post,.side-card,.stories,.composer").forEach(el=>el.classList.add("is-visible"));
   }
 })();
+
+
+/* Small tactile feedback for every interactive button */
+document.addEventListener("click",event=>{
+  const button=event.target.closest("button");
+  if(!button||button.disabled||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  button.classList.remove("is-pressed");
+  void button.offsetWidth;
+  button.classList.add("is-pressed");
+  button.addEventListener("animationend",()=>button.classList.remove("is-pressed"),{once:true});
+});
 
 </script>
 </body></html>
