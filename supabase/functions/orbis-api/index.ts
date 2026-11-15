@@ -189,10 +189,13 @@ Deno.serve(async (req: Request) => {
       try{cursor=JSON.parse(new TextDecoder().decode(base64UrlToBytes(cursorRaw)))}catch{return out({error:"Некорректный курсор ленты."},400)}
       if(!cursor||typeof cursor.createdAt!=="string"||!Number.isFinite(Date.parse(cursor.createdAt))||typeof cursor.id!=="string"||! /^[0-9a-f-]{36}$/i.test(cursor.id))return out({error:"Некорректный курсор ленты."},400);
     }
+    const mode=String(u.searchParams.get("mode")||"for-you"),ranked=mode==="for-you";
+    if(cursor&&ranked&&!Number.isInteger(cursor.score))return out({error:"Некорректный курсор рекомендаций."},400);
     let q=admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
-      .eq("status","published").is("reply_to",null).order("created_at",{ascending:false}).order("id",{ascending:false});
+      .eq("status","published").is("reply_to",null);
+    if(ranked)q=q.order("engagement_score",{ascending:false});
+    q=q.order("created_at",{ascending:false}).order("id",{ascending:false});
     const topic=u.searchParams.get("topic");if(topic)q=q.ilike("topic",topic);
-    const mode=String(u.searchParams.get("mode")||"for-you");
     if(mode==="following"){
       const {data:follows,error:followError}=await admin.from("follows").select("following_id").eq("follower_id",uid).limit(5000);
       if(followError)return out({error:"Не удалось загрузить подписки."},400);
@@ -200,7 +203,7 @@ Deno.serve(async (req: Request) => {
       if(!ids.length)return out({posts:[],hasMore:false,nextCursor:null});
       q=q.in("author_id",ids);
     }
-    if(cursor)q=q.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");
+    if(cursor){if(ranked)q=q.or("engagement_score.lt."+cursor.score+",and(engagement_score.eq."+cursor.score+",created_at.lt."+cursor.createdAt+"),and(engagement_score.eq."+cursor.score+",created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");else q=q.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");}
     const {data,error}=await q.limit(limit+1);
     if(error)return out({error:error.message},400);
     let rows=data||[];const hasMore=rows.length>limit;if(hasMore)rows=rows.slice(0,limit);
@@ -213,7 +216,7 @@ Deno.serve(async (req: Request) => {
     const counts=new Map((likes||[]).map((x:any)=>[x.post_id,Number(x.like_count)||0]));
     const liked=new Set((mine||[]).map((x:any)=>x.post_id)),saved=new Set((bookmarks||[]).map((x:any)=>x.post_id));
     const posts=enriched.map((p:any)=>({id:p.id,postNumber:String(p.post_number),title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,authorNumber:p.profiles?.public_number==null?null:String(p.profiles.public_number),avatar_url:p.profiles?.avatar_url,createdAt:p.created_at,replyTo:p.reply_to,media:p.media||[],poll:p.poll||null,likes:counts.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
-    const last=rows[rows.length-1],nextCursor=last?bytesToBase64Url(encoder.encode(JSON.stringify({createdAt:last.created_at,id:last.id}))):null;
+    const last=rows[rows.length-1],nextCursor=last?bytesToBase64Url(encoder.encode(JSON.stringify({createdAt:last.created_at,id:last.id,...(ranked?{score:Number(last.engagement_score)||0}:{})}))):null;
     return out({posts,hasMore,nextCursor});
   }
   const singlePost=path.match(/^\/api\/posts\/([0-9a-f-]+)$/i);
