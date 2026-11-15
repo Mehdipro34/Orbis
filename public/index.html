@@ -2977,7 +2977,7 @@ document.addEventListener("click",event=>{
    });
    if(resetButton)resetButton.addEventListener("click",async()=>{
     const email=document.getElementById("authEmail")?.value.trim().toLowerCase()||"";
-    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){if(note){note.className="auth-form-note error";note.textContent="Сначала введи электронную почту, на которую зарегистрирован аккаунт."}return}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){if(note){note.className="auth-form-note error";note.textContent="Сначала введи электронную почту, на которую зарегистрирован аккаунт."}return}
     resetButton.disabled=true;
     if(note){note.className="auth-form-note";note.textContent="Отправляем письмо для восстановления…"}
     try{
