@@ -2476,7 +2476,7 @@ document.addEventListener("click",event=>{
    const raw=typeof input==="string"?input:(input&&input.url)||"";
    let parsed;try{parsed=new URL(raw,location.href)}catch{return nativeFetch(input,init)}
    if(!parsed.pathname.startsWith("/api/")||parsed.pathname==="/api/news"||parsed.pathname==="/api/news/sources")return nativeFetch(input,init);
-   if(parsed.pathname==="/api/media")return new Response(JSON.stringify({error:"Загрузка медиа будет включена после настройки Supabase Storage."}),{status:503,headers:{"content-type":"application/json"}});
+
    try{
      await window.orbisSupabaseReady;
      const current=await client.auth.getSession();session=current.data.session;
