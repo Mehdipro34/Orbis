@@ -16,11 +16,22 @@
 
 ## Important current limitations
 - The Telegram bot token and hosting URL must be supplied/configured by the project owner; neither is embedded in the repository.
-- Media upload endpoint currently returns a clear 503 until a Supabase Storage bucket and its access policies are configured.
+- The `orbis-media` Supabase Storage bucket exists. The API uploads through the server-side service-role client; the bucket is public-read for media URLs. Confirm the bucket configuration before production use.
 - The RSS news pages still use the existing Worker endpoints; their KV binding must remain configured or those pages will fail.
-- Stories and bookmarks have database/API foundations; their complete UI screens still need to be connected.
+- Stories and bookmarks have UI and API routes. Stories support text plus one photo/video and expire after 24 hours; one Story per author per UTC day is enforced by a unique index.
 - No load test has been run. Free-tier capacity is not a promise of support for 10,000 concurrent users.
 - Never expose the Supabase service-role key in frontend JavaScript. Only the publishable key belongs in the browser.
 
 ## Account model
 Telegram Mini App initData is verified server-side using the bot token. A corresponding Supabase Auth user and public profile are created on first sign-in. The private account lookup table is not readable by browser roles.
+
+## Current end-to-end checks
+- Frontend inline JavaScript blocks were syntax-compiled successfully.
+- HTML document tags and CSS brace pairs were checked.
+- Supabase project reports ACTIVE_HEALTHY.
+- Both Edge Functions are ACTIVE; `orbis-api` is deployed at version 4.
+- Security Advisor currently returns no findings.
+- All eight application tables have RLS enabled.
+- Database currently has zero profiles, posts and Stories; no live user registration has yet been verified.
+- A real Telegram sign-in cannot be tested until the owner sets the bot token secret and configures the official Mini App URL.
+- The Cloudflare Worker remains responsible for RSS/news only. Core social/auth endpoints are disabled there to prevent a second KV-based account store.
