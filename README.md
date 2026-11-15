@@ -4,8 +4,9 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity.
 
 ## Product rules
 
-- Telegram Mini App is the only registration and sign-in method.
-- Telegram Web App `initData` is verified server-side before an account is created or a session is issued.
+- Telegram is the only registration and sign-in provider.
+- Telegram Mini App `initData` is verified server-side; ordinary browser sign-in uses Telegram OIDC Authorization Code + PKCE and server-side ID-token signature/claim validation.
+- Both Telegram entry points resolve to the same profile using the Telegram user ID.
 - Supabase Auth provides durable sessions; PostgreSQL stores profiles and social data.
 - The feed uses paginated queries. Posts support likes, comments, post replies, media and bookmarks.
 - Comments are stored separately from posts and loaded 20 at a time.
@@ -39,6 +40,7 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity.
 ## Required owner configuration before live use
 
 1. Set `TELEGRAM_BOT_TOKEN` in Supabase Edge Function secrets.
+2. For browser sign-in, also set `TELEGRAM_LOGIN_CLIENT_ID`, `TELEGRAM_LOGIN_CLIENT_SECRET` and the exact HTTPS `TELEGRAM_LOGIN_REDIRECT_URI` in Supabase Edge Function secrets. Register the website origin and redirect URI in BotFather → Login Widget. Cloudflare secrets are not shared with Supabase.
 2. Configure the official Telegram bot's Mini App URL to the deployed HTTPS frontend.
 3. In Cloudflare Worker settings, remove any stale `ORBIS_MEDIA` R2 binding. ORBIS uses Supabase Storage and does not require an R2 bucket.
 4. Confirm the `ORBIS_KV` namespace ID in `wrangler.toml`.
