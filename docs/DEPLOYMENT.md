@@ -35,7 +35,20 @@ The Worker serves the static PWA and the RSS/news proxy. The social API and acco
    ```
 5. Save the HTTPS `workers.dev` URL returned by Wrangler.
 
-No R2 bucket is required. User media is stored in Supabase Storage. The Worker KV namespace is only used for RSS cache and rate limiting.
+No R2 bucket is required. User media is stored in Supabase Storage. The Worker KV namespace is only used for RSS cache and news rate limiting.
+
+### Fix the current Cloudflare error 10085
+
+The supplied build log shows a stale dashboard binding named `ORBIS_MEDIA` pointing to an R2 bucket that does not exist. It is not present in the current `wrangler.toml`, and the current Worker source does not use R2.
+
+In Cloudflare Dashboard:
+1. Open **Workers & Pages** → **orbissocial**.
+2. Open **Settings** → **Bindings**.
+3. Find the R2 bucket binding named **ORBIS_MEDIA**.
+4. Remove that binding and save the settings. Do not create an R2 bucket for this project; Supabase Storage is the single media store.
+5. Retry the existing Worker deployment. The build log should list `ASSETS` and `ORBIS_KV`, and should no longer list `ORBIS_MEDIA`.
+
+The Cloudflare account-management connector is not available in this session, so this dashboard-only binding cannot be removed remotely from here.
 
 ## 3. Telegram Mini App
 
@@ -55,9 +68,10 @@ After deployment and configuration:
 - Open ORBIS through Telegram and complete the first sign-in.
 - Confirm one profile appears in Supabase `profiles` and its private mapping appears in `account_lookup`.
 - Publish one test post; confirm it appears in the Supabase feed.
+- Add a comment and a like; confirm counts update and comments load 20 at a time.
 - Upload a photo to a post and a Story; confirm media appears in the `orbis-media` bucket.
 - If archive channels are configured, confirm Telegram receives the post, media and Story.
-- Test like, reply, follow, bookmark, profile edit, report, logout and a fresh sign-in.
+- Test like, comment, reply-as-post, follow, bookmark, profile edit, report, logout and a fresh sign-in.
 - Install the PWA from the browser menu on a supported device. The service worker caches the static shell only; social actions still need internet.
 
 ## 5. Limits and safety
@@ -66,4 +80,5 @@ After deployment and configuration:
 - Do not announce a public launch until the full smoke test is complete.
 - Free tiers have quotas and can pause/throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users.
 - Keep the service-role key and bot token private.
-- The project currently has report submission and lightweight rule-based anti-spam checks (link floods, repeated-character spam and highly repetitive text). It does not yet have a complete human moderation console or proven automated AI moderation.
+- The project has report submission, lightweight rule-based anti-spam checks and per-user rate limits. It does not yet have a complete human moderation console or proven automated AI moderation.
+- Direct messages, a notification center, clans, Stars/Premium and ad management are not yet implemented.
