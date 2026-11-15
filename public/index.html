@@ -1954,7 +1954,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="auth-card-wrap"><div class="auth-card auth-card-compact">
    <div class="auth-card-top"><span class="auth-mini-logo">✳</span><span class="auth-secure">● ORBIS ACCESS</span></div>
    <div class="auth-heading"><div class="auth-eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h2 id="authTitle">С возвращением</h2><p id="authSubtitle">Войди и продолжай.</p></div>
-   <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true" hidden>Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false" hidden>Регистрация</button><span class="auth-tab-glider"></span></div>
+   <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
    <form id="orbisAuthForm" novalidate>
     <label class="auth-field auth-username-field" id="authUsernameField" hidden><span>ИМЯ ПОЛЬЗОВАТЕЛЯ</span><span class="auth-input-wrap"><i>@</i><input id="authUsername" type="text" autocomplete="username" placeholder="Твой username" minlength="3" maxlength="24"></span></label>
     <label class="auth-field auth-email-field" id="authEmailField"><span>ЭЛЕКТРОННАЯ ПОЧТА</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com" required></span></label>
@@ -1970,7 +1970,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     <button class="auth-submit" type="submit"><span id="authSubmitText">Войти</span><b>↗</b></button>
    </form>
    
-   <div class="auth-legal">ORBIS теперь запускается в гостевом режиме — без почты и пароля.</div>
+   <div class="auth-legal">Создай аккаунт по электронной почте или войди в существующий. Для некоторых аккаунтов потребуется подтверждение адреса.</div>
   </div></div>
  </div>
  <div class="auth-copyright">© 2026 ORBIS</div>
@@ -2240,7 +2240,7 @@ document.addEventListener("click",event=>{
  function enterApp(){if(gateway)gateway.hidden=true;const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(shell)shell.hidden=false;document.body.classList.remove("orbis-auth-open","orbis-demo-open");document.body.classList.add("orbis-app-open");window.scrollTo({top:0,behavior:"auto"});window.dispatchEvent(new Event("orbis:login"))} window.orbisEnterApp=enterApp;
  const landing=document.getElementById("orbisLanding");
  function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>{const target=mode==="signup"?username:email;target&&target.focus({preventScroll:true})},220);window.scrollTo({top:0,behavior:"smooth"})}
- document.querySelectorAll("[data-open-auth]").forEach(button=>{button.hidden=true;button.disabled=true;});
+ document.querySelectorAll("[data-open-auth]").forEach(button=>{button.hidden=false;button.disabled=false;button.addEventListener("click",()=>openAuth(button.dataset.openAuth||"login"));});
  const back=document.getElementById("authBackLanding");if(back)back.addEventListener("click",()=>{if(gateway)gateway.hidden=true;if(landing)landing.hidden=false;document.body.classList.remove("orbis-auth-open");window.scrollTo({top:0,behavior:"smooth"})});
  // Installation remains available through the browser's native install menu.
  if(skip)skip.addEventListener("click",showAccess);
@@ -2964,24 +2964,21 @@ document.addEventListener("click",event=>{
   }catch(error){if(note)note.textContent=error.message||"Не удалось подключить авторизацию.";return}
   try{
    await window.orbisSupabaseReady;
-   let current=await window.orbisSupabase.auth.getSession();
-   if(!current.data.session){
-    const guest=await window.orbisSupabase.auth.signInAnonymously({options:{data:{display_name:"Гость"}}});
-    if(guest.error)throw guest.error;
-    current=await window.orbisSupabase.auth.getSession();
+   const current=await window.orbisSupabase.auth.getSession();
+   if(current.data.session){
+    const data=await api("/api/auth/me");
+    window.orbisUser=data.user;syncUserUI(data.user);
+    window.orbisEnterApp?.();
+    await loadFeed();await loadCurrentProfile();await openSharedPostFromHash();
+   }else{
+    const landing=document.getElementById("orbisLanding");
+    if(landing)landing.hidden=false;
    }
-   const data=await api("/api/auth/me");
-   window.orbisUser=data.user;
-   syncUserUI(data.user);
-   window.orbisEnterApp?.();
-   await loadFeed();
-   await loadCurrentProfile();
   }catch(error){
-   console.error("ORBIS guest start:",error);
-   const message=String(error?.message||"Не удалось открыть ORBIS.");
-   if(note){note.className="auth-form-note error";note.textContent=/anonymous|anonymous sign|disabled/i.test(message)?"Гостевой вход не включён в настройках Supabase. Включи Authentication → Sign In / Providers → Anonymous Sign-Ins.":message}
+   console.error("ORBIS session restore:",error);
    const landing=document.getElementById("orbisLanding");
-   if(landing){landing.hidden=false;const status=document.createElement("div");status.className="guest-start-error";status.textContent=/anonymous|anonymous sign|disabled/i.test(message)?"Чтобы открыть ORBIS без регистрации, включи Anonymous Sign-Ins в Supabase.": "ORBIS пока не смог подключиться. Проверь соединение и попробуй обновить страницу.";landing.querySelector(".land-main")?.prepend(status)}
+   if(landing)landing.hidden=false;
+   if(note){note.className="auth-form-note error";note.textContent="Не удалось восстановить сессию. Войди в аккаунт или создай новый."}
   }
  });
 })();
@@ -2989,7 +2986,7 @@ document.addEventListener("click",event=>{
 
 <style id="orbis-auth-and-layout-fix">
 #orbisLanding[hidden],#authGateway[hidden]{display:none!important}
-#authGateway{display:none!important}#orbisLanding [data-open-auth]{display:none!important}
+
 
 
 /* Keep the signed-in experience balanced and centered on wide displays. */
