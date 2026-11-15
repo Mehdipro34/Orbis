@@ -2131,7 +2131,7 @@ document.addEventListener("click",event=>{
   return data;
  };
  function card(post){
-  const article=document.createElement("article");article.className="post";
+  const article=document.createElement("article");article.className="post";article.id="post-"+post.id;
   const top=document.createElement("div");top.className="post-top";
   const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=(post.author||post.username||"O").slice(0,1).toUpperCase();
   const identity=document.createElement("div");
