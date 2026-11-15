@@ -51,12 +51,49 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 @media(max-width:650px){.topbar h1{font-size:27px}.hero h2{font-size:23px}.mobile-nav{box-shadow:0 -8px 28px #4c3b990d}.mobile-nav button.active{background:linear-gradient(135deg,#f0edff,#fff0f4)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+/* ORBIS signature motion system */
+:root{--orb-purple:#7561f2;--orb-pink:#ff8eaa;--orb-cyan:#65dcca;--orb-yellow:#ffd36d}
+body:after{content:"";position:fixed;z-index:-2;inset:-20%;pointer-events:none;background:radial-gradient(circle at 22% 35%,#f7c9e733,transparent 20%),radial-gradient(circle at 78% 28%,#a99bff30,transparent 22%),radial-gradient(circle at 65% 78%,#83ead12b,transparent 20%);animation:ambientDrift 18s ease-in-out infinite alternate}
+@keyframes ambientDrift{0%{transform:translate3d(-1.5%,0,0) scale(1)}100%{transform:translate3d(1.5%,-2%,0) scale(1.06)}}
+.brand{gap:14px}.brandmark{width:48px;height:48px;isolation:isolate;overflow:visible;border-radius:17px;background:linear-gradient(135deg,#a996ff,#7057ed 55%,#ff8ca5);box-shadow:0 10px 26px #7964ef55,0 0 0 5px #eeeaff;animation:logoFloat 4s ease-in-out infinite}
+.brandmark:after{inset:-6px;border:1px solid #a58eff70;animation:logoHalo 3.5s ease-in-out infinite}
+.orbit-core{position:relative;z-index:2;font-size:27px;line-height:1;text-shadow:0 2px 9px #34207855;animation:coreTurn 13s linear infinite;display:block}
+.orbit-ring{position:absolute;z-index:1;left:50%;top:50%;width:62px;height:23px;border:1.5px solid #a18cff;border-radius:50%;transform:translate(-50%,-50%) rotate(-35deg);animation:ringTurn 7s linear infinite}
+.orbit-dot{position:absolute;z-index:3;width:8px;height:8px;border-radius:50%;background:#ffe28a;top:3px;right:2px;box-shadow:0 0 12px #ffe28a;animation:dotPulse 1.8s ease-in-out infinite}
+.brand-word{background:linear-gradient(90deg,#5140c9,#8c67ed 55%,#ed829c);background-clip:text;-webkit-background-clip:text;color:transparent;text-shadow:0 5px 20px #8d73ed20}
+@keyframes logoFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
+@keyframes logoHalo{0%,100%{opacity:.45;transform:scale(.96)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes coreTurn{to{transform:rotate(360deg)}}
+@keyframes ringTurn{to{transform:translate(-50%,-50%) rotate(325deg)}}
+@keyframes dotPulse{0%,100%{transform:scale(.8);opacity:.7}50%{transform:scale(1.3);opacity:1}}
+.hero{min-height:225px;display:flex;flex-direction:column;justify-content:center;isolation:isolate}
+.hero>*:not(.hero-visual){position:relative;z-index:2}
+.hero-visual{position:absolute;z-index:1;width:235px;height:235px;right:16px;top:50%;transform:translateY(-50%);display:grid;place-items:center;pointer-events:none}
+.hero-planet{width:96px;height:96px;border-radius:32px;display:grid;place-items:center;color:white;font-size:57px;background:linear-gradient(145deg,#c3b6ff,#8067f1 55%,#fa9bad);box-shadow:inset 0 3px 14px #ffffff88,0 15px 40px #39218c55,0 0 55px #c6b6ff70;animation:planetBob 5s ease-in-out infinite}
+.hero-orbit{position:absolute;border:1.5px solid #ffffff70;border-radius:50%;width:210px;height:75px;box-shadow:0 0 17px #ffffff2b}
+.orbit-a{transform:rotate(-28deg);animation:heroOrbit 12s linear infinite}
+.orbit-b{width:185px;height:115px;transform:rotate(55deg);border-color:#ffc7e5a6;animation:heroOrbit 16s linear infinite reverse}
+.hero-spark{position:absolute;right:20px;top:36px;color:#ffe58d;font-size:29px;text-shadow:0 0 18px #ffe58d;animation:sparkBlink 2.4s ease-in-out infinite}
+@keyframes planetBob{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-9px) rotate(5deg)}}
+@keyframes heroOrbit{to{rotate:332deg}}
+@keyframes sparkBlink{0%,100%{opacity:.45;transform:scale(.8) rotate(0)}50%{opacity:1;transform:scale(1.25) rotate(25deg)}}
+.hero:before{animation:haloDrift 10s ease-in-out infinite alternate}.hero:after{animation:haloDrift 8s ease-in-out infinite alternate-reverse}
+@keyframes haloDrift{to{transform:translate(-18px,13px) scale(1.12)}}
+.story-ring{position:relative;transition:transform .25s,filter .25s}.story:hover .story-ring{transform:translateY(-4px) scale(1.06);filter:saturate(1.2)}
+.avatar{transition:transform .25s,box-shadow .25s}.post:hover .avatar{transform:rotate(-5deg) scale(1.06);box-shadow:0 8px 22px #7866ec55}
+.nav .create{position:relative;overflow:hidden}.nav .create:after,.primary:after{content:"";position:absolute;top:-60%;left:-45%;width:35%;height:220%;background:linear-gradient(90deg,transparent,#ffffff55,transparent);transform:rotate(25deg);animation:buttonShine 5s ease-in-out infinite}
+@keyframes buttonShine{0%,55%{left:-50%}85%,100%{left:130%}}
+.post:hover,.side-card:hover{border-color:#dcd4ff}.hero-tag{animation:tagGlow 3s ease-in-out infinite}
+@keyframes tagGlow{0%,100%{box-shadow:0 0 0 #ffffff00}50%{box-shadow:0 0 22px #ffffff32}}
+@media(max-width:800px){.hero-visual{right:-43px;opacity:.65;transform:translateY(-50%) scale(.78)}.hero h2,.hero p,.hero-label,.hero-tag{max-width:75%}}
+@media(max-width:520px){.hero{min-height:225px}.hero-visual{right:-76px;opacity:.38;transform:translateY(-50%) scale(.68)}.hero h2,.hero p,.hero-label,.hero-tag{max-width:88%}.brandmark{width:43px;height:43px}.orbit-ring{width:56px;height:21px}}
+@media(prefers-reduced-motion:reduce){body:after,.brandmark,.brandmark:after,.orbit-core,.orbit-ring,.orbit-dot,.hero-planet,.hero-orbit,.hero-spark,.hero:before,.hero:after,.hero-tag,.nav .create:after{animation:none!important}}
 </style>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
- <div class="brand"><div class="brandmark">✳</div> ORBIS</div>
+ <div class="brand"><div class="brandmark" aria-label="ORBIS"><span class="orbit-core">✳</span><i class="orbit-ring"></i><i class="orbit-dot"></i></div><span class="brand-word">ORBIS</span></div>
  <nav class="nav">
   <button class="active" data-view="Лента"><span class="nav-icon">⌂</span>Лента</button>
   <button data-view="Stories"><span class="nav-icon">◉</span>Stories</button>
@@ -68,7 +105,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 </aside>
 <main>
  <header class="topbar"><div><div class="kicker">ОДНА ЛЕНТА — МНОГО МИРОВ</div><h1 id="pageTitle">Твоя лента</h1></div><div class="top-actions"><span class="date-pill">✦ ORBIS COMMUNITY</span><button class="bell" aria-label="Уведомления">♧</button></div></header>
- <section class="hero"><div class="hero-label">WELCOME TO ORBIS</div><h2>Место, где идеи находят своё место.</h2><p>Открывай интересное, делись мыслями и следи за тем, что происходит в мире вокруг тебя.</p><span class="hero-tag">✦ Твой поток начинается здесь</span></section>
+ <section class="hero"><div class="hero-visual" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-spark">✦</div><div class="hero-planet">✳</div></div><div class="hero-label">WELCOME TO ORBIS</div><h2>Место, где идеи находят своё место.</h2><p>Открывай интересное, делись мыслями и следи за тем, что происходит в мире вокруг тебя.</p><span class="hero-tag">✦ Твой поток начинается здесь</span></section>
  <section class="stories"><div class="section-head"><h2>Истории</h2><span>Свежие · 24 часа</span></div><div class="story-row">
   <div class="story add"><div class="story-ring"><div>＋</div></div><small>Твоя Story</small></div>
   <div class="story"><div class="story-ring"><div>А</div></div><small>Алина</small></div><div class="story"><div class="story-ring"><div>М</div></div><small>Мурад</small></div><div class="story"><div class="story-ring"><div>К</div></div><small>Камран</small></div><div class="story"><div class="story-ring"><div>С</div></div><small>Севда</small></div><div class="story"><div class="story-ring"><div>R</div></div><small>Research</small></div>
