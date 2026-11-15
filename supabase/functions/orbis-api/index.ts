@@ -66,7 +66,8 @@ Deno.serve(async (req: Request) => {
   if (req.method==="GET" && path==="/api/username-available") {
     const username=String(u.searchParams.get("username")||"").trim().toLowerCase();
     if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username))return out({available:false,error:"Username: 3–24 символа, латиница, цифры, точка или _."},400);
-    const {data}=await admin.from("profiles").select("id").eq("username",username).maybeSingle();
+    const {data,error}=await admin.from("profiles").select("id").eq("username",username).maybeSingle();
+    if(error)return out({available:false,error:"Не удалось проверить username. Попробуй ещё раз."},503);
     return out({available:!data});
   }
   if (req.method==="GET" && path==="/api/auth/me") {
