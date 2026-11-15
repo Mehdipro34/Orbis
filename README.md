@@ -1,37 +1,34 @@
 # ORBIS
 
-Telegram-first social network starter built on Cloudflare Workers.
+Telegram-first social network prototype built with Cloudflare Workers.
 
-## Current foundation
+## Repository structure
 
-- Cloudflare Worker HTTP API
-- Telegram webhook verification using `WEBHOOK_SECRET`
-- Telegram Bot API helper
-- Health endpoint at `/health`
-- Protected webhook setup endpoint at `POST /setup`
+- `public/index.html` — first responsive Telegram Mini App interface.
+- `src/index.js` — Cloudflare Worker and Telegram webhook foundation.
+- `wrangler.toml` — Worker and static asset configuration.
 
-## Required Worker secrets
+## Cloudflare Worker
 
-Set these in Cloudflare Worker settings. Never commit them to Git:
+Required secrets in Worker settings:
 
 - `BOT_TOKEN`
 - `WEBHOOK_SECRET`
 
-## Configure the webhook
+Never commit secrets to GitHub or share them in chat.
 
-Send a POST request to `/setup` with the header:
+Static assets are served from `public/` by Cloudflare Workers Static Assets. The Worker retains API routes such as `/health`, `/setup`, and `/telegram`.
 
-```
-x-orbis-setup: YOUR_WEBHOOK_SECRET
-```
+## Current prototype status
 
-The Worker registers `/telegram` as the Telegram webhook.
+The first UI includes a responsive feed layout, navigation, category filters, a post composer preview, and Telegram Web App initialization.
 
-## Test
+The interface is currently a visual prototype. Posts are not yet saved, photo uploads are not active, and real Telegram user authentication, database/storage, moderation, and a production feed have not yet been implemented.
 
-- Open `/health` in a browser; expect JSON with `ok: true`.
-- Send `/orbis_test` to the bot; expect a confirmation message.
+## Next implementation stages
 
-## Important
-
-This is the initial integration foundation, not the complete social network. It does not yet include persistent post storage, feed generation, media archival, Mini App authentication, moderation, or production-scale capacity. Those features require a deliberate next implementation stage.
+1. Verify deployment and Telegram webhook.
+2. Validate Telegram Mini App init data on the server.
+3. Add persistent post storage and feed API.
+4. Add image upload/archive workflow.
+5. Connect the bot menu button to the Mini App URL.
