@@ -93,9 +93,22 @@ Deno.serve(async (req: Request) => {
     let email=login;
     if(!login.includes("@")) {
       if(!/^[a-zA-Z0-9_.]{3,24}$/.test(login)) return out({error:"Неверный email/username или пароль."},401);
-      const {data:account,error}=await admin.from("account_lookup").select("email").eq("username",login).maybeSingle();
-      if(error || !account?.email) return out({error:"Неверный email/username или пароль."},401);
-      email=account.email;
+      // Resolve usernames from canonical profiles; email accounts may not have a legacy lookup row.
+      const {data:profile,error:profileError}=await admin.from("profiles").select("id").eq("username",login).maybeSingle();
+      if(profileError) return out({error:"Неверный email/username или пароль."},401);
+      if(profile?.id){
+        const {data:userData,error:userError}=await admin.auth.admin.getUserById(profile.id);
+        if(!userError && userData?.user?.email) email=userData.user.email;
+        else {
+          const {data:account,error}=await admin.from("account_lookup").select("email").eq("username",login).maybeSingle();
+          if(error || !account?.email) return out({error:"Неверный email/username или пароль."},401);
+          email=account.email;
+        }
+      }else{
+        const {data:account,error}=await admin.from("account_lookup").select("email").eq("username",login).maybeSingle();
+        if(error || !account?.email) return out({error:"Неверный email/username или пароль."},401);
+        email=account.email;
+      }
     } else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login)) {
       return out({error:"Неверный email/username или пароль."},401);
     }
@@ -131,6 +144,14 @@ Deno.serve(async (req: Request) => {
         if(existing)p=existing;
         else return out({error:created.error.code==="23505"?"Этот username уже занят. Зарегистрируйся с другим username.":created.error.message},created.error.code==="23505"?409:400);
       }else p=created.data;
+    }
+    // Keep the legacy username index synchronized for Telegram and email/password accounts.
+    if(p && authUser.email){
+      const {error:lookupError}=await admin.from("account_lookup").upsert({
+        user_id:uid,username:p.username,email:String(authUser.email).trim().toLowerCase(),
+        telegram_id:p.telegram_id??null
+      },{onConflict:"user_id"});
+      if(lookupError)console.error("ORBIS account index sync:",lookupError.message);
     }
     return p ? out({authenticated:true,user:{id:uid,...safeProfile(p)}}) : out({authenticated:false},401);
   }
