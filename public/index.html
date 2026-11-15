@@ -2339,7 +2339,7 @@ document.addEventListener("click",event=>{
   const reply=document.createElement("button");reply.type="button";reply.dataset.action="reply";reply.textContent="↩ Ответить постом";
   const showReplies=document.createElement("button");showReplies.type="button";showReplies.dataset.action="show-replies";showReplies.textContent="◌ Ответы-посты";
   const share=document.createElement("button");share.type="button";share.dataset.action="share";share.textContent="↗ Поделиться";
-  const save=document.createElement("button");save.type="button";save.dataset.action="bookmark";save.textContent="⌑ Сохранить";
+  const save=document.createElement("button");save.type="button";save.dataset.action="bookmark";save.textContent=post.saved?"✓ Сохранено":"⌑ Сохранить";save.setAttribute("aria-pressed",String(Boolean(post.saved)));
   const report=document.createElement("button");report.type="button";report.dataset.action="report";report.textContent="⚑ Пожаловаться";
   actions.append(like,comments,reply,showReplies,share,save,report);article.append(top,title,topic,body,actions);return article;
  }
