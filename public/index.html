@@ -599,6 +599,47 @@ button>*:not(.orb-sheen):not(.orb-ripple){position:relative;z-index:2}
  .orb-sheen:after{display:none}
 }
 
+
+/* ORBIS EXPLORER — cinematic centerpiece and responsive device layouts */
+.discovery-panel{position:relative;isolation:isolate;overflow:hidden;min-height:176px;margin:0 0 18px;padding:23px 25px;border:1px solid #e8e1ff;border-radius:23px;background:linear-gradient(112deg,#171638 0%,#29215f 48%,#5745a5 100%);color:#fff;box-shadow:0 20px 48px #38266e26}
+.discovery-panel:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 82% 50%,#a895ff55,transparent 24%),radial-gradient(circle at 10% 110%,#ff8ca533,transparent 38%);animation:discoveryGlow 7s ease-in-out infinite alternate}
+.discovery-copy{position:relative;z-index:2;max-width:74%}
+.discovery-kicker{font-size:9px;letter-spacing:2.2px;font-weight:900;color:#c7bbff}
+.discovery-panel h2{max-width:450px;margin:8px 0;font-size:20px;line-height:1.25;letter-spacing:-.5px}
+.discovery-panel p{max-width:420px;margin:0;color:#d7d1f4;font-size:11px;line-height:1.6}
+.discovery-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
+.discovery-tags span{padding:5px 9px;border:1px solid #ffffff35;border-radius:99px;background:#ffffff12;color:#f4efff;font-size:9px;backdrop-filter:blur(8px)}
+.discovery-orbit{position:absolute;right:8%;top:50%;width:145px;height:145px;transform:translateY(-50%);border:1px solid #d2c6ff77;border-radius:50%;box-shadow:0 0 0 16px #ffffff08,0 0 0 38px #ffffff06,0 0 48px #a58bff33;animation:discoverySpin 19s linear infinite}
+.discovery-orbit:before,.discovery-orbit:after{content:"";position:absolute;inset:18px;border:1px solid #ffb7d877;border-radius:50%;transform:rotateX(65deg) rotate(-25deg)}
+.discovery-orbit:after{inset:-13px 28px;border-color:#7de9e1aa;transform:rotate(62deg)}
+.discovery-orbit i{position:absolute;left:12px;top:22px;width:13px;height:13px;border-radius:50%;background:#ffcb79;box-shadow:0 0 18px #ffcb79;animation:discoveryPulse 2s ease-in-out infinite}
+.discovery-orbit b{position:absolute;right:10px;bottom:18px;width:9px;height:9px;border-radius:50%;background:#78e5df;box-shadow:0 0 16px #78e5df}
+.discovery-orbit span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:38px;color:#fff1b9;text-shadow:0 0 24px #fff1b9}
+@keyframes discoveryGlow{from{opacity:.65;transform:scale(1)}to{opacity:1;transform:scale(1.035)}}
+@keyframes discoverySpin{to{rotate:360deg}}
+@keyframes discoveryPulse{50%{transform:scale(1.5);box-shadow:0 0 28px #ffcb79}}
+/* Rocket flies directly through the visual centre of the welcome screen */
+.intro-rocket-wrap{left:50%!important;top:50%!important;animation:rocketThroughCenter 4.8s cubic-bezier(.42,0,.2,1) forwards!important}
+@keyframes rocketThroughCenter{
+  0%{transform:translate(-50%,125vh) scale(.52) rotate(-8deg);opacity:0}
+  12%{opacity:1}
+  38%{transform:translate(-50%,-50%) scale(1.04) rotate(0);opacity:1}
+  48%{transform:translate(-50%,-50%) scale(1.13) rotate(0);opacity:1;filter:drop-shadow(0 0 38px #a9f5ff)}
+  62%{transform:translate(-50%,-50%) scale(1.02) rotate(0);opacity:1}
+  100%{transform:translate(-50%,-175vh) scale(.46) rotate(7deg);opacity:0}
+}
+.intro-rocket-wrap:before{content:"";position:absolute;left:50%;top:50%;width:280px;height:280px;transform:translate(-50%,-50%);border:1px solid #c9baff88;border-radius:50%;box-shadow:0 0 0 20px #b6a4ff12,0 0 0 48px #b6a4ff0b,0 0 55px #8c7aff66;animation:centerPortal 1.3s ease-out 1.65s both}
+.intro-rocket-wrap:after{content:"";position:absolute;left:50%;top:50%;width:360px;height:2px;transform:translate(-50%,-50%);background:linear-gradient(90deg,transparent,#b9faffcc,#fff, #ffb5dcaa,transparent);box-shadow:0 0 20px #8beaff;opacity:0;animation:centerFlash .8s ease-out 1.8s both}
+@keyframes centerPortal{0%{opacity:0;scale:.25}45%{opacity:1}100%{opacity:0;scale:1.5}}
+@keyframes centerFlash{0%{opacity:0;scaleX:.1}25%{opacity:1}100%{opacity:0;scaleX:1.5}}
+/* Responsive layouts: wide desktop, compact laptop, tablet, phone */
+@media(min-width:1450px){.shell{max-width:1500px;grid-template-columns:260px minmax(0,740px) 320px;gap:36px;padding:32px}.hero{min-height:245px}.discovery-panel{min-height:190px}}
+@media(min-width:651px) and (max-width:1080px){.shell{grid-template-columns:190px minmax(0,1fr);gap:18px;padding:20px}.sidebar{top:18px;height:calc(100dvh - 36px)}.brand{font-size:20px;padding-bottom:25px}.nav button{padding:11px 10px;font-size:13px}.discovery-orbit{right:4%;scale:.82}.discovery-copy{max-width:78%}}
+@media(max-width:650px){.shell{padding:12px 11px calc(88px + env(safe-area-inset-bottom))}.discovery-panel{min-height:166px;padding:19px 17px;border-radius:19px}.discovery-copy{max-width:83%}.discovery-panel h2{font-size:17px}.discovery-panel p{font-size:10px}.discovery-orbit{right:-43px;opacity:.5;scale:.78}.hero{min-height:205px}.top-actions{gap:6px}.sound-toggle{font-size:10px;padding:7px 9px}.mobile-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom))}}
+@media(max-width:390px){.shell{padding-left:9px;padding-right:9px}.topbar h1{font-size:23px}.kicker{font-size:8px;letter-spacing:1.6px}.hero{padding:17px}.hero h2{font-size:19px}.discovery-panel{padding:16px 14px}.discovery-copy{max-width:88%}.discovery-panel h2{font-size:16px}.compose-tools .tiny{font-size:10px;padding:6px 8px}.hint{font-size:9px}}
+@media(max-height:650px) and (min-width:651px){.orbis-intro{justify-content:flex-start}.intro-word{margin-top:8vh}.intro-loader{margin-top:8px}.intro-caption{margin-top:5px}.intro-rocket-wrap{scale:.78}}
+@media(prefers-reduced-motion:reduce){.discovery-panel:before,.discovery-orbit,.discovery-orbit i,.intro-rocket-wrap,.intro-rocket-wrap:before,.intro-rocket-wrap:after{animation:none!important}.intro-rocket-wrap{opacity:1;transform:translate(-50%,-50%)!important}}
+
 </style>
 </head>
 <body>
@@ -630,7 +671,7 @@ button>*:not(.orb-sheen):not(.orb-ripple){position:relative;z-index:2}
  <div class="brand"><div class="brandmark" aria-label="ORBIS"><span class="orbit-core">✳</span><i class="orbit-ring"></i><i class="orbit-dot"></i></div><span class="brand-word">ORBIS</span></div>
  <nav class="nav">
   <button class="active" data-view="Лента"><span class="nav-icon">⌂</span>Лента</button>
-  <button data-view="Stories"><span class="nav-icon">◉</span>Stories</button>
+  
   <button data-view="Навигатор"><span class="nav-icon">✳</span>Навигатор</button>
   <button data-view="Профиль"><span class="nav-icon">◎</span>Профиль</button>
   <button class="create" id="openComposer"><span class="nav-icon">＋</span>Создать публикацию</button>
@@ -640,11 +681,8 @@ button>*:not(.orb-sheen):not(.orb-ripple){position:relative;z-index:2}
 <main>
  <header class="topbar"><div><div class="kicker">ОДНА ЛЕНТА — МНОГО МИРОВ</div><h1 id="pageTitle">Твоя лента</h1></div><div class="top-actions"><span class="date-pill">✦ ORBIS COMMUNITY</span><button class="bell" aria-label="Уведомления">♧</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">♫ Звук: выкл.</button></div></header>
  <section class="hero"><div class="hero-visual" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-spark">✦</div><div class="hero-planet">✳</div></div><div class="hero-label">WELCOME TO ORBIS</div><h2>Место, где идеи находят своё место.</h2><p>Открывай интересное, делись мыслями и следи за тем, что происходит в мире вокруг тебя.</p><span class="hero-tag">✦ Твой поток начинается здесь</span></section>
- <section class="stories"><div class="section-head"><h2>Истории</h2><span>Свежие · 24 часа</span></div><div class="story-row">
-  <div class="story add"><div class="story-ring"><div>＋</div></div><small>Твоя Story</small></div>
-  <div class="story"><div class="story-ring"><div>А</div></div><small>Алина</small></div><div class="story"><div class="story-ring"><div>М</div></div><small>Мурад</small></div><div class="story"><div class="story-ring"><div>К</div></div><small>Камран</small></div><div class="story"><div class="story-ring"><div>С</div></div><small>Севда</small></div><div class="story"><div class="story-ring"><div>R</div></div><small>Research</small></div>
- </div></section>
- <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button><button class="tiny" id="newStory">◉ Добавить Story</button></div><span class="hint">1 пост в день</span></div></section>
+ <section class="discovery-panel"><div class="discovery-orbit" aria-hidden="true"><i></i><b></b><span>✦</span></div><div class="discovery-copy"><div class="discovery-kicker">ORBIS EXPLORER · 01</div><h2>Твоя следующая большая идея — ближе, чем кажется.</h2><p>Исследуй темы, открывай новые взгляды и находи своё направление.</p><div class="discovery-tags"><span>✦ Идеи</span><span>◈ Открытия</span><span>⌁ Сообщество</span></div></div></section>
+ <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button></div><span class="hint">1 пост в день</span></div></section>
  <div class="filter-row"><strong>Сейчас в ORBIS</strong><span>Новые мысли и знакомые темы</span></div>
  <div class="topic-filter" id="topicFilter"><button class="active">Все темы</button><button>Новости</button><button>Технологии</button><button>Бизнес</button><button>Общество</button><button>Наука</button><button>Идеи</button></div>
  <section id="feed">
@@ -657,10 +695,10 @@ button>*:not(.orb-sheen):not(.orb-ripple){position:relative;z-index:2}
   <div class="topic-item"><i class="topic-dot"></i><div><b>Новости</b><small>События и важное</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#8b7cf6;box-shadow:0 0 0 4px #f0eeff"></i><div><b>Технологии</b><small>Наука и разработки</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#ff987f;box-shadow:0 0 0 4px #fff0ed"></i><div><b>Бизнес</b><small>Компании и идеи</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#5bc9b3;box-shadow:0 0 0 4px #e9faf6"></i><div><b>Общество</b><small>Люди и культура</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#e6b95f;box-shadow:0 0 0 4px #fff8e8"></i><div><b>Наука</b><small>Открытия и знания</small></div><em>→</em></div>
  </section>
  <section class="side-card"><h3>Твой профиль</h3><div class="profile-preview"><div class="avatar">O</div><div><p>Гость ORBIS</p><small>Имя · @username</small></div></div><p class="side-copy">Минималистично и по делу: имя, никнейм и короткое описание.</p></section>
- <section class="side-card"><h3>Принципы ORBIS</h3><div class="stat-line"><span>Главная лента</span><b>Живая</b></div><div class="stat-line"><span>Stories</span><b>24 часа</b></div><div class="stat-line"><span>Навигатор</span><b>По темам</b></div><p class="side-copy">Никакого перегруженного профиля и лишних разделов. Только то, ради чего люди приходят.</p></section>
+ <section class="side-card"><h3>Принципы ORBIS</h3><div class="stat-line"><span>Главная лента</span><b>Живая</b></div><div class="stat-line"><span>Навигатор</span><b>По темам</b></div><div class="stat-line"><span>Навигатор</span><b>По темам</b></div><p class="side-copy">Никакого перегруженного профиля и лишних разделов. Только то, ради чего люди приходят.</p></section>
 </aside>
 </div>
-<nav class="mobile-nav"><button class="active" data-view="Лента" aria-label="Лента">⌂</button><button data-view="Stories" aria-label="Stories">◉</button><button id="mobileCreate" aria-label="Создать">＋</button><button data-view="Навигатор" aria-label="Навигатор">✳</button><button data-view="Профиль" aria-label="Профиль">◎</button></nav>
+<nav class="mobile-nav"><button class="active" data-view="Лента" aria-label="Лента">⌂</button><button id="mobileCreate" aria-label="Создать">＋</button><button data-view="Навигатор" aria-label="Навигатор">✳</button><button data-view="Профиль" aria-label="Профиль">◎</button></nav>
 <div class="modal" id="modal"><div class="dialog"><h2 id="dialogTitle">Новая публикация</h2><p class="sub">Поделись мыслью с сообществом ORBIS.</p><input id="postTitle" maxlength="120" placeholder="Название публикации"><input id="postTopic" maxlength="48" placeholder="Тема, например: Технологии"><textarea id="postBody" maxlength="4000" placeholder="Текст публикации..."></textarea><div class="dialog-actions"><button class="secondary" id="cancel">Отмена</button><button class="primary" id="publish">Продолжить</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -669,7 +707,7 @@ const $=id=>document.getElementById(id),modal=$("modal"),toast=$("toast");let to
 function notify(s){toast.textContent=s;toast.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.style.display="none",2800)}
 function openComposer(){$("dialogTitle").textContent="Новая публикация";modal.classList.add("open");$("postTitle").focus()}
 ["openComposer","openComposer2","newText","mobileCreate"].forEach(id=>$(id).addEventListener("click",openComposer));
-$("newStory").addEventListener("click",()=>notify("Создание Stories подключим к отдельному серверу и дневному лимиту."));
+
 $("cancel").addEventListener("click",()=>modal.classList.remove("open"));
 modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
 $("publish").addEventListener("click",()=>{if(!$("postTitle").value.trim()||!$("postTopic").value.trim()||!$("postBody").value.trim()){notify("Добавь название, тему и текст публикации.");return}notify("Форма заполнена. Сохранение появится после подключения Posts API.")});
