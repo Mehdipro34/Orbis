@@ -2332,7 +2332,7 @@ document.addEventListener("click",event=>{
  }
  async function loadCurrentProfile(){
   try{
-   const data=await api("/api/auth/me");
+   const data=await api("/api/guest/me");
    window.orbisUser=data.user;
    const name=$("profileNameInput"),handle=$("profileHandleInput"),bio=$("profileBioInput");
    if(name&&handle&&bio){
@@ -2875,7 +2875,6 @@ document.addEventListener("click",event=>{
   if(!window.orbisUser){window.notify?.("Сначала войди в ORBIS.");return}
   openComposer();
  });
- document.addEventListener("DOMContentLoaded",()=>setTimeout(refresh,250));
  window.addEventListener("orbis:login",refresh);
 })();
 </script>
