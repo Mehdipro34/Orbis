@@ -2012,7 +2012,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 <div class="modal" id="modal"><div class="dialog"><h2 id="dialogTitle">Новая публикация</h2><p class="sub">Поделись мыслью с сообществом ORBIS.</p><input id="postTitle" maxlength="120" placeholder="Заголовок (необязательно)"><input id="postTopic" maxlength="48" placeholder="Тема (необязательно)"><textarea id="postBody" maxlength="4000" placeholder="Напиши текст или оставь поле пустым, если публикуешь только фото/видео..."></textarea><label style="display:block;margin:12px 0;color:#777e96;font-size:12px">Добавить фото или видео (до 4 файлов)<input id="postMedia" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" style="display:block;width:100%;margin-top:8px;padding:10px;border:1px dashed #aaa;border-radius:12px;background:#fafaff"></label><div id="postMediaNote" class="post-meta">Можно опубликовать только текст, только фото/видео или объединить их. Фото до 12 МБ, видео до 50 МБ на файл.</div><div class="dialog-actions"><button class="secondary" id="cancel">Отмена</button><button class="primary" id="publish">Опубликовать</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
-const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand()}
 const $=id=>document.getElementById(id),modal=$("modal"),toast=$("toast");let toastTimer;
 function notify(s){toast.textContent=s;toast.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.style.display="none",2800)}
 function openComposer(){
