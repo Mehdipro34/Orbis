@@ -2236,7 +2236,7 @@ document.addEventListener("click",event=>{
  function enterApp(){if(gateway)gateway.hidden=true;const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(shell)shell.hidden=false;document.body.classList.remove("orbis-auth-open","orbis-demo-open");document.body.classList.add("orbis-app-open");window.scrollTo({top:0,behavior:"auto"});window.dispatchEvent(new Event("orbis:login"))} window.orbisEnterApp=enterApp;
  const landing=document.getElementById("orbisLanding");
  function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>{const target=mode==="signup"?username:email;target&&target.focus({preventScroll:true})},220);window.scrollTo({top:0,behavior:"smooth"})}
- document.querySelectorAll("[data-open-auth]").forEach(button=>button.addEventListener("click",()=>{openAuth(button.dataset.openAuth||"login")}));
+ document.querySelectorAll("[data-open-auth]").forEach(button=>{button.hidden=true;button.disabled=true;});
  const back=document.getElementById("authBackLanding");if(back)back.addEventListener("click",()=>{if(gateway)gateway.hidden=true;if(landing)landing.hidden=false;document.body.classList.remove("orbis-auth-open");window.scrollTo({top:0,behavior:"smooth"})});
  // Installation remains available through the browser's native install menu.
  if(skip)skip.addEventListener("click",showAccess);
@@ -2928,6 +2928,8 @@ document.addEventListener("click",event=>{
 
 <style id="orbis-auth-and-layout-fix">
 #orbisLanding[hidden],#authGateway[hidden]{display:none!important}
+#authGateway{display:none!important}#orbisLanding [data-open-auth]{display:none!important}
+
 
 /* Keep the signed-in experience balanced and centered on wide displays. */
 #orbisAppShell.shell{width:min(100%,1760px);margin-inline:auto;grid-template-columns:minmax(215px,250px) minmax(0,1fr) minmax(250px,300px);justify-content:center;gap:clamp(18px,2vw,32px);padding-inline:clamp(16px,2vw,30px)}
