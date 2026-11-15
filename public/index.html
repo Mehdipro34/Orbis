@@ -36,6 +36,84 @@ main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-b
 @media(max-width:720px){.app{display:block;padding:12px 12px 90px}.sidebar{display:none}.topbar{padding:3px 1px 14px}.topbar h1{font-size:23px}.hero{padding:19px;border-radius:22px}.hero h2{font-size:24px;margin-top:14px}.hero p{font-size:10px}.feed-toolbar{align-items:flex-start}.feed-select{width:42%;font-size:9px}.news-card{padding:14px;border-radius:18px}.news-title{font-size:16px}.news-summary{font-size:10px}.catalog-grid{gap:8px}.catalog-card{min-height:128px;padding:13px}.mobile-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;display:flex;justify-content:space-around;gap:3px;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:#080e1beF;border-top:1px solid #25334b;backdrop-filter:blur(18px)}.mobile-nav button{flex:1;display:grid;gap:2px;place-items:center;border:0;background:transparent;color:#8190ab;font-size:8px;padding:4px 2px}.mobile-nav button span{font-size:17px}.mobile-nav button.active{color:#b6a5ff}.rightbar{display:none}.search-hint{display:none}}
 @media(max-width:390px){.top-actions{gap:5px}.refresh-btn{width:40px;justify-content:center;font-size:0;padding:0}.refresh-btn .refresh-icon{font-size:15px}.interest-grid{grid-template-columns:1fr}.news-time{font-size:8px}.news-action{padding:7px 6px}.catalog-grid{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ORBIS V2 — richer editorial media and high-colour interface */
+:root{--bg:#060817;--panel:#10172d;--panel2:#151f3b;--line:#2a385b;--purple:#b49aff;--cyan:#5ff3e0;--pink:#ff75b5;--gold:#ffd078;--shadow:0 26px 90px #0009}
+body{background:radial-gradient(ellipse at 9% -8%,#6538c455,transparent 34%),radial-gradient(ellipse at 98% 15%,#00c7b64a,transparent 31%),radial-gradient(ellipse at 46% 110%,#3023a32b,transparent 40%),#060817}
+.hero{background:linear-gradient(115deg,#3b237a 0%,#48317f 38%,#075c68 100%);border-color:#b39aff66;box-shadow:0 20px 70px #4f33b844}
+.hero h2{background:linear-gradient(95deg,#fff,#c8fff7 80%);background-clip:text;-webkit-background-clip:text;color:transparent}
+.hero-chip{background:#ffffff17;border-color:#ffffff36}
+.news-card{background:linear-gradient(142deg,#141d38 0%,#0c1428 72%,#111b31 100%);border-color:#34466b;box-shadow:0 16px 40px #0005}
+.news-card:nth-child(4n+1){background:linear-gradient(145deg,#1a1a43,#10172d 68%,#102a39)}
+.news-card:nth-child(4n+2){background:linear-gradient(145deg,#182b40,#10172d 72%,#211838)}
+.news-card:nth-child(4n+3){background:linear-gradient(145deg,#2a1d42,#10172d 72%,#102a35)}
+.news-card:hover{border-color:#9d8cff;box-shadow:0 25px 65px #0007,0 0 24px #967bff20}
+.news-title{font-size:19px;line-height:1.34}
+.news-summary{font-size:12px;color:#adbad4}
+.news-image{display:block;width:100%;height:clamp(170px,27vw,310px);max-height:310px;object-fit:cover;border-radius:16px;margin:8px 0 14px;border:1px solid #a5c5ff25;box-shadow:0 15px 34px #0005}
+.news-media-frame{position:relative;overflow:hidden;border:1px solid #a48fff3e;border-radius:16px;margin:9px 0 14px;background:linear-gradient(135deg,#2b245b,#0d3744);min-height:80px}
+.news-media-frame img{display:block;width:100%;height:clamp(170px,28vw,320px);object-fit:cover}
+.news-media-frame video{display:block;width:100%;max-height:370px;background:#000}
+.news-media-frame .media-overlay{position:absolute;left:12px;bottom:12px;padding:7px 10px;border-radius:99px;background:#090e1bbf;color:#fff;font-size:9px;border:1px solid #ffffff3b;backdrop-filter:blur(8px)}
+.news-meta-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.news-meta-pill{font-size:8px;letter-spacing:.4px;padding:4px 7px;border-radius:99px;background:#a38cff18;border:1px solid #a38cff36;color:#cfc4ff}
+.news-meta-pill.country{background:#50dccc13;border-color:#50dccc32;color:#8ef5e5}
+.news-action[data-action="translate"]{color:#a8ddff;border-color:#4ca5dd28;background:#4da3db12}
+.news-action[data-action="translate"]:hover{color:#e3f5ff;background:#4da3db25}
+.news-action.translated{background:#62e6d51b;border-color:#62e6d546;color:#8df5e3}
+.feed-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:11px;margin:-4px 0 17px;border:1px solid #34466a;border-radius:17px;background:linear-gradient(115deg,#151b39d9,#102a36d9);box-shadow:0 12px 34px #0003}
+.feed-controls label{display:grid;gap:5px;min-width:0;color:#8c9bb9;font-size:8px;font-weight:850;letter-spacing:.7px}
+.feed-controls select{width:100%;min-width:0;border:1px solid #384b70;border-radius:11px;padding:9px 8px;background:#0b1428;color:#e5edff;font-size:10px;outline:none}
+.feed-controls select:focus{border-color:#b49aff;box-shadow:0 0 0 3px #b49aff20}
+.catalog-card{background:linear-gradient(135deg,#201c50,#112c43);border-color:#41547a;min-height:144px}
+.catalog-card:nth-child(3n+2){background:linear-gradient(135deg,#3b1d50,#152747)}
+.catalog-card:nth-child(3n+3){background:linear-gradient(135deg,#123f4b,#172447)}
+.navigator-head{background:radial-gradient(circle at 88% 10%,#5be4d944,transparent 33%),linear-gradient(120deg,#412579,#0b5661);border-color:#9884ff75}
+.right-hero{background:radial-gradient(circle at 100% 0%,#67eadc2b,transparent 50%),linear-gradient(135deg,#38206b,#0c4650);border-color:#8d7cff66}
+.right-card{background:linear-gradient(145deg,#121a32f0,#0c1628f0);border-color:#344363}
+.ad-card{background:radial-gradient(circle at 88% 4%,#f9cb7040,transparent 35%),linear-gradient(120deg,#3a245b,#16414b);border-color:#bc9aff72}
+.mobile-nav{border-top-color:#455779}
+.mobile-nav button{font-size:8px}
+.wiki-search-panel{padding:18px;border:1px solid #6d83b8;border-radius:22px;background:radial-gradient(circle at 92% 3%,#65dedc40,transparent 40%),linear-gradient(120deg,#231e55,#113d49);margin-bottom:15px}
+.wiki-search-panel h2{font-size:21px;margin:7px 0}
+.wiki-search-panel p{font-size:10px;color:#b6c6df;margin:0 0 13px}
+.wiki-search-row{display:flex;gap:8px}
+.wiki-search-row input{flex:1;min-width:0;border:1px solid #61769b;border-radius:12px;padding:11px 12px;background:#090f20;color:#fff;outline:none}
+.wiki-search-row button{border:0;border-radius:12px;padding:0 15px;background:linear-gradient(105deg,#b6a1ff,#5ce8dc);color:#11172a;font-weight:900}
+.wiki-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.wiki-chips button{border:1px solid #9c8cff4e;border-radius:99px;background:#ffffff0d;color:#d9d5ff;padding:6px 10px;font-size:9px}
+.wiki-card{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;padding:14px;margin-bottom:10px;border:1px solid #405177;border-radius:18px;background:linear-gradient(130deg,#161d3c,#102133)}
+.wiki-card img{width:128px;height:120px;object-fit:cover;border-radius:12px;background:#1a2940}
+.wiki-card h3{font-size:14px;margin:2px 0 7px}
+.wiki-card p{font-size:10px;line-height:1.6;color:#a8b6d0;margin:0 0 10px}
+.wiki-card-actions{display:flex;gap:8px;flex-wrap:wrap}
+.wiki-card-actions a,.wiki-card-actions button{border:1px solid #495a7f;border-radius:9px;padding:7px 9px;background:#ffffff0b;color:#dcd7ff;font-size:9px}
+.source-row{cursor:pointer}
+.source-row:hover{border-color:#a58bff;color:#fff}
+@media(max-width:720px){.feed-controls{grid-template-columns:1fr 1fr}.feed-controls label:last-child{grid-column:1/-1}.news-title{font-size:16px}.news-image,.news-media-frame img{height:210px}.wiki-card{grid-template-columns:90px minmax(0,1fr);gap:10px;padding:11px}.wiki-card img{width:90px;height:100px}.wiki-search-row button{padding:0 10px}}
+@media(max-width:390px){.feed-controls{padding:8px;gap:6px}.feed-controls select{font-size:9px}.mobile-nav button{font-size:7px}.wiki-card{grid-template-columns:1fr}.wiki-card img{width:100%;height:150px}}
+
+.news-art-cover{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;min-height:160px;padding:18px;border-radius:16px;margin:8px 0 14px;background:radial-gradient(circle at 25% 25%,color-mix(in srgb,var(--topic-color) 75%,transparent),transparent 35%),radial-gradient(circle at 83% 20%,#ffffff2a,transparent 28%),linear-gradient(120deg,color-mix(in srgb,var(--topic-color) 36%,#11172f),#121a35 62%,#102e3b);border:1px solid color-mix(in srgb,var(--topic-color) 55%,transparent)}
+.news-art-cover:before,.news-art-cover:after{content:"";position:absolute;border:1px solid #ffffff35;border-radius:50%;width:170px;height:170px;right:20px;top:-90px;box-shadow:0 0 0 18px #ffffff09,0 0 0 38px #ffffff06}
+.news-art-cover:after{width:110px;height:110px;right:65px;top:-62px}
+.news-art-cover .art-icon{font-size:63px;line-height:1;color:#ffffffde;text-shadow:0 9px 24px #0008;z-index:1;animation:artFloat 5s ease-in-out infinite}
+.news-art-cover .art-label{z-index:1;font-size:8px;letter-spacing:2px;font-weight:950;color:#e8efff;padding:7px 10px;border:1px solid #ffffff35;background:#07102075;border-radius:99px;backdrop-filter:blur(8px)}
+@keyframes artFloat{50%{transform:translateY(-5px) rotate(-3deg)}}
+.lead-card{border-color:#5e6f9a;box-shadow:0 20px 56px #0006}
+.lead-card .news-title{font-size:22px}
+.more-feed-wrap{display:flex;justify-content:center;padding:10px 0 22px}
+.load-more-btn{border:1px solid #927dfb88;border-radius:14px;padding:12px 22px;background:linear-gradient(110deg,#9d86ff25,#58dfd325);color:#e5e4ff;font-weight:900;font-size:10px;transition:.2s}
+.load-more-btn:hover{transform:translateY(-2px);box-shadow:0 12px 25px #8d75ff24;border-color:#b3a2ff}
+.source-directory-tools{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:8px;margin-bottom:11px}
+.source-directory-tools input,.source-directory-tools select{width:100%;min-width:0;border:1px solid #384b70;border-radius:12px;padding:10px;background:#0b1428;color:#e5edff;font-size:10px;outline:none}
+.source-result-count{padding:7px 4px;color:#8798b7;font-size:9px}
+.source-directory-row{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:left}
+.source-directory-row span{font-weight:800;min-width:0}
+.source-directory-row small{text-align:right;max-width:48%;line-height:1.5}
+#installBtn{color:#90f0e3;border-color:#55cbbb66}
+.top-actions button[hidden]{display:none}
+#settingsDialog .dialog{background:radial-gradient(circle at 100% 0%,#4e439a3b,transparent 42%),linear-gradient(145deg,#151d38,#0b1220)}
+@media(max-width:720px){.source-directory-tools{grid-template-columns:1fr}.source-directory-row{align-items:flex-start}.source-directory-row small{max-width:52%}.lead-card .news-title{font-size:18px}.news-art-cover{min-height:135px}}
 </style>
 </head>
 <body>
@@ -48,6 +126,7 @@ main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-b
     <button class="nav-item active" data-view="for-you"><span class="nav-icon">✧</span>Для тебя</button>
     <button class="nav-item" data-view="latest"><span class="nav-icon">◷</span>Последние новости</button>
     <button class="nav-item" data-view="navigator"><span class="nav-icon">⌘</span>Навигатор</button>
+    <button class="nav-item" data-view="encyclopedia"><span class="nav-icon">📚</span>Энциклопедия</button>
     <button class="nav-item" data-view="saved"><span class="nav-icon">▣</span>Сохранённое <small id="savedCount">0</small></button>
   </nav>
   <div class="nav-label">КАТАЛОГ ТЕМ</div>
@@ -66,15 +145,20 @@ main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-b
 <main>
   <header class="topbar">
     <div><div class="eyebrow">YOUR PERSONAL NEWS GALAXY</div><h1 id="pageTitle">Твоя орбита</h1></div>
-    <div class="top-actions"><button class="icon-btn" id="interestsBtn" title="Настроить интересы" aria-label="Настроить интересы">✧</button><button class="refresh-btn" id="refreshBtn"><span class="refresh-icon">↻</span>Обновить</button></div>
+    <div class="top-actions"><button class="icon-btn" id="interestsBtn" title="Настроить интересы" aria-label="Настроить интересы">✧</button><button class="icon-btn" id="settingsBtn" title="Настройки языка" aria-label="Настройки">⚙</button><button class="icon-btn" id="installBtn" title="Установить ORBIS" aria-label="Установить ORBIS">⇩</button><button class="refresh-btn" id="refreshBtn"><span class="refresh-icon">↻</span>Обновить</button></div>
   </header>
   <section class="hero" id="hero">
     <div class="hero-top"><span class="hero-kicker">ORBIS · DAILY SIGNAL</span><span class="live-badge">● RSS LIVE · 10 MIN</span></div>
     <h2>Мир меняется. Оставайся на своей орбите.</h2>
     <p>Главные истории из технологий, науки, кино, игр, бизнеса и автомобильного мира — в одной чистой ленте, собранной под твои интересы.</p>
-    <div class="hero-bottom"><span class="hero-chip"><b id="sourceCount">40</b> источников</span><span class="hero-chip"><b>7</b> направлений</span><span class="hero-chip">Без пользовательского спама</span></div>
+    <div class="hero-bottom"><span class="hero-chip"><b id="sourceCount">568</b> RSS-лент</span><span class="hero-chip"><b>15</b> направлений</span><span class="hero-chip">30 стран · 25 языков</span></div>
   </section>
   <div class="interests-row" id="interestChips"></div>
+  <div class="feed-controls" id="feedControls">
+    <label><span>Страна / регион</span><select id="countrySelect" aria-label="Страна"><option value="all">🌐 Весь мир</option><option value="AZ">🇦🇿 Азербайджан</option><option value="GB">🇬🇧 Великобритания</option><option value="US">🇺🇸 США</option><option value="DE">🇩🇪 Германия</option><option value="FR">🇫🇷 Франция</option><option value="ES">🇪🇸 Испания</option><option value="TR">🇹🇷 Турция</option><option value="RU">🇷🇺 Россия</option><option value="JP">🇯🇵 Япония</option><option value="KR">🇰🇷 Южная Корея</option><option value="IN">🇮🇳 Индия</option><option value="CN">🇨🇳 Китай</option><option value="BR">🇧🇷 Бразилия</option><option value="CA">🇨🇦 Канада</option><option value="AU">🇦🇺 Австралия</option><option value="NL">🇳🇱 Нидерланды</option><option value="IT">🇮🇹 Италия</option><option value="UA">🇺🇦 Украина</option><option value="VN">🇻🇳 Вьетнам</option><option value="ID">🇮🇩 Индонезия</option></select></label>
+    <label><span>Язык новостей</span><select id="sourceLanguageSelect" aria-label="Язык новостей"><option value="all">Все языки</option><option value="ru">Русский</option><option value="az">Азербайджанский</option><option value="en">English</option><option value="tr">Türkçe</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="es">Español</option><option value="pt">Português</option><option value="ar">العربية</option><option value="fa">فارسی</option><option value="hi">हिन्दी</option><option value="ur">اردو</option><option value="zh">中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="vi">Tiếng Việt</option><option value="id">Bahasa Indonesia</option><option value="uk">Українська</option><option value="nl">Nederlands</option><option value="it">Italiano</option><option value="sw">Kiswahili</option></select></label>
+    <label><span>Перевод карточек</span><select id="translationLanguageSelect" aria-label="Язык перевода"><option value="ru">Русский</option><option value="az">Азербайджанский</option><option value="en">English</option><option value="tr">Türkçe</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="es">Español</option><option value="pt">Português</option><option value="ar">العربية</option><option value="fa">فارسی</option><option value="hi">हिन्दी</option><option value="ur">اردو</option><option value="zh">中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="vi">Tiếng Việt</option><option value="id">Bahasa Indonesia</option><option value="uk">Українська</option><option value="nl">Nederlands</option><option value="it">Italiano</option></select></label>
+  </div>
   <div class="feed-toolbar"><div class="feed-title"><h2 id="feedHeading">Для тебя</h2><span id="feedSub">подборка по интересам</span></div><select class="feed-select" id="sortSelect" aria-label="Сортировка"><option value="recommended">Рекомендации</option><option value="recent">Сначала новые</option></select></div>
   <div class="search-wrap"><span class="search-ico">⌕</span><input id="searchInput" type="search" placeholder="Найти новость, тему или источник…" autocomplete="off"><span class="search-hint">ПОИСК ПО ЛЕНТЕ</span></div>
   <div class="status-line"><div class="status-left"><span class="status-light"></span><span id="statusText">Подключаем новостные источники…</span></div><button id="lastUpdate">Обновлено —</button></div>
@@ -94,9 +178,19 @@ main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-b
   <button class="active" data-view="for-you"><span>✧</span>Для тебя</button>
   <button data-view="latest"><span>◷</span>Новое</button>
   <button data-view="navigator"><span>⌘</span>Темы</button>
+  <button data-view="encyclopedia"><span>📚</span>Wiki</button>
   <button data-view="saved"><span>▣</span>Кэш</button>
 </nav>
 
+<div class="dialog-backdrop" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+ <div class="dialog"><div class="eyebrow">ORBIS · PERSONAL SETTINGS</div><h2 id="settingsTitle">Настройки ORBIS</h2><p>Выбери язык, на который ORBIS будет переводить заголовки и описания новостей. Настройка сохраняется на этом устройстве.</p>
+  <label style="display:grid;gap:7px;color:#a8b7d0;font-size:10px;font-weight:850">Язык перевода
+   <select id="settingsTranslationSelect" style="width:100%;padding:11px;border:1px solid #45577b;border-radius:12px;background:#0b1428;color:#fff"></select>
+  </label>
+  <p style="margin-top:12px">Перевод запускается кнопкой «Перевести» в карточке. Оригинал издателя всегда остаётся доступен.</p>
+  <div class="dialog-actions"><button class="secondary-btn" id="cancelSettings">Закрыть</button><button class="primary-btn" id="saveSettings">Сохранить настройки</button></div>
+ </div>
+</div>
 <div class="dialog-backdrop" id="interestDialog" role="dialog" aria-modal="true" aria-labelledby="interestTitle">
  <div class="dialog"><div class="eyebrow">ORBIS · PERSONAL SIGNAL</div><h2 id="interestTitle">Собери свою орбиту</h2><p>Выбери темы, которые тебе интересны. ORBIS будет поднимать их новости выше в ленте «Для тебя». Настройки сохраняются на устройстве.</p>
   <div class="interest-grid" id="interestOptions"></div><div class="dialog-actions"><button class="secondary-btn" id="cancelInterests">Позже</button><button class="primary-btn" id="saveInterests">Сохранить интересы</button></div>
@@ -112,25 +206,21 @@ const SUPABASE_KEY="sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx";
 const EDGE_API=SUPABASE_URL+"/functions/v1/orbis-api";
 const DEVICE_KEY="orbis_guest_device_v1",TOKEN_KEY="orbis_guest_token_v1";
 const INTEREST_KEY="orbis_news_interests_v1",WEIGHTS_KEY="orbis_news_weights_v1",LIKES_KEY="orbis_news_liked_v1",PENDING_KEY="orbis_news_pending_v1";
+const COUNTRY_KEY="orbis_news_country_v1",SOURCE_LANGUAGE_KEY="orbis_news_source_language_v1",TRANSLATION_LANGUAGE_KEY="orbis_news_translation_language_v1",TRANSLATION_CACHE_KEY="orbis_news_translation_cache_v1";
 const ADMOB_NEWS_UNIT_ID="ca-app-pub-9946397950500083/7255776003";
-const CATEGORIES=[
- {id:"world",name:"Мир",icon:"◉",description:"Главные международные события",tone:"#89a9ff"},
- {id:"technology",name:"Технологии",icon:"⌘",description:"AI, гаджеты, стартапы и цифровое будущее",tone:"#a58bff"},
- {id:"science",name:"Наука",icon:"✧",description:"Космос, открытия, исследования и природа",tone:"#61d8ce"},
- {id:"movies",name:"Кино",icon:"▣",description:"Премьеры, индустрия, актёры и кинофестивали",tone:"#ff9bc0"},
- {id:"gaming",name:"Игры",icon:"▰",description:"Игровая индустрия, релизы и студии",tone:"#a6e18c"},
- {id:"business",name:"Бизнес",icon:"↗",description:"Компании, экономика, рынки и предпринимательство",tone:"#f1ca83"},
- {id:"auto",name:"Авто",icon:"⌁",description:"Автомобили, электрокары и технологии движения",tone:"#7dc6ff"}
-];
-const SOURCES_FALLBACK=41;
+const CATEGORIES=[{"id":"world","name":"Мир","icon":"🌍","description":"Международные события и репортажи","tone":"#67d9e8"},{"id":"politics","name":"Политика","icon":"🏛️","description":"Государства, выборы и общественная жизнь","tone":"#a78bfa"},{"id":"business","name":"Бизнес","icon":"📈","description":"Компании, экономика и рынки","tone":"#f4bd72"},{"id":"technology","name":"Технологии","icon":"⌘","description":"AI, гаджеты, интернет и стартапы","tone":"#65d7ff"},{"id":"science","name":"Наука","icon":"🔬","description":"Космос, исследования и открытия","tone":"#62dfbd"},{"id":"movies","name":"Кино и сериалы","icon":"🎬","description":"Фильмы, сериалы и индустрия развлечений","tone":"#ff8eb7"},{"id":"culture","name":"Культура","icon":"🎨","description":"Музыка, искусство, книги и идеи","tone":"#e6a3fa"},{"id":"gaming","name":"Игры","icon":"🎮","description":"Игры, разработчики и игровые платформы","tone":"#b4e47d"},{"id":"sports","name":"Спорт","icon":"🏟️","description":"Спортивные события и результаты","tone":"#ffae83"},{"id":"auto","name":"Авто","icon":"🚘","description":"Автомобили и мобильность","tone":"#7cc9ff"},{"id":"health","name":"Здоровье","icon":"🩺","description":"Медицина и благополучие","tone":"#80dfc6"},{"id":"education","name":"Образование","icon":"🎓","description":"Учёба, университеты и знания","tone":"#f7d87c"},{"id":"environment","name":"Экология","icon":"🌿","description":"Климат, природа и устойчивое развитие","tone":"#7fd89e"},{"id":"travel","name":"Путешествия","icon":"✈️","description":"Страны, города и путешествия","tone":"#89baff"},{"id":"food","name":"Еда","icon":"🍽️","description":"Кулинария, продукты и гастрономия","tone":"#f4a477"}];
+const SOURCES_FALLBACK=568;
 let state={
  view:"for-you",category:"",articles:[],visible:[],saved:[],interests:readJson(INTEREST_KEY,["technology","science","business","gaming","world"]),
  weights:readJson(WEIGHTS_KEY,{}),liked:readJson(LIKES_KEY,{}),pending:readJson(PENDING_KEY,{}),
- loading:false,sourceDirectory:[],ads:[],lastUpdated:null,sort:"recommended",search:""
+ loading:false,sourceDirectory:[],ads:[],lastUpdated:null,sort:"recommended",search:"",sourceId:"",renderCount:24,
+ country:readJson(COUNTRY_KEY,"all"),sourceLanguage:readJson(SOURCE_LANGUAGE_KEY,"all"),
+ translationLang:readJson(TRANSLATION_LANGUAGE_KEY,"ru"),translations:readJson(TRANSLATION_CACHE_KEY,{})
+
 };
 const $=id=>document.getElementById(id);
 const nativeFetch=window.fetch.bind(window);
-let guestToken=localStorage.getItem(TOKEN_KEY)||"",toastTimer=0,refreshTimer=null,dbPromise=null,feedLoadVersion=0,renderVersion=0;
+let guestToken=localStorage.getItem(TOKEN_KEY)||"",toastTimer=0,refreshTimer=null,dbPromise=null,feedLoadVersion=0,renderVersion=0,deferredInstallPrompt=null;
 
 function readJson(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||"null");return value===null?fallback:value}catch{return fallback}}
 function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(error){console.warn("ORBIS storage:",error)}}
@@ -160,12 +250,43 @@ function openDb(){
  if(dbPromise)return dbPromise;
  dbPromise=new Promise((resolve,reject)=>{
   if(!("indexedDB" in window)){reject(new Error("IndexedDB недоступен"));return}
-  const request=indexedDB.open("orbis-news-cache-v1",1);
-  request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("articles"))db.createObjectStore("articles",{keyPath:"key"})};
+  const request=indexedDB.open("orbis-news-cache-v1",2);
+  request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("articles"))db.createObjectStore("articles",{keyPath:"key"});if(!db.objectStoreNames.contains("feed"))db.createObjectStore("feed",{keyPath:"key"})};
   request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error||new Error("Не удалось открыть кэш"));
  });
  return dbPromise;
 }
+async function saveFeedCache(items){
+ try{
+  const db=await openDb();
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction("feed","readwrite"),store=tx.objectStore("feed");
+   store.clear();items.slice(0,160).forEach(item=>store.put(item));
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+  });
+ }catch(error){console.warn("ORBIS feed cache:",error.message)}
+}
+async function readFeedCache(){
+ try{
+  const db=await openDb();
+  return await new Promise((resolve,reject)=>{
+   const tx=db.transaction("feed","readonly"),request=tx.objectStore("feed").getAll();
+   request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error);
+  });
+ }catch(error){return []}
+}
+async function cacheSavedArticle(article){
+ const stored=Object.assign({},article,{savedAt:new Date().toISOString()});
+ if(stored.image&&!stored.imageBlob&&navigator.onLine){
+  try{
+   const response=await nativeFetch(stored.image,{mode:"cors",credentials:"omit",signal:AbortSignal.timeout(4500)});
+   const blob=await response.blob();
+   if(response.ok&&blob.type.startsWith("image/")&&blob.size>0&&blob.size<=4*1024*1024)stored.imageBlob=blob;
+  }catch(error){console.debug("ORBIS image cache skipped:",error.message)}
+ }
+ await cachePut(stored);
+}
+
 async function cachePut(article){
  try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction("articles","readwrite");tx.objectStore("articles").put(article);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
  catch(error){const list=readJson("orbis-news-cache-fallback",[]).filter(item=>item.key!==article.key);list.unshift(article);writeJson("orbis-news-cache-fallback",list.slice(0,100))}
@@ -187,38 +308,66 @@ async function normaliseItems(items){
  return Promise.all((items||[]).map(async item=>Object.assign({},item,{key:await hashUrl(item.url)})));
 }
 async function loadSources(){
- try{const data=await nativeFetch("/api/news/sources",{cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("sources");return response.json()});state.sourceDirectory=data.sources||[];$("sourceCount").textContent=String(state.sourceDirectory.length||SOURCES_FALLBACK)}
- catch(error){$("sourceCount").textContent=String(SOURCES_FALLBACK)}
+ try{
+  const response=await nativeFetch("/api/news/sources",{cache:"no-store"});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"RSS catalog");
+  state.sourceDirectory=data.sources||[];
+  $("sourceCount").textContent=String(data.totalSources||state.sourceDirectory.length||SOURCES_FALLBACK);
+  if(Array.isArray(data.categories)&&data.categories.length)CATEGORIES.splice(0,CATEGORIES.length,...data.categories);
+  fillFilterOptions("countrySelect",data.countries||[],state.country,"all","🌐 Весь мир");
+  fillFilterOptions("sourceLanguageSelect",data.languages||[],state.sourceLanguage,"all","Все языки");
+  fillFilterOptions("translationLanguageSelect",data.languages||[],state.translationLang,"ru","Русский");
+  fillFilterOptions("settingsTranslationSelect",data.languages||[],state.translationLang,"ru","Русский");
+ }catch(error){
+  $("sourceCount").textContent=String(SOURCES_FALLBACK);
+  renderCategoryNav();
+ }
+ renderCategoryNav();
+ updateStats();
+}
+function fillFilterOptions(id,items,selected,fallback,label){
+ const select=$(id);if(!select)return;
+ const rows=items.length?items:[{id:fallback,name:label}];
+ select.replaceChildren();
+ rows.forEach(item=>{
+  const option=document.createElement("option");option.value=item.id;
+  option.textContent=(item.flag?item.flag+" ":"")+item.name;
+  select.append(option);
+ });
+ select.value=[...select.options].some(option=>option.value===selected)?selected:fallback;
+}
+function renderCategoryNav(){
+ const nav=$("categoryNav");if(!nav)return;nav.replaceChildren();
+ CATEGORIES.forEach(item=>{
+  const button=document.createElement("button");button.type="button";button.className="nav-item";button.dataset.category=item.id;
+  const icon=document.createElement("span");icon.className="nav-icon";icon.textContent=item.icon;
+  button.append(icon,document.createTextNode(item.name));
+  nav.append(button);
+ });
+ setActiveNav();
 }
 function preferredCategories(){
- const prefs=state.interests.length?state.interests:["technology","science","business","world"];
+ const prefs=state.interests.length?state.interests:CATEGORIES.map(item=>item.id);
  return prefs.slice().sort((a,b)=>(Number(state.weights[b])||0)-(Number(state.weights[a])||0));
 }
-async function fetchCategory(id){
- const response=await nativeFetch("/api/news?category="+encodeURIComponent(id),{cache:"no-store"});
- const data=await response.json().catch(()=>({}));
- if(!response.ok)throw new Error(data.error||("Не удалось получить новости: "+category(id).name));
- return {category:id,items:await normaliseItems(data.items||[]),failedSources:data.failedSources||[]};
-}
 async function fetchNewsForView(){
- const ids=state.view==="latest"?CATEGORIES.map(item=>item.id):
-  state.view==="category"?[state.category]:
-  preferredCategories();
- const unique=[...new Set(ids)];
- const settled=await Promise.allSettled(unique.map(fetchCategory));
- let merged=[],failed=0;
- settled.forEach(result=>{if(result.status==="fulfilled"){merged.push(...result.value.items);failed+=result.value.failedSources.length}else failed++});
- const seen=new Set();
- merged=merged.filter(item=>{if(seen.has(item.url))return false;seen.add(item.url);return true});
+ const categoryId=state.view==="category"?state.category:"all";
+ const params=new URLSearchParams({category:categoryId,country:state.country||"all",language:state.sourceLanguage||"all"});
+ if(state.sourceId)params.set("source",state.sourceId);
+ const response=await nativeFetch("/api/news?"+params.toString(),{cache:"no-store"});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(data.error||"Не удалось собрать новостную ленту.");
+ let merged=await normaliseItems(data.items||[]);
  if(state.view==="for-you"&&state.sort==="recommended"){
   const weights=Object.assign({},state.weights);
   merged.sort((a,b)=>{
-   const wa=(state.interests.includes(a.category)?5:0)+(Number(weights[a.category])||0)*1.8;
-   const wb=(state.interests.includes(b.category)?5:0)+(Number(weights[b.category])||0)*1.8;
+   const wa=(state.interests.includes(a.category)?6:0)+(Number(weights[a.category])||0)*2.3;
+   const wb=(state.interests.includes(b.category)?6:0)+(Number(weights[b.category])||0)*2.3;
    return wb-wa || (Date.parse(b.publishedAt||0)||0)-(Date.parse(a.publishedAt||0)||0);
   });
  }else merged.sort((a,b)=>(Date.parse(b.publishedAt||0)||0)-(Date.parse(a.publishedAt||0)||0));
- return {items:merged,failed};
+ return {items:merged,failed:(data.failedSources||[]).length,failedSources:data.failedSources||[],sourceCount:data.sourceCount||0,workingSources:data.workingSources||0};
 }
 async function syncReactions(items){
  if(!items.length||!guestToken)return;
@@ -272,15 +421,21 @@ function setActiveNav(){
  document.querySelectorAll("[data-view]").forEach(button=>button.classList.toggle("active",button.dataset.view===state.view));
  document.querySelectorAll("[data-category]").forEach(button=>button.classList.toggle("active",state.view==="category"&&button.dataset.category===state.category));
 }
-function openView(view,cat){
- state.view=view;if(view==="category")state.category=cat||"world";
+function openView(view,cat,sourceId){
+ state.view=view;state.sourceId=sourceId||"";state.renderCount=24;if(view==="category")state.category=cat||"world";
+ $("countrySelect").value=state.country||"all";$("sourceLanguageSelect").value=state.sourceLanguage||"all";
  setActiveNav();$("searchInput").value="";state.search="";
- const names={ "for-you":"Твоя орбита","latest":"Последние новости","navigator":"Навигатор тем","saved":"Сохранённый кэш","category":category(state.category).name };
+ const names={ "for-you":"Твоя орбита","latest":"Последние новости","navigator":"Навигатор тем","encyclopedia":"Энциклопедия","saved":"Сохранённый кэш","category":category(state.category).name };
  $("pageTitle").textContent=names[view]||"ORBIS";$("feedHeading").textContent=names[view]||"ORBIS";
- $("feedSub").textContent=view==="for-you"?"подборка по интересам":view==="latest"?"новости из всех направлений":view==="saved"?"доступно на этом устройстве":view==="navigator"?"каталоги и источники":view==="category"?"тематическая лента":"";
- $("hero").hidden=view==="saved"||view==="navigator";$("interestChips").hidden=view==="saved"||view==="navigator";
- $("sortSelect").hidden=view==="saved"||view==="navigator";
+ $("feedSub").textContent=view==="for-you"?"все темы · персональная сортировка":view==="latest"?"мировая лента · сначала свежие":view==="saved"?"доступно на этом устройстве":view==="navigator"?"страны, темы и источники":view==="encyclopedia"?"поиск знаний по Википедии":view==="category"?"тематическая лента":"";
+ $("hero").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
+ $("interestChips").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
+ $("feedControls").hidden=view==="saved"||view==="encyclopedia";
+ $("sortSelect").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
+ $("feedControls").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
+ document.querySelector(".search-wrap").hidden=view==="encyclopedia"||view==="navigator";
  if(view==="navigator"){renderNavigator();return}
+ if(view==="encyclopedia"){renderWikiPanel();return}
  if(view==="saved"){renderSaved();return}
  loadFeed();
 }
@@ -291,24 +446,25 @@ async function loadFeed(){
  $("statusText").textContent=navigator.onLine?"Собираем новости по темам…":"Офлайн · показываем сохранённые материалы";
  $("refreshBtn").classList.add("busy");
  try{
-  const result=await fetchNewsForView();
+  let result;
+  if(navigator.onLine){result=await fetchNewsForView();if(version!==feedLoadVersion)return;state.articles=result.items;await saveFeedCache(state.articles)}
+  else {state.articles=await readFeedCache();result={failed:0,sourceCount:0,workingSources:0};}
   if(version!==feedLoadVersion)return;
-  state.articles=result.items;
-  if(!navigator.onLine&&state.view!=="saved")state.articles=state.saved.slice();
   await syncReactions(state.articles);
   if(version!==feedLoadVersion)return;
   applySearch();
   state.lastUpdated=new Date();$("lastUpdate").textContent="Обновлено "+state.lastUpdated.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
   const count=state.articles.length;
-  $("statusText").textContent=count?(result.failed?"Источники доступны · часть RSS временно не ответила":"Источники синхронизированы"): "По выбранным темам пока нет доступных новостей";
+  $("statusText").textContent=count?(navigator.onLine?(result.failed?"Источники доступны · часть RSS временно не ответила":"Источники синхронизированы · "+result.workingSources+" из "+result.sourceCount+" источников"):"Офлайн · показана последняя копия ленты"): "По выбранным темам пока нет доступных новостей";
   $("sideSync").textContent=navigator.onLine?"Синхронизация активна":"Офлайн-режим";
   await loadSaved();updateStats();
  }catch(error){
   if(version!==feedLoadVersion)return;
   console.warn("ORBIS news:",error.message);
-  state.articles=state.saved.slice();applySearch();
-  $("statusText").textContent=state.saved.length?"Показан локальный кэш · подключение недоступно":"Нет подключения к новостным источникам";
-  if(!state.saved.length)renderError(error.message);
+  const cachedFeed=await readFeedCache();
+  state.articles=cachedFeed.length?cachedFeed:state.saved.slice();applySearch();
+  $("statusText").textContent=state.articles.length?"Показана последняя сохранённая лента · подключение недоступно":"Нет подключения к новостным источникам";
+  if(!state.articles.length)renderError(error.message);
  }finally{
   if(version===feedLoadVersion){state.loading=false;$("refreshBtn").classList.remove("busy")}
  }
@@ -325,28 +481,64 @@ function applySearch(){
 function articleLiked(item){return Boolean(state.liked[item.key]&&state.liked[item.key].liked)}
 function articleLikes(item){return Number(state.liked[item.key]&&state.liked[item.key].likes)||0}
 function articleSaved(item){return state.saved.some(saved=>saved.key===item.key)}
+function countryFlag(code){
+ const flags={AZ:"🇦🇿",GB:"🇬🇧",US:"🇺🇸",DE:"🇩🇪",FR:"🇫🇷",ES:"🇪🇸",TR:"🇹🇷",RU:"🇷🇺",JP:"🇯🇵",KR:"🇰🇷",IN:"🇮🇳",PK:"🇵🇰",CN:"🇨🇳",BR:"🇧🇷",VN:"🇻🇳",ID:"🇮🇩",UA:"🇺🇦",NL:"🇳🇱",IT:"🇮🇹",CA:"🇨🇦",AU:"🇦🇺",QA:"🇶🇦",KE:"🇰🇪",CH:"🇨🇭",SG:"🇸🇬",IE:"🇮🇪",BE:"🇧🇪",AT:"🇦🇹",PL:"🇵🇱",SE:"🇸🇪",NO:"🇳🇴",DK:"🇩🇰",FI:"🇫🇮",CZ:"🇨🇿",HU:"🇭🇺",RO:"🇷🇴",RS:"🇷🇸",PT:"🇵🇹"};
+ return flags[code]||"🌐";
+}
 function makeNewsCard(item,index){
- const card=document.createElement("article");card.className="news-card";card.style.animationDelay=Math.min(index%10,9)*35+"ms";card.dataset.key=item.key;
+ const card=document.createElement("article");card.className="news-card";card.style.animationDelay=Math.min(index%12,11)*32+"ms";card.dataset.key=item.key;
+ if(index===0)card.classList.add("lead-card");
  const top=document.createElement("div");top.className="news-top";
  const meta=document.createElement("div");meta.className="source-meta";
  const mark=document.createElement("span");mark.className="source-mark";mark.textContent=(item.credit||item.source||"N").slice(0,1).toUpperCase();
  const source=document.createElement("span");source.className="source-name";source.textContent=item.source||"Новостной источник";meta.append(mark,source);
- const date=document.createElement("time");date.className="news-time";if(item.publishedAt){date.dateTime=item.publishedAt;date.textContent=new Date(item.publishedAt).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}else date.textContent="Новость";
+ const date=document.createElement("time");date.className="news-time";
+ if(item.publishedAt){date.dateTime=item.publishedAt;date.textContent=new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date(item.publishedAt))}
+ else date.textContent="Свежая публикация";
  top.append(meta,date);
  const cat=document.createElement("span");cat.className="category-label";cat.textContent=category(item.category).icon+" "+category(item.category).name.toUpperCase();
+ const pills=document.createElement("div");pills.className="news-meta-pills";
+ const country=document.createElement("span");country.className="news-meta-pill country";country.textContent=countryFlag(item.country)+" "+(item.countryName||"Мир");pills.append(country);
+ if(item.languageName){const lang=document.createElement("span");lang.className="news-meta-pill";lang.textContent=item.languageName;pills.append(lang)}
  const title=document.createElement("h3");title.className="news-title";title.textContent=item.title;
  const summary=document.createElement("p");summary.className="news-summary";summary.textContent=item.summary||"Открой оригинальную публикацию, чтобы прочитать подробности.";
- card.append(top,cat,title,summary);
- if(item.image){const image=document.createElement("img");image.className="news-image";image.loading="lazy";image.alt="";image.src=item.image;image.onerror=()=>image.remove();card.append(image)}
+ card.append(top,cat,pills);
+ if(item.videoUrl||item.videoId||item.image||item.imageBlob){
+  const frame=document.createElement("div");frame.className="news-media-frame";
+  if(item.videoUrl){
+   const video=document.createElement("video");video.controls=true;video.preload="metadata";video.playsInline=true;video.src=item.videoUrl;video.setAttribute("aria-label","Видео к новости");frame.append(video);
+   const badge=document.createElement("span");badge.className="media-overlay";badge.textContent="▶ ВИДЕО";frame.append(badge);
+  }else{
+   const image=document.createElement("img");image.loading="lazy";image.alt="Фото к новости";
+   if(item.imageBlob instanceof Blob){
+    const objectUrl=URL.createObjectURL(item.imageBlob);image.src=objectUrl;
+    image.addEventListener("load",()=>URL.revokeObjectURL(objectUrl),{once:true});
+    image.onerror=()=>{URL.revokeObjectURL(objectUrl);frame.remove()};
+   }else if(item.image){image.src=item.image;image.onerror=()=>frame.remove()}
+   if(item.image||item.imageBlob)frame.append(image);
+  }
+  if(item.videoId){const watch=document.createElement("a");watch.className="media-overlay";watch.href="https://www.youtube.com/watch?v="+encodeURIComponent(item.videoId);watch.target="_blank";watch.rel="noopener noreferrer";watch.textContent="▶ Смотреть видео ↗";frame.append(watch)}
+  if(frame.childNodes.length)card.append(frame);
+ }else{
+  const cover=document.createElement("div");cover.className="news-art-cover";
+  cover.style.setProperty("--topic-color",category(item.category).tone||category(item.category).color||"#a58bff");
+  const artIcon=document.createElement("span");artIcon.className="art-icon";artIcon.textContent=category(item.category).icon;
+  const artLabel=document.createElement("span");artLabel.className="art-label";artLabel.textContent=category(item.category).name+" · ORBIS EDITION";
+  cover.append(artIcon,artLabel);card.append(cover);
+ }
+ card.append(title,summary);
  const bottom=document.createElement("div");bottom.className="news-bottom";const actions=document.createElement("div");actions.className="news-actions";
- const like=document.createElement("button");like.type="button";like.className="news-action"+(articleLiked(item)?" liked":"");like.dataset.action="like";like.textContent=(articleLiked(item)?"♥ ":"♡ ")+articleLikes(item)+" · Нравится";like.setAttribute("aria-pressed",String(articleLiked(item)));
+ const like=document.createElement("button");like.type="button";like.className="news-action"+(articleLiked(item)?" liked":"");like.dataset.action="like";like.textContent=(articleLiked(item)?"♥ ":"♡ ")+articleLikes(item)+" · Лайк";like.setAttribute("aria-pressed",String(articleLiked(item)));
  const save=document.createElement("button");save.type="button";save.className="news-action"+(articleSaved(item)?" saved":"");save.dataset.action="save";save.textContent=articleSaved(item)?"▣ Сохранено":"▢ Сохранить";save.setAttribute("aria-pressed",String(articleSaved(item)));
- actions.append(like,save);const link=document.createElement("a");link.className="news-open";link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Читать источник ↗";bottom.append(actions,link);card.append(bottom);return card;
+ const translate=document.createElement("button");translate.type="button";translate.className="news-action";translate.dataset.action="translate";translate.textContent="文 Перевести";translate.title="Перевести материал на выбранный язык";
+ actions.append(like,save,translate);
+ const link=document.createElement("a");link.className="news-open";link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Читать источник ↗";
+ bottom.append(actions,link);card.append(bottom);return card;
 }
 function makeAdCard(ad,index){
  ad=ad||{};
  const card=document.createElement("article");card.className="ad-card";card.style.animationDelay=(index%4)*45+"ms";
- const top=document.createElement("div");top.className="ad-top";const badge=document.createElement("span");badge.className="ad-badge";badge.textContent="РЕКЛАМА";const source=document.createElement("span");source.className="ad-sponsor";source.textContent=ad?"ORBIS PARTNER":"РЕКЛАМНОЕ МЕСТО ORBIS";top.append(badge,source);
+ const top=document.createElement("div");top.className="ad-top";const badge=document.createElement("span");badge.className="ad-badge";badge.textContent="РЕКЛАМА";const source=document.createElement("span");source.className="ad-sponsor";source.textContent=ad.id?"ORBIS PARTNER":"РЕКЛАМНОЕ МЕСТО ORBIS";top.append(badge,source);
  const title=document.createElement("h3");title.textContent=ad.headline||"Здесь может быть ваш бренд";
  const body=document.createElement("p");body.textContent=ad.body||"Нативный рекламный блок будет показывать одобренные предложения партнёров ORBIS.";
  card.append(top);
@@ -362,17 +554,37 @@ async function getFeedAd(){
  try{return (await api("/api/ads/feed")).ad||null}catch(error){return null}
 }
 async function renderArticles(items){
- const sequence=++renderVersion;
- const feed=$("feed");feed.replaceChildren();
- if(!items.length){const empty=document.createElement("div");empty.className="empty-state";const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="✧";const strong=document.createElement("strong");strong.textContent="Пока ничего не найдено";const note=document.createElement("span");note.textContent="Попробуй другую тему или измени поисковый запрос.";empty.append(icon,strong,note);feed.append(empty);return}
- let ad=null;
- if(items.length>=5)ad=await getFeedAd();
- if(sequence!==renderVersion)return;
- items.forEach((item,index)=>{
-  feed.append(makeNewsCard(item,index));
+ const sequence=++renderVersion,feed=$("feed");feed.replaceChildren();
+ if(!items.length){
+  const empty=document.createElement("div");empty.className="empty-state";
+  const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="✧";
+  const strong=document.createElement("strong");strong.textContent="Пока ничего не найдено";
+  const note=document.createElement("span");note.textContent="Попробуй другую страну, тему или язык.";
+  empty.append(icon,strong,note);feed.append(empty);return;
+ }
+ let ad=null;if(items.length>=5)ad=await getFeedAd();if(sequence!==renderVersion)return;
+ const count=Math.min(items.length,Math.max(1,state.renderCount||24));
+ for(let index=0;index<count;index++){
+  feed.append(makeNewsCard(items[index],index));
   if((index+1)%5===0)feed.append(makeAdCard(ad,index));
- });
+ }
+ if(items.length>count){
+  const moreWrap=document.createElement("div");moreWrap.className="more-feed-wrap";
+  const more=document.createElement("button");more.className="load-more-btn";more.type="button";
+  more.textContent="Показать ещё новости · "+Math.min(24,items.length-count);
+  more.addEventListener("click",()=>{
+   const current=count,next=Math.min(items.length,current+24);state.renderCount=next;
+   for(let index=current;index<next;index++){
+    feed.insertBefore(makeNewsCard(items[index],index),moreWrap);
+    if((index+1)%5===0)feed.insertBefore(makeAdCard(ad,index),moreWrap);
+   }
+   if(next>=items.length)moreWrap.remove();
+   else more.textContent="Показать ещё новости · "+Math.min(24,items.length-next);
+  });
+  moreWrap.append(more);feed.append(moreWrap);
+ }
 }
+
 function renderError(message){
  const feed=$("feed");feed.replaceChildren();const empty=document.createElement("div");empty.className="empty-state";const strong=document.createElement("strong");strong.textContent="Не удалось загрузить новости";const p=document.createElement("p");p.textContent=message||"Проверь подключение и попробуй снова.";const retry=document.createElement("button");retry.className="primary-btn";retry.textContent="Повторить";retry.addEventListener("click",loadFeed);empty.append(strong,p,retry);feed.append(empty);
 }
@@ -387,17 +599,109 @@ async function renderSaved(){
 }
 function renderNavigator(){
  const feed=$("feed");feed.replaceChildren();
- const head=document.createElement("div");head.className="navigator-head";const kicker=document.createElement("div");kicker.className="eyebrow";kicker.textContent="ORBIS · TOPIC MAP";const title=document.createElement("h2");title.textContent="Навигатор интересов";const desc=document.createElement("p");desc.textContent="Готовые каталоги тем и десятки RSS-источников. Открой направление, чтобы получить его отдельную обновляемую ленту.";head.append(kicker,title,desc);feed.append(head);
- const grid=document.createElement("div");grid.className="catalog-grid";
- CATEGORIES.forEach(item=>{const button=document.createElement("button");button.className="catalog-card";button.type="button";const icon=document.createElement("div");icon.className="catalog-icon";icon.textContent=item.icon;const name=document.createElement("b");name.textContent=item.name;const detail=document.createElement("span");detail.textContent=item.description;const arrow=document.createElement("i");arrow.className="catalog-arrow";arrow.textContent="↗";button.append(icon,name,detail,arrow);button.addEventListener("click",()=>openView("category",item.id));grid.append(button)});
- feed.append(grid);
- const sourcesHead=document.createElement("div");sourcesHead.style.cssText="margin:22px 0 7px;font-weight:850;font-size:13px";sourcesHead.textContent="Каталог RSS-источников";feed.append(sourcesHead);
- const sourceList=document.createElement("div");sourceList.className="source-list";
- const directory=state.sourceDirectory.length?state.sourceDirectory:[];
- if(directory.length){directory.forEach(source=>{const row=document.createElement("div");row.className="source-row";const label=document.createElement("span");label.textContent=source.name;const meta=document.createElement("small");meta.textContent=category(source.category).name;row.append(label,meta);row.addEventListener("click",()=>openView("category",source.category));sourceList.append(row)})}
- else {const row=document.createElement("p");row.className="news-summary";row.textContent="Каталог источников загружается вместе с новостными лентами.";sourceList.append(row)}
- feed.append(sourceList);
+ const head=document.createElement("div");head.className="navigator-head";
+ const kicker=document.createElement("div");kicker.className="eyebrow";kicker.textContent="ORBIS · WORLD MAP";
+ const title=document.createElement("h2");title.textContent="Открой новости со всего мира";
+ const desc=document.createElement("p");desc.textContent=state.sourceDirectory.length+" RSS-лент в тематических направлениях. Выбирай страну, категорию, язык или отдельное издание — ORBIS соберёт отдельную ленту.";
+ head.append(kicker,title,desc);feed.append(head);
+ const section=(name,count)=>{const heading=document.createElement("div");heading.style.cssText="font-weight:950;font-size:14px;letter-spacing:.1px;margin:20px 0 10px";heading.textContent=name+(count!==undefined?" · "+count:"");feed.append(heading)};
+ section("Страны и регионы",new Set(state.sourceDirectory.map(s=>s.country).filter(Boolean)).size);
+ const countries=new Map();
+ state.sourceDirectory.forEach(source=>{if(source.country){const old=countries.get(source.country);countries.set(source.country,{id:source.country,name:source.countryName||source.country,count:(old?.count||0)+1})}});
+ const countryGrid=document.createElement("div");countryGrid.className="catalog-grid";
+ const countryCards=[{id:"all",name:"Весь мир",count:state.sourceDirectory.length},...Array.from(countries.values()).sort((a,b)=>a.name.localeCompare(b.name))];
+ countryCards.forEach(item=>{
+  const button=document.createElement("button");button.type="button";button.className="catalog-card";
+  const icon=document.createElement("div");icon.className="catalog-icon";icon.textContent=item.id==="all"?"🌐":countryFlag(item.id);
+  const name=document.createElement("b");name.textContent=item.name;
+  const detail=document.createElement("span");detail.textContent=item.count+" RSS-источников";
+  const arrow=document.createElement("i");arrow.className="catalog-arrow";arrow.textContent="↗";
+  button.append(icon,name,detail,arrow);
+  button.addEventListener("click",()=>{state.country=item.id;state.sourceId="";$("countrySelect").value=item.id;writeJson(COUNTRY_KEY,item.id);openView("for-you")});
+  countryGrid.append(button);
+ });
+ feed.append(countryGrid);
+ section("Темы и направления",CATEGORIES.length);
+ const categories=document.createElement("div");categories.className="catalog-grid";
+ CATEGORIES.forEach(item=>{
+  const button=document.createElement("button");button.className="catalog-card";button.type="button";
+  const icon=document.createElement("div");icon.className="catalog-icon";icon.textContent=item.icon;
+  const name=document.createElement("b");name.textContent=item.name;
+  const count=document.createElement("span");count.textContent=state.sourceDirectory.filter(s=>s.category===item.id).length+" источников · "+item.description;
+  const arrow=document.createElement("i");arrow.className="catalog-arrow";arrow.textContent="↗";
+  button.append(icon,name,count,arrow);button.addEventListener("click",()=>{state.sourceId="";openView("category",item.id)});categories.append(button);
+ });
+ feed.append(categories);
+ section("Каталог RSS-издателей",state.sourceDirectory.length);
+ const controls=document.createElement("div");controls.className="source-directory-tools";
+ const search=document.createElement("input");search.type="search";search.placeholder="Найти источник, страну, язык или тему…";search.setAttribute("aria-label","Поиск источника");
+ const filter=document.createElement("select");filter.setAttribute("aria-label","Фильтр каталога");
+ [["all","Все темы"],...CATEGORIES.map(c=>[c.id,c.name])].forEach(([id,label])=>{const opt=document.createElement("option");opt.value=id;opt.textContent=label;filter.append(opt)});
+ controls.append(search,filter);feed.append(controls);
+ const sourceList=document.createElement("div");sourceList.className="source-list source-directory-list";
+ const renderSources=()=>{
+  sourceList.replaceChildren();
+  const query=search.value.trim().toLocaleLowerCase(),topic=filter.value;
+  const list=state.sourceDirectory.filter(source=>{
+   const text=[source.name,source.publisher,source.feed,source.languageName,source.countryName].join(" ").toLocaleLowerCase();
+   return (!query||text.includes(query))&&(topic==="all"||source.category===topic);
+  });
+  const info=document.createElement("div");info.className="source-result-count";info.textContent="Показано "+list.length+" из "+state.sourceDirectory.length+" источников";sourceList.append(info);
+  list.forEach(source=>{
+   const row=document.createElement("button");row.type="button";row.className="source-row source-directory-row";row.title="Открыть ленту "+source.name;
+   const label=document.createElement("span");label.textContent=countryFlag(source.country)+" "+source.name;
+   const meta=document.createElement("small");meta.textContent=category(source.category).name+" · "+(source.languageName||source.language)+" · "+(source.countryName||"Мир");
+   row.append(label,meta);
+   row.addEventListener("click",()=>{state.country=source.country||"all";state.sourceLanguage=source.language||"all";$("countrySelect").value=state.country;$("sourceLanguageSelect").value=state.sourceLanguage;writeJson(COUNTRY_KEY,state.country);writeJson(SOURCE_LANGUAGE_KEY,state.sourceLanguage);openView("category",source.category,source.id)});
+   sourceList.append(row);
+  });
+  if(!list.length){const empty=document.createElement("p");empty.className="news-summary";empty.textContent="Ничего не найдено по этому запросу.";sourceList.append(empty)}
+ };
+ search.addEventListener("input",renderSources);filter.addEventListener("change",renderSources);renderSources();feed.append(sourceList);
 }
+
+async function searchWiki(query){
+ const box=$("wikiResults");if(!box)return;
+ box.replaceChildren();const loading=document.createElement("div");loading.className="skeleton";loading.style.height="120px";box.append(loading);
+ const lang=state.translationLang||"ru";
+ try{
+  const response=await nativeFetch("/api/wiki?lang="+encodeURIComponent(lang)+"&q="+encodeURIComponent(query),{cache:"no-store"});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"Не удалось выполнить поиск.");
+  box.replaceChildren();
+  if(!data.results?.length){const empty=document.createElement("div");empty.className="empty-state";empty.textContent="Ничего не найдено. Попробуй другое написание или язык.";box.append(empty);return}
+  data.results.forEach(result=>{
+   const card=document.createElement("article");card.className="wiki-card";
+   if(result.image){const image=document.createElement("img");image.loading="lazy";image.src=result.image;image.alt="";image.onerror=()=>image.remove();card.append(image)}
+   const text=document.createElement("div");const title=document.createElement("h3");title.textContent=result.title;const extract=document.createElement("p");extract.textContent=result.extract||"Краткое описание пока не доступно.";
+   const actions=document.createElement("div");actions.className="wiki-card-actions";
+   const open=document.createElement("a");open.href=result.url;open.target="_blank";open.rel="noopener noreferrer";open.textContent="Открыть статью ↗";
+   const save=document.createElement("button");save.type="button";save.textContent="▣ Сохранить";save.dataset.wikiSave="1";
+   const article={title:result.title,summary:result.extract,url:result.url,image:result.image,source:"Wikipedia",credit:"Wikipedia",category:"science",language:result.language,languageName:result.language,key:null};
+   save.addEventListener("click",async()=>{article.key=await hashUrl(article.url);await cachePut(Object.assign({},article,{savedAt:new Date().toISOString()}));await loadSaved();updateStats();save.textContent="✓ Сохранено";toast("Статья сохранена для офлайн-чтения")});
+   actions.append(open,save);text.append(title,extract,actions);card.append(text);box.append(card);
+  });
+ }catch(error){box.replaceChildren();const empty=document.createElement("div");empty.className="empty-state";empty.textContent=error.message;const retry=document.createElement("button");retry.className="primary-btn";retry.style.marginTop="12px";retry.textContent="Повторить поиск";retry.addEventListener("click",()=>searchWiki(query));empty.append(retry);box.append(empty)}
+}
+function renderWikiPanel(){
+ const feed=$("feed");feed.replaceChildren();
+ const panel=document.createElement("section");panel.className="wiki-search-panel";
+ const kicker=document.createElement("div");kicker.className="eyebrow";kicker.textContent="ORBIS · KNOWLEDGE ATLAS";
+ const title=document.createElement("h2");title.textContent="Открой целый мир знаний";
+ const desc=document.createElement("p");desc.textContent="Поиск по Википедии на выбранном языке. Изучай историю, страны, науку, технологии, культуру и многое другое.";
+ const form=document.createElement("form");form.className="wiki-search-row";
+ const input=document.createElement("input");input.type="search";input.placeholder="Например: Баку, Солнечная система, Великий шёлковый путь…";input.required=true;
+ const button=document.createElement("button");button.type="submit";button.textContent="Найти";
+ form.append(input,button);form.addEventListener("submit",event=>{event.preventDefault();const query=input.value.trim();if(query.length>1)searchWiki(query)});
+ const chips=document.createElement("div");chips.className="wiki-chips";
+ ["Баку","Космос","История Азербайджана","Искусственный интеллект","Древний Рим","Океаны","Архитектура","Футбол"].forEach(query=>{const chip=document.createElement("button");chip.type="button";chip.textContent=query;chip.addEventListener("click",()=>{input.value=query;searchWiki(query)});chips.append(chip)});
+ panel.append(kicker,title,desc,form,chips);
+ const note=document.createElement("p");note.style.cssText="margin:10px 0 0;color:#8fa6c7;font-size:9px";note.textContent="Язык статей: "+($("translationLanguageSelect").selectedOptions[0]?.textContent||"Русский")+" · Материалы Википедии доступны на условиях лицензий проекта.";panel.append(note);
+ const results=document.createElement("div");results.id="wikiResults";
+ const footer=document.createElement("div");footer.className="navigator-head";footer.style.marginTop="13px";footer.innerHTML="<b>Знания рядом</b><p>Ищи статью на русском, азербайджанском, английском, турецком и других доступных языках. Сохраняй нужные материалы в свой офлайн-кэш.</p>";
+ feed.append(panel,results,footer);
+}
+
 function openInterestDialog(){
  const grid=$("interestOptions");grid.replaceChildren();
  CATEGORIES.forEach(item=>{
@@ -431,11 +735,48 @@ async function toggleLike(item,button){
   state.pending[item.key]=next;writeJson(PENDING_KEY,state.pending);toast("Сохранили реакцию локально — синхронизируем позже");
  }finally{button.disabled=false}
 }
+async function toggleTranslation(item,card,button){
+ const titleNode=card.querySelector(".news-title"),summaryNode=card.querySelector(".news-summary");
+ if(!titleNode||!summaryNode)return;
+ const target=state.translationLang||"ru";
+ if(card.dataset.translation===target){
+  titleNode.textContent=item.title;summaryNode.textContent=item.summary||"Открой оригинальную публикацию, чтобы прочитать подробности.";
+  card.dataset.translation="";button.textContent="文 Перевести";button.classList.remove("translated");return;
+ }
+ const cacheKey=item.key+":"+target;button.disabled=true;button.textContent="Переводим…";
+ try{
+  let translated=state.translations[cacheKey];
+  if(!translated){
+   const response=await nativeFetch("/api/translate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({target,texts:[item.title,item.summary||item.title]})});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.error||"Перевод временно недоступен.");
+   translated={title:data.translated?.[0]||item.title,summary:data.translated?.[1]||item.summary||""};
+   state.translations[cacheKey]=translated;
+   const keys=Object.keys(state.translations);if(keys.length>100)keys.slice(0,keys.length-100).forEach(key=>delete state.translations[key]);
+   writeJson(TRANSLATION_CACHE_KEY,state.translations);
+  }
+  titleNode.textContent=translated.title;summaryNode.textContent=translated.summary;
+  card.dataset.translation=target;button.textContent="↶ Оригинал";button.classList.add("translated");
+ }catch(error){toast(error.message+" Оригинал доступен у издателя.");button.textContent="文 Повторить"}
+ finally{button.disabled=false}
+}
+
 async function toggleSave(item,button){
  const saved=articleSaved(item);
  if(saved){await cacheDelete(item.key);state.saved=state.saved.filter(x=>x.key!==item.key);button.classList.remove("saved");button.textContent="▢ Сохранить";button.setAttribute("aria-pressed","false");toast("Удалено из кэша")}
- else{await cachePut(Object.assign({},item,{savedAt:new Date().toISOString()}));state.saved.unshift(item);button.classList.add("saved");button.textContent="▣ Сохранено";button.setAttribute("aria-pressed","true");toast("Новость сохранена офлайн")}
+ else{const stored=await cacheSavedArticle(item);state.saved.unshift(stored);button.classList.add("saved");button.textContent="▣ Сохранено";button.setAttribute("aria-pressed","true");toast(stored.imageBlob?"Новость и фото сохранены офлайн":"Новость сохранена офлайн")}
  $("savedCount").textContent=String(state.saved.length);updateStats();
+}
+async function cacheSavedArticle(item){
+ const stored=Object.assign({},item,{savedAt:new Date().toISOString()});
+ if(stored.image&&!stored.imageBlob&&navigator.onLine){
+  try{
+   const response=await nativeFetch(stored.image,{mode:"cors",credentials:"omit",signal:AbortSignal.timeout(4500)});
+   const blob=await response.blob();
+   if(response.ok&&blob.type.startsWith("image/")&&blob.size>0&&blob.size<=4*1024*1024)stored.imageBlob=blob;
+  }catch(error){console.debug("Image not available for offline cache:",error.message)}
+ }
+ await cachePut(stored);return stored;
 }
 function currentItem(key){return state.articles.find(item=>item.key===key)||state.saved.find(item=>item.key===key)}
 document.addEventListener("click",event=>{
@@ -447,6 +788,7 @@ document.addEventListener("click",event=>{
  if(action){const card=action.closest(".news-card"),item=card&&currentItem(card.dataset.key);if(!item)return;
   if(action.dataset.action==="like")toggleLike(item,action);
   if(action.dataset.action==="save")toggleSave(item,action);
+  if(action.dataset.action==="translate")toggleTranslation(item,card,action);
  }
 });
 $("refreshBtn").addEventListener("click",async()=>{await loadFeed();toast("Лента ORBIS обновлена")});
@@ -460,10 +802,33 @@ $("saveInterests").addEventListener("click",()=>{
 $("interestDialog").addEventListener("click",event=>{if(event.target===$("interestDialog"))$("interestDialog").classList.remove("open")});
 $("searchInput").addEventListener("input",event=>{state.search=event.target.value;applySearch()});
 $("sortSelect").addEventListener("change",event=>{state.sort=event.target.value;openView(state.view,state.category)});
-window.addEventListener("online",async()=>{ $("sideSync").textContent="Соединение восстановлено";await syncPending();if(!state.loading)loadFeed()});
+$("countrySelect").addEventListener("change",event=>{state.country=event.target.value;state.sourceId="";writeJson(COUNTRY_KEY,state.country);if(state.view!=="saved"&&state.view!=="navigator"&&state.view!=="encyclopedia")loadFeed()});
+$("sourceLanguageSelect").addEventListener("change",event=>{state.sourceLanguage=event.target.value;state.sourceId="";writeJson(SOURCE_LANGUAGE_KEY,state.sourceLanguage);if(state.view!=="saved"&&state.view!=="navigator"&&state.view!=="encyclopedia")loadFeed()});
+$("translationLanguageSelect").addEventListener("change",event=>{state.translationLang=event.target.value;writeJson(TRANSLATION_LANGUAGE_KEY,state.translationLang);$("settingsTranslationSelect").value=state.translationLang;if(state.view==="encyclopedia")renderWikiPanel();toast("Язык перевода сохранён")});
+$("settingsBtn").addEventListener("click",()=>{$("settingsTranslationSelect").value=state.translationLang;$("settingsDialog").classList.add("open")});
+$("cancelSettings").addEventListener("click",()=>$("settingsDialog").classList.remove("open"));
+$("saveSettings").addEventListener("click",()=>{
+ state.translationLang=$("settingsTranslationSelect").value||"ru";
+ $("translationLanguageSelect").value=state.translationLang;
+ writeJson(TRANSLATION_LANGUAGE_KEY,state.translationLang);
+ $("settingsDialog").classList.remove("open");
+ toast("Настройки ORBIS сохранены");
+ if(state.view==="encyclopedia")renderWikiPanel();
+});
+$("settingsDialog").addEventListener("click",event=>{if(event.target===$("settingsDialog"))$("settingsDialog").classList.remove("open")});
+window.addEventListener("online",async()=>{ $("sideSync").textContent="Соединение восстановлено";await syncPending();if(state.view!=="encyclopedia"&&!state.loading)loadFeed()});
 window.addEventListener("offline",()=>{$("sideSync").textContent="Офлайн-режим";toast("Нет подключения. Сохранённые новости доступны в кэше")});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&navigator.onLine&&state.lastUpdated&&Date.now()-state.lastUpdated.getTime()>600000)loadFeed()});
-function scheduleRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(!document.hidden&&navigator.onLine&&state.view!=="saved"&&state.view!=="navigator")loadFeed()},600000)}
+window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferredInstallPrompt=event;$("installBtn").hidden=false});
+window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;$("installBtn").hidden=true;toast("ORBIS установлен")});
+$("installBtn").addEventListener("click",async()=>{
+ if(deferredInstallPrompt){
+  deferredInstallPrompt.prompt();
+  try{const choice=await deferredInstallPrompt.userChoice;if(choice?.outcome==="accepted")toast("ORBIS добавляется на устройство")}catch{}
+  deferredInstallPrompt=null;$("installBtn").hidden=true;
+ }else toast("В меню браузера выбери «Установить приложение» или «Добавить на главный экран»");
+});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&navigator.onLine&&state.view!=="encyclopedia"&&state.lastUpdated&&Date.now()-state.lastUpdated.getTime()>600000)loadFeed()});
+function scheduleRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(!document.hidden&&navigator.onLine&&state.view!=="saved"&&state.view!=="navigator"&&state.view!=="encyclopedia")loadFeed()},600000)}
 async function boot(){
  renderInterestChips();await loadSaved();updateStats();await loadSources();
  try{await createGuestSession();await syncPending()}catch(error){console.warn("Guest session:",error.message)}

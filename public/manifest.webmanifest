@@ -2,12 +2,16 @@
   "id": "/",
   "name": "ORBIS — News Universe",
   "short_name": "ORBIS",
-  "description": "Личная новостная лента: технологии, наука, кино, игры, бизнес и авто.",
+  "description": "Международные новости из 568 RSS-лент, персональные темы, перевод и офлайн-сохранение.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
-  "background_color": "#070a13",
+  "background_color": "#060817",
   "theme_color": "#080b16",
   "categories": [
     "news",

@@ -6,7 +6,6 @@
     "ad_units": {
       "launch_or_entry": "ca-app-pub-9946397950500083/8255877389",
       "additional_placement": "ca-app-pub-9946397950500083/6022585386",
-      "additional_placement_2": "ca-app-pub-9946397950500083/7255776003",
       "news_feed_native": "ca-app-pub-9946397950500083/7255776003"
     }
   },
@@ -16,6 +15,6 @@
     "This file only records configuration; it does not activate ads.",
     "AdMob mobile SDK identifiers do not display in the current web/PWA client. Actual AdMob delivery requires a native Android client with Google Mobile Ads SDK.",
     "The website uses approved ORBIS Ad Center campaigns for live web advertising placements.",
-    "Before release, verify ad unit format, app registration, test ads, age-related settings, and privacy/consent requirements in Google AdMob."
+    "Before release, verify app registration, ad format, test ads, age-related settings, and privacy/consent requirements."
   ]
 }

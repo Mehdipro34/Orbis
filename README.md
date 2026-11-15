@@ -1,52 +1,61 @@
 # ORBIS — News Universe
 
-ORBIS is a news-first social reading PWA. There are no user-authored posts, public profiles, stories, comments, or direct messages. Readers can like news and save it privately to their device for offline reading.
+ORBIS is a news-first social reading PWA. It has no user-authored posts, public profiles, comments, stories or direct messages. Readers can like articles, tune a personal feed, translate summaries, and save stories privately for offline reading.
 
 ## Production
 - Website/PWA: https://orbis-mehdipro34.vercel.app
 - Frontend: `public/index.html`
 - RSS aggregator: `api/news.js`
-- RSS directory: `api/news/sources.js`
+- RSS catalog endpoint: `api/news/sources.js`
+- RSS catalogue data: `api/news/catalog.js`
+- Wikipedia search endpoint: `api/wiki.js`
+- Translation endpoint: `api/translate.js`
 - Anonymous reaction API: Supabase Edge Function `orbis-api`
-- Supabase project: `wdwvcvpgovvkoodozbxf`
 
-## Features
-- Seven topic streams: World, Technology, Science, Movies, Gaming, Business and Auto.
-- For You: readers choose interests; likes add category weight and reorder the personalized stream.
-- Latest: a cross-category chronological stream.
-- Navigator: topic catalog and publisher/source directory.
-- Article actions: like/unlike and open the original publisher. No user comments, replies or posting.
-- Offline reading: explicitly saved news is stored in IndexedDB with a local fallback.
-- Refresh: manual and automatic every 10 minutes while the app is in use. RSS CDN cache is 10 minutes.
-- Native-style ad placement after every five articles. Approved ORBIS Ad Center campaigns show in the web feed and record impression/click events.
-- Installable PWA shell.
+## Product features
+- **568 RSS feed URLs** from international publishers plus additional curated feeds. URLs are catalogued by topic, country, and an approximate source-language label. A URL in the catalogue does not guarantee that the publisher currently serves it.
+- **15 topic catalogs:** World, Politics, Business, Technology, Science, Movies & Series, Culture, Gaming, Sports, Auto, Health, Education, Environment, Travel, Food.
+- **For You:** all topics are present. Chosen interests and liked categories affect ranking; the app does not hide all other topics.
+- **Latest:** cross-category chronological feed.
+- **Navigator:** filter and open countries, categories, and individual publisher RSS feeds. The complete source directory is searchable.
+- **Media cards:** show RSS-supplied images, video enclosure links, or YouTube video references where the publisher provides them. When there is no source image, ORBIS displays a topic-themed graphic cover rather than inventing a photo.
+- **Translation:** choose a target language in settings or the feed controls, then translate an individual card. The original article link remains available. The translation provider is a best-effort third-party endpoint and can temporarily fail or change.
+- **Encyclopedia:** search Wikipedia in the selected language and save relevant entries.
+- **Article actions:** like/unlike and save; no user comments, replies or posting.
+- **Offline:** the latest feed metadata is kept in IndexedDB; saved articles are kept in a separate IndexedDB store. The app attempts to save the image with an article when the image host allows cross-origin access. Text/metadata is the reliable offline part.
+- **Refresh:** manual and automatic every 10 minutes while the app is active. RSS API responses are CDN-cached for 10 minutes.
+- **Advertising:** native-style placement after every five articles. Approved ORBIS Ad Center campaigns render in the website and record impressions/clicks. If there is no approved campaign, a clearly-labelled empty advertising slot is shown.
+- **PWA:** installable to a supported desktop or mobile home screen.
 
-## RSS directory
-The source directory has 41 entries across seven categories: BBC News, Oxu.az, Deutsche Welle, Euronews, Al Jazeera, The Guardian, NPR, TechCrunch, The Verge, WIRED, Ars Technica, ScienceDaily, NASA, Phys.org, Nature, Variety, IndieWire, Deadline, The Hollywood Reporter, IGN, PC Gamer, Eurogamer, GameSpot, Kotaku, Game Developer, CNBC, BBC Business, The Economist, MarketWatch, Financial Times, Motor1, Electrek, InsideEVs and Autoblog.
+## RSS aggregation
+The aggregator does not request all 568 feeds simultaneously. A request rotates through bounded batches (up to 30 feeds for the all-topics feed, up to 12 for a single category, or one when a specific source is selected). This keeps the endpoint bounded and varies publishers over time. It deduplicates URLs, sorts by publication date, extracts available media, and keeps a short RSS excerpt with a link to the original publisher.
 
-Each category aggregates up to five feeds per request, removes duplicate article URLs, validates publisher-host links, and filters some unsuitable headlines/snippets. This is a rule-based filter, not full editorial or AI moderation. Publishers may change/block RSS endpoints; the interface reports partial failures. ORBIS shows short RSS excerpts and links back to publishers; it does not republish entire articles.
+RSS sources can be retired, rate-limited, blocked, or changed by their publishers. Country and language labels are catalogue metadata and may not describe every individual article perfectly. Some feeds expose no images or video. ORBIS cannot guarantee every catalogue URL returns news at every moment. It does not republish full publisher articles.
+
+Some headline/summary screening is rule-based. It is imperfect, can hide valid stories or miss unsuitable content; it is not human editorial review or complete AI moderation.
 
 ## Identity and privacy
-No signup form and no public user profile are shown. A device-scoped anonymous identifier and signed token are used only for server-side reaction accounting and rate limits. Saved articles, selected interests, and recommendation weights stay in the browser. Clearing browser storage removes local preferences and the local saved cache.
+No signup form and no public user profile are presented. A device-scoped anonymous identifier and signed token are used for reaction accounting and rate limits. Likes can be queued locally when offline. Interests, translation preferences, weights and saved stories are browser/device-local and do not sync across devices.
 
 ## Advertising / AdMob
 - Supplied Android App ID: `ca-app-pub-9946397950500083~3195122396`.
-- Selected news-feed Native Ad Unit ID: `ca-app-pub-9946397950500083/7255776003`.
-- The AdMob unit is recorded in `config/admob.json` for a future native Android client. AdMob mobile SDK IDs do not render ads in a standard website/PWA. Actual AdMob delivery requires an Android native client using Google's Mobile Ads SDK and the required privacy/consent setup.
-- The current website uses approved ORBIS Ad Center campaigns. If none is approved, the feed shows a clearly labelled ad placement, not a fabricated third-party ad.
+- Selected feed Native Ad Unit ID: `ca-app-pub-9946397950500083/7255776003`.
+- AdMob mobile SDK IDs do not render in a standard website/PWA. Actual AdMob delivery requires a native Android client using Google's Mobile Ads SDK and its privacy/consent setup.
+- The current website uses approved ORBIS Ad Center campaigns.
 
 ## Performance and limitations
-- RSS requests are bounded per category, concurrent and time-limited. Responses use CDN caching and stale serving.
-- Saved articles are stored per browser/device, not synchronized across devices. Live news, ad retrieval and reaction synchronization need connectivity.
-- No load test or multi-device end-to-end test has been completed. There is no verified 10,000/100,000 concurrent-user capacity. Free-tier Vercel/Supabase limits, RSS publisher limits, function execution and bandwidth quotas still apply.
-- A native Android AdMob integration and testing remain separate release work.
+- The public RSS directory is large, but each feed request uses a bounded source batch.
+- No load test or complete multi-device end-to-end test has been completed. There is no verified concurrent-user capacity.
+- Vercel/Supabase quotas, publisher rate limits, network egress and translation provider policies still apply.
+- Translation depends on an external service and is not a guarantee of certified translation.
+- Offline text/metadata is available from IndexedDB; external video playback and most publisher images still need a network connection.
 
 ## Main files
-- `public/index.html` — news PWA, layout, feed and interactions.
-- `public/sw.js` — static app-shell offline cache.
-- `public/manifest.webmanifest` — install metadata.
-- `api/news.js` — RSS aggregation and headline safety filter.
-- `api/news/sources.js` — feed/category directory.
-- `supabase/functions/orbis-api/index.ts` — guest session and news reactions.
-- `config/admob.json` — supplied Android AdMob configuration.
-- `docs/ARCHITECTURE.md` — technical architecture and known limits.
+- `public/index.html` — application UI and interactions.
+- `public/sw.js` / `public/manifest.webmanifest` — PWA shell and installation metadata.
+- `api/news/catalog.js` — RSS URLs, categories, countries and language metadata.
+- `api/news.js` — RSS aggregator, feed media extraction and title screening.
+- `api/news/sources.js` — full source directory API.
+- `api/wiki.js` — Wikipedia search.
+- `api/translate.js` — on-demand translation.
+- `supabase/functions/orbis-api/index.ts` — anonymous reaction API.
