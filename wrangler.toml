@@ -12,3 +12,7 @@ APP_NAME = "ORBIS"
 [[kv_namespaces]]
 binding = "ORBIS_KV"
 id = "fe305f5ddfbf4acf8017287f90821e7d"
+
+[[r2_buckets]]
+binding = "ORBIS_MEDIA"
+bucket_name = "orbis-media"
