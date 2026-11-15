@@ -1731,7 +1731,7 @@ body{overflow-x:hidden}
 </aside>
 </div>
 <nav class="mobile-nav"><button class="active" data-view="Лента" aria-label="Лента">⌂</button><button id="mobileCreate" aria-label="Создать">＋</button><button data-view="Навигатор" aria-label="Навигатор">✳</button><button data-view="Профиль" aria-label="Профиль">◎</button></nav>
-<div class="modal" id="modal"><div class="dialog"><h2 id="dialogTitle">Новая публикация</h2><p class="sub">Поделись мыслью с сообществом ORBIS.</p><input id="postTitle" maxlength="120" placeholder="Название публикации"><input id="postTopic" maxlength="48" placeholder="Тема, например: Технологии"><textarea id="postBody" maxlength="4000" placeholder="Текст публикации..."></textarea><div class="dialog-actions"><button class="secondary" id="cancel">Отмена</button><button class="primary" id="publish">Продолжить</button></div></div></div>
+<div class="modal" id="modal"><div class="dialog"><h2 id="dialogTitle">Новая публикация</h2><p class="sub">Поделись мыслью с сообществом ORBIS.</p><input id="postTitle" maxlength="120" placeholder="Название публикации"><input id="postTopic" maxlength="48" placeholder="Тема, например: Технологии"><textarea id="postBody" maxlength="4000" placeholder="Текст публикации..."></textarea><label style="display:block;margin:12px 0;color:#777e96;font-size:12px">Фото и видео (до 4 файлов)<input id="postMedia" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" style="display:block;width:100%;margin-top:8px;padding:10px;border:1px dashed #aaa;border-radius:12px;background:#fafaff"></label><div id="postMediaNote" class="post-meta">Фото до 12 МБ, видео до 50 МБ на файл.</div><div class="dialog-actions"><button class="secondary" id="cancel">Отмена</button><button class="primary" id="publish">Продолжить</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
 const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand()}
@@ -2144,6 +2144,14 @@ document.addEventListener("click",event=>{
   const body=document.createElement("div");body.className="post-body";body.textContent=post.body;
   article.dataset.postId=post.id;
   if(post.replyTo){const context=document.createElement("div");context.className="post-meta";context.textContent="↳ Ответ на публикацию: "+(post.replyToTitle||"исходный пост");article.append(context)}
+  if(Array.isArray(post.media)&&post.media.length){
+   const mediaWrap=document.createElement("div");mediaWrap.className="post-media";mediaWrap.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0";
+   post.media.forEach(item=>{
+    if(String(item.type||"").startsWith("video/")){const video=document.createElement("video");video.src=item.url;video.controls=true;video.playsInline=true;video.style.cssText="width:100%;max-height:340px;border-radius:14px;background:#111";mediaWrap.append(video)}
+    else{const image=document.createElement("img");image.src=item.url;image.alt="Медиа публикации ORBIS";image.loading="lazy";image.style.cssText="width:100%;max-height:360px;object-fit:cover;border-radius:14px";mediaWrap.append(image)}
+   });
+   article.append(mediaWrap);
+  }
   const actions=document.createElement("div");actions.className="post-actions";
   const like=document.createElement("button");like.type="button";like.dataset.action="like";like.textContent=(post.liked?"♥ ":"♡ ")+(post.likes||0)+" · Реакция";like.setAttribute("aria-pressed",String(Boolean(post.liked)));if(post.liked)like.style.color="#e36c91";
   const reply=document.createElement("button");reply.type="button";reply.dataset.action="reply";reply.textContent="↩ Ответить";
@@ -2270,12 +2278,23 @@ document.addEventListener("click",event=>{
   if(target.id==="publish"){
    event.preventDefault();event.stopImmediatePropagation();
    const title=$("postTitle").value.trim(),topic=$("postTopic").value.trim(),body=$("postBody").value.trim();
+   const selectedFiles=[...($("postMedia")?.files||[])];
    if(!title||!topic||!body){window.notify?.("Добавь название, тему и текст публикации.");return}
+   if(selectedFiles.length>4){window.notify?.("Можно прикрепить не более 4 файлов.");return}
    target.disabled=true;target.textContent="Сохраняем...";
    try{
-    const data=await api("/api/posts",{method:"POST",body:JSON.stringify({title,topic,body,replyTo:replyToPostId})});
+    let media=[];
+    if(selectedFiles.length){
+     const formData=new FormData();selectedFiles.forEach(file=>formData.append("files",file));
+     const uploadResponse=await fetch("/api/media",{method:"POST",credentials:"same-origin",body:formData});
+     const uploadData=await uploadResponse.json().catch(()=>({error:"Не удалось прочитать ответ загрузки."}));
+     if(!uploadResponse.ok)throw new Error(uploadData.error||"Ошибка загрузки медиа.");
+     media=uploadData.media||[];
+    }
+    const data=await api("/api/posts",{method:"POST",body:JSON.stringify({title,topic,body,replyTo:replyToPostId,media})});
     const feed=$("feed"),el=card(data.post);el.classList.add("api-post");feed.prepend(el);
     ["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
+    if($("postMedia"))$("postMedia").value="";
     replyToPostId=null;$("dialogTitle").textContent="Новая публикация";
     $("modal").classList.remove("open");window.notify?.("Публикация сохранена в ORBIS и архивирована в Telegram.");
    }catch(error){window.notify?.(error.message)}
