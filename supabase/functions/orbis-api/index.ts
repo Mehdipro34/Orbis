@@ -35,7 +35,7 @@ async function enrichPostCounts(admin:any, uid:string, rows:any[]){
   const likeMap=new Map((likes||[]).map((x:any)=>[x.post_id,Number(x.like_count)||0]));
   const liked=new Set((mine||[]).map((x:any)=>x.post_id));
   const saved=new Set((bookmarks||[]).map((x:any)=>x.post_id));
-  return rows.map((p:any)=>({...p,likes:likeMap.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
+  return rows.map((p:any)=>({...p,postNumber:p.post_number==null?null:String(p.post_number),authorNumber:p.profiles?.public_number==null?null:String(p.profiles.public_number),likes:likeMap.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
 }
 
 
@@ -287,7 +287,7 @@ Deno.serve(async (req: Request) => {
   }
   const replies=path.match(/^\/api\/posts\/([0-9a-f-]+)\/replies$/i);
   if(req.method==="GET"&&replies){
-    const {data,error}=await admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name)").eq("reply_to",replies[1]).eq("status","published").order("created_at",{ascending:true}).limit(20);
+    const {data,error}=await admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name,public_number)").eq("reply_to",replies[1]).eq("status","published").order("created_at",{ascending:true}).limit(20);
     if(error)return out({error:error.message},400);
     const counted=await enrichPostCounts(admin,uid,data||[]);
     return out({replies:counted.map((p:any)=>({id:p.id,title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,createdAt:p.created_at,replyTo:p.reply_to,likes:p.likes,liked:p.liked}))});
@@ -331,11 +331,11 @@ Deno.serve(async (req: Request) => {
     return error?out({error:error.message},400):out({ok:true},201);
   }
   if(req.method==="GET"&&path==="/api/bookmarks"){
-    const {data,error}=await admin.from("bookmarks").select("post_id,posts(*,profiles!posts_author_id_fkey(username,display_name))").eq("user_id",uid).order("created_at",{ascending:false}).limit(30);
+    const {data,error}=await admin.from("bookmarks").select("post_id,posts(*,profiles!posts_author_id_fkey(username,display_name,public_number))").eq("user_id",uid).order("created_at",{ascending:false}).limit(30);
     if(error)return out({error:error.message},400);
     const rawPosts=(data||[]).map((x:any)=>x.posts).filter(Boolean);
     const countedPosts=await enrichPostCounts(admin,uid,rawPosts);
-    return out({posts:countedPosts.map((p:any)=>({...p,username:p.profiles?.username,author:p.profiles?.display_name,createdAt:p.created_at}))});
+    return out({posts:countedPosts.map((p:any)=>({...p,username:p.profiles?.username,author:p.profiles?.display_name,authorNumber:p.profiles?.public_number==null?null:String(p.profiles.public_number),createdAt:p.created_at}))});
   }
   if(req.method==="POST"&&path==="/api/bookmarks"){
     if(await isRateLimited(admin,uid,"bookmark",90,60))return out({error:"Слишком много действий с закладками."},429);
