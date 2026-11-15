@@ -66,4 +66,4 @@ After deployment and configuration:
 - Do not announce a public launch until the full smoke test is complete.
 - Free tiers have quotas and can pause/throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users.
 - Keep the service-role key and bot token private.
-- The project currently has report submission and basic platform controls; it does not yet have a complete human moderation console or proven automated AI moderation.
+- The project currently has report submission and lightweight rule-based anti-spam checks (link floods, repeated-character spam and highly repetitive text). It does not yet have a complete human moderation console or proven automated AI moderation.
