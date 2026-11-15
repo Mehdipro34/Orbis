@@ -1,14 +1,14 @@
 # ORBIS — current product and technical architecture
 
-Status: active implementation with deployed Supabase Edge Functions. Telegram Mini App auth and browser OIDC code paths are deployed, but live Telegram credentials, public hosting rollout and end-to-end registration/posting are not yet verified.
+Status: active implementation. Email/password authentication is implemented with Supabase Auth and the social API is deployed; live email confirmation and end-to-end registration/posting are not yet verified.
 
 ## Product
 
-ORBIS is a Telegram-first social network with a cinematic orbital identity. Registration and sign-in are only through the official Telegram Mini App. The main experience includes a live feed, profiles, topic Navigator, Stories, reactions, comments, post replies, bookmarks and follows.
+ORBIS is an email-first social network with a cinematic orbital identity. Registration and sign-in use email + password; Telegram is not required. The main experience includes a live feed, profiles, topic Navigator, Stories, reactions, comments, post replies, bookmarks and follows.
 
 ## User-facing features in the current build
 
-- **Telegram account:** Mini App login verifies Telegram `initData`; browser login uses Telegram OIDC Authorization Code + PKCE with server-side ID-token signature/claim checks. Both map the Telegram ID to the same Supabase Auth user and ORBIS profile.
+- **Account:** Supabase Auth handles email/password registration, email confirmation and persistent sessions. The API creates an ORBIS profile from verified account metadata on first authenticated visit.
 - **Feed:** server-paginated posts, up to 20 per page, topic filters and refresh.
 - **Posts:** title, topic, text, up to four media files, daily per-account publication quota.
 - **Reactions:** likes stored separately and toggled by the signed-in user.
@@ -24,18 +24,18 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity. Regi
 ## Architecture
 
 ### Client
-- `public/index.html` is the responsive web and Telegram Mini App client.
+- `public/index.html` is the responsive web app client.
 - The browser contains only the Supabase publishable key.
-- Telegram Mini App `initData` or a browser OIDC authorization code is sent to `orbis-telegram-auth`; Telegram IDs supplied by the browser are never accepted as proof of identity.
+- The browser uses Supabase Auth email/password methods and sends its access token to `orbis-api`.
 - API requests go directly to Supabase Edge Functions, not through a second Worker social API.
 
 ### Supabase
 - PostgreSQL is the canonical store for profiles and social metadata.
 - Supabase Auth stores the account and session.
 - Supabase Storage bucket `orbis-media` stores post and Story media.
-- Edge Function `orbis-telegram-auth` verifies Telegram, creates/repairs the account and issues a session.
+- Supabase Auth verifies credentials and issues a durable session; `orbis-api` creates the public profile from the authenticated user's signup metadata.
 - Edge Function `orbis-api` verifies the Supabase session and serves social routes.
-- Private `account_lookup` contains Telegram-to-account mapping and is not readable by browser roles.
+- The legacy `account_lookup` table is not used by the email-first frontend.
 - `post_comments` and `api_rate_limits` are not directly accessible to browser roles.
 - Aggregate views `post_like_counts`, `post_comment_counts`, and `post_topic_counts` avoid scanning every reaction/comment/post row when rendering feed counters.
 - `consume_orbis_rate_limit` is a database-side atomic per-user rate limiter.
@@ -45,13 +45,6 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity. Regi
 - `ORBIS_KV` is used for RSS cache and Worker news rate limiting.
 - No R2 bucket is required. The current `wrangler.toml` and Worker source contain no R2 binding.
 - A stale dashboard R2 binding named `ORBIS_MEDIA` caused the reported Cloudflare error 10085. Remove it from Worker Settings → Bindings before deploying again.
-
-### Telegram archive
-- Telegram private channels are optional archive/mirror destinations for posts, media and Stories.
-- Supabase remains the canonical searchable database and media store in this implementation.
-- Archive failure does not discard a post or Story already saved in Supabase; the API returns an archive warning.
-- Required for sign-in: `TELEGRAM_BOT_TOKEN`.
-- Optional archive IDs: `POSTS_CHANNEL_ID`, `MEDIA_CHANNEL_ID`, `STORIES_CHANNEL_ID`.
 
 ## Data model
 
@@ -72,7 +65,7 @@ RLS is enabled on all ten tables. Browser roles cannot read Telegram identifiers
 ## Performance and abuse controls
 
 - Feed pages are limited to 20 posts; comments to 20 per request; replies and profile posts are bounded.
-- Search, media uploads, likes, comments, follows, bookmarks, reports and Telegram sign-in have per-user rate limits.
+- Search, media uploads, likes, comments, follows, bookmarks, reports and account creation and media uploads are guarded by Supabase Auth and server-side rate limits.
 - Post and Story daily quotas are enforced by database unique indexes, not just UI code.
 - Media type and size checks happen server-side.
 - The Worker caches RSS responses; it does not proxy social API traffic.
