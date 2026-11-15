@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090b18">
-<meta name="description" content="ORBIS — социальное пространство для публикаций, поиска идей и личных профилей.">
+<meta name="description" content="ORBIS — социальное пространство для публикаций, интересов и личных профилей.">
 <title>ORBIS — пространство идей</title>
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
@@ -2006,7 +2006,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </section>
 <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button></div><span class="hint">Твои идеи — в одном потоке</span></div></section>
  <div class="filter-row"><strong>Сейчас в ORBIS</strong><span>Новые мысли и знакомые темы</span></div>
- <div class="topic-filter" id="topicFilter"><button class="active">Все темы</button><button>Новости</button><button>Технологии</button><button>Бизнес</button><button>Общество</button><button>Наука</button><button>Идеи</button></div>
+ <div class="topic-filter" id="topicFilter"><button class="active">Все темы</button><button>Новости</button><button>Технологии</button><button>Бизнес</button><button>Общество</button><button>Наука</button><button>Идеи</button><button>Образование</button><button>Спорт</button><button>Игры</button><button>Культура</button><button>Путешествия</button><button>Экология</button></div>
  <section id="feed"><div class="post feed-loading" aria-live="polite">Подключаем настоящую ленту ORBIS…</div></section>
  <section id="orbisScreen" class="orbis-screen" hidden></section>
 </main>
@@ -2045,7 +2045,13 @@ const orbisTopics=[
  {name:"Бизнес",sub:"Предпринимательство и идеи проектов",icon:"◇",tone:"gold"},
  {name:"Общество",sub:"Люди, культура и жизнь",icon:"◎",tone:"pink"},
  {name:"Наука",sub:"Открытия и исследования",icon:"✧",tone:"blue"},
- {name:"Идеи",sub:"Мысли, вдохновение и творчество",icon:"✳",tone:"mint"}
+ {name:"Идеи",sub:"Мысли, вдохновение и творчество",icon:"✳",tone:"mint"},
+ {name:"Образование",sub:"Учёба, навыки и новые знания",icon:"⌘",tone:"blue"},
+ {name:"Спорт",sub:"Команды, соревнования и активность",icon:"◈",tone:"cyan"},
+ {name:"Игры",sub:"Игровые миры и цифровые развлечения",icon:"▣",tone:"pink"},
+ {name:"Культура",sub:"Книги, кино, музыка и искусство",icon:"✧",tone:"gold"},
+ {name:"Путешествия",sub:"Города, страны и открытия",icon:"⌖",tone:"violet"},
+ {name:"Экология",sub:"Природа, климат и устойчивые идеи",icon:"❋",tone:"mint"}
 ];
 function setOrbisScreen(view){
  document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x.dataset.view===view));
@@ -2055,7 +2061,7 @@ function setOrbisScreen(view){
  orbisScreen.hidden=isHome;
  if(isHome)return;
  if(view==="Навигатор"){
-  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">ORBIS · EXPLORE</span><h2>Навигатор</h2><p>Выбирай направление и открывай публикации по интересующим тебя темам.</p></div><div class="navigator-feature"><div><span class="screen-eyebrow">ТВОЙ ПУТЬ В ORBIS</span><h3>Найди тему, которая тебя зажигает.</h3><p>Один выбор — и ты уже в потоке интересных мыслей.</p></div><div class="navigator-galaxy"><i></i><b></b><span>✦</span></div></div><div class="navigator-section-title"><div><b>Поиск по ORBIS</b><small>Находи людей и публикации по ключевым словам</small></div><span>ПОИСК</span></div><div class="orbis-search" style="display:flex;gap:9px;margin:12px 0 20px"><input id="orbisSearchInput" type="search" placeholder="Имя, username, тема или слово..." style="flex:1;min-width:0;padding:13px 15px;border:1px solid #344362;border-radius:13px;background:#10182b;color:#f5f3ff"><button id="orbisSearchButton" class="primary" type="button">Найти</button></div><div id="orbisSearchResults" aria-live="polite"></div><div class="navigator-section-title"><div><b>Исследуй направления</b><small>Выбери тему, чтобы открыть публикации</small></div><span>06 THEMES</span></div><div class="navigator-grid">'+orbisTopics.map((t,i)=>'<button class="navigator-topic '+t.tone+'" data-topic="'+t.name+'" style="--topic-delay:'+i*65+'ms"><span class="navigator-topic-icon">'+t.icon+'</span><span class="navigator-topic-name">'+t.name+'</span><span class="navigator-topic-sub">'+t.sub+'</span><span class="navigator-topic-arrow">↗</span><span class="navigator-topic-orbit"></span></button>').join("")+'</div><div class="navigator-section-title news-section-title"><div><b>Новости из разных источников</b><small>Свежие заголовки с переходом к оригинальным публикациям</small></div><span>RSS LIVE</span></div><div class="news-toolbar"><select id="newsSourceSelect" aria-label="Новостной источник"><option value="bbc-ru">BBC News · Русский</option><option value="oxu-az">Oxu.az · Азербайджан</option><option value="bbc-world">BBC News · Мир</option><option value="aljazeera-en">Al Jazeera · Мир</option></select><button id="newsRefresh" class="secondary" type="button">↻ Обновить</button></div><div id="newsStatus" class="news-status" aria-live="polite">Подключаем новостные источники…</div><div id="newsFeed" class="news-feed" aria-live="polite"></div>';
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">ORBIS · EXPLORE</span><h2>Навигатор</h2><p>Выбирай направление и открывай публикации по интересующим тебя темам.</p></div><div class="navigator-feature"><div><span class="screen-eyebrow">ТВОЙ ПУТЬ В ORBIS</span><h3>Найди тему, которая тебя зажигает.</h3><p>Один выбор — и ты уже в потоке интересных мыслей.</p></div><div class="navigator-galaxy"><i></i><b></b><span>✦</span></div></div><div class="navigator-section-title"><div><b>Выбери свои интересы</b><small>Нажми на направление — откроются публикации сообщества по этой теме</small></div><span>ORBIS INTERESTS</span></div><div class="navigator-grid">'+orbisTopics.map((t,i)=>'<button class="navigator-topic '+t.tone+'" data-topic="'+t.name+'" style="--topic-delay:'+i*65+'ms"><span class="navigator-topic-icon">'+t.icon+'</span><span class="navigator-topic-name">'+t.name+'</span><span class="navigator-topic-sub">'+t.sub+'</span><span class="navigator-topic-arrow">↗</span><span class="navigator-topic-orbit"></span></button>').join("")+'</div><div class="navigator-section-title news-section-title"><div><b>Новости из разных источников</b><small>Свежие заголовки с переходом к оригинальным публикациям</small></div><span>RSS LIVE</span></div><div class="news-toolbar"><select id="newsSourceSelect" aria-label="Новостной источник"><option value="bbc-ru">BBC News · Русский</option><option value="oxu-az">Oxu.az · Азербайджан</option><option value="bbc-world">BBC News · Мир</option><option value="aljazeera-en">Al Jazeera · Мир</option></select><button id="newsRefresh" class="secondary" type="button">↻ Обновить</button></div><div id="newsStatus" class="news-status" aria-live="polite">Подключаем новостные источники…</div><div id="newsFeed" class="news-feed" aria-live="polite"></div>';
   orbisScreen.querySelectorAll("[data-topic]").forEach(btn=>btn.addEventListener("click",()=>{
    const topic=btn.dataset.topic;setOrbisScreen("Лента");
    const filter=[...document.querySelectorAll("#topicFilter button")].find(x=>x.textContent.trim()===topic);
@@ -2556,7 +2562,6 @@ document.addEventListener("click",event=>{
   }finally{if(submit)submit.disabled=false}
  },true);
  let replyToPostId=null;
- let lastSearchQuery="";
  async function refreshNewestPosts(){
   if(feedLoading)return;
   const feed=$("feed");if(!feed)return;
@@ -2593,28 +2598,6 @@ document.addEventListener("click",event=>{
   finally{if(refresh)refresh.disabled=false}
  }
  window.orbisLoadNews=loadNews;
- async function runSearch(){
-  const input=$("orbisSearchInput"),results=$("orbisSearchResults");if(!input||!results)return;
-  const q=input.value.trim();lastSearchQuery=q;if(q.length<2){results.textContent="Введи хотя бы 2 символа.";return}
-  results.textContent="Ищем...";
-  try{
-   const data=await api("/api/search",{method:"POST",body:JSON.stringify({q})});
-   results.replaceChildren();
-   const heading=document.createElement("h3");heading.textContent="Пользователи";results.append(heading);
-   if(!data.users.length){const empty=document.createElement("p");empty.textContent="Пользователи не найдены.";results.append(empty)}
-   data.users.forEach(user=>{
-    const row=document.createElement("div");row.className="post";row.style.margin="8px 0";
-    const name=document.createElement("button");name.type="button";name.className="profile-result-link";name.dataset.action="open-profile";name.dataset.username=user.username;name.textContent=user.name+" · @"+user.username;
-    const bio=document.createElement("p");bio.className="post-body";bio.textContent=user.bio||"Без описания";
-    const follow=document.createElement("button");follow.className="secondary";follow.type="button";follow.dataset.action="follow";follow.dataset.username=user.username;follow.textContent=user.isFollowing?"Вы подписаны":"Подписаться";
-    row.append(name,bio,follow);results.append(row);
-   });
-   const postHeading=document.createElement("h3");postHeading.textContent="Публикации";results.append(postHeading);
-   if(!data.posts.length){const empty=document.createElement("p");empty.textContent="Публикации не найдены.";results.append(empty)}
-   data.posts.forEach(post=>results.append(card(post)));
-  }catch(error){results.textContent=error.message}
- }
-
  async function openSharedPostFromHash(){
   const match=location.hash.match(/^#post-([0-9a-f-]{36})$/i);if(!match)return;
   const id=match[1];let article=document.getElementById("post-"+id);
@@ -2663,7 +2646,6 @@ document.addEventListener("click",event=>{
   const target=event.target.closest("button");if(!target)return;
   if(target.closest("#topicFilter")){event.preventDefault();event.stopImmediatePropagation();const buttons=target.closest("#topicFilter").querySelectorAll("button");buttons.forEach(x=>x.classList.toggle("active",x===target));loadFeed(true,target.textContent.trim()==="Все темы"?"":target.textContent.trim());return}
   if(target.id==="newsRefresh"){event.preventDefault();loadNews($("newsSourceSelect")?.value||"bbc-ru");return}
-  if(target.id==="orbisSearchButton"){event.preventDefault();runSearch();return}
   if(target.id==="refreshFeed"){event.preventDefault();target.classList.add("is-loading");try{await loadFeed();window.notify?.("Лента обновлена.")}finally{target.classList.remove("is-loading")}return}
   if(target.id==="profileLogout"){
    event.preventDefault();target.disabled=true;
@@ -2757,27 +2739,6 @@ document.addEventListener("click",event=>{
    }catch(error){window.notify?.(error.message)}finally{target.disabled=false}
    return;
   }
-  if(target.dataset.action==="open-profile"){
-   event.preventDefault();event.stopImmediatePropagation();
-   const username=target.dataset.username,results=$("orbisSearchResults");
-   target.disabled=true;
-   try{
-    const data=await api("/api/profile/"+encodeURIComponent(username));
-    results.replaceChildren();
-    const back=document.createElement("button");back.type="button";back.className="secondary";back.dataset.action="back-search";back.textContent="← Назад к поиску";
-    const heading=document.createElement("div");heading.className="post";heading.style.marginTop="12px";
-    const name=document.createElement("h3");name.textContent=data.user.name+" · @"+data.user.username;
-    const bio=document.createElement("p");bio.className="post-body";bio.textContent=data.user.bio||"Пользователь пока не добавил описание.";
-    const stats=document.createElement("p");stats.className="post-meta";stats.textContent="Подписчики: "+data.followers+" · Подписки: "+data.following;
-    const follow=document.createElement("button");follow.type="button";follow.className="secondary";follow.dataset.action="follow";follow.dataset.username=data.user.username;follow.textContent=data.isFollowing?"Вы подписаны":"Подписаться";
-    heading.append(name,bio,stats,follow);results.append(back,heading);
-    const postsTitle=document.createElement("h3");postsTitle.textContent="Публикации";results.append(postsTitle);
-    if(!data.posts.length){const empty=document.createElement("p");empty.textContent="Публикаций пока нет.";results.append(empty)}
-    else data.posts.forEach(item=>results.append(card(item)));
-   }catch(error){window.notify?.(error.message)}finally{target.disabled=false}
-   return;
-  }
-  if(target.dataset.action==="back-search"){runSearch();return}
   if(target.dataset.action==="reply"){
    event.preventDefault();event.stopImmediatePropagation();
    const article=target.closest("[data-post-id]");if(!article)return;
@@ -2849,8 +2810,8 @@ document.addEventListener("click",event=>{
    setTimeout(async()=>{
     try{
      const data=await api("/api/navigator");
-     const heading=[...document.querySelectorAll(".navigator-section-title span")].find(x=>x.textContent==="06 THEMES");
-     if(heading)heading.textContent=data.topics.length+" ТЕМ";data.topics.forEach(item=>{const tile=orbisScreen.querySelector('[data-topic="'+CSS.escape(item.name)+'"]');if(tile){const sub=tile.querySelector(".navigator-topic-sub");if(sub)sub.textContent=item.count+" публикаций · "+(sub.dataset.base||sub.textContent)}});
+     const heading=[...orbisScreen.querySelectorAll(".navigator-section-title span")].find(x=>x.textContent==="ORBIS INTERESTS");
+     if(heading)heading.textContent="12 НАПРАВЛЕНИЙ";data.topics.forEach(item=>{const tile=orbisScreen.querySelector('[data-topic="'+CSS.escape(item.name)+'"]');if(tile){const sub=tile.querySelector(".navigator-topic-sub");if(sub)sub.textContent=item.count+" публикаций · "+(sub.dataset.base||sub.textContent)}});
     }catch(error){}
    },100);
   }
@@ -2861,8 +2822,6 @@ document.addEventListener("click",event=>{
   if(document.querySelector('[data-view="Лента"].active'))refreshNewestPosts();
   if(document.querySelector('[data-view="Навигатор"].active'))loadNews($("newsSourceSelect")?.value||"bbc-ru");
  },300000);
- const searchInput=$("orbisSearchInput");
- document.addEventListener("keydown",event=>{if(event.key==="Enter"&&event.target===$("orbisSearchInput")){event.preventDefault();runSearch()}});
  window.addEventListener("orbis:login",()=>{
   if(window.orbisUser)syncUserUI(window.orbisUser);
   loadFeed().then(openSharedPostFromHash);
