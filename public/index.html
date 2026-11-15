@@ -1869,6 +1869,12 @@ document.addEventListener("DOMContentLoaded",()=>{
 .orbis-comments-more{display:block;margin:10px auto 0;border:1px solid #e6e1f7;background:#fff;color:#6958d9;padding:8px 12px;border-radius:10px;font-size:10px}
 @media(max-width:480px){.orbis-comment-form{align-items:stretch;flex-direction:column}.orbis-comment-form .primary{width:100%}}
 </style>
+<style id="orbis-feature-grid">
+#features .land-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+#features .land-grid article{min-width:0}
+@media(max-width:1050px){#features .land-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){#features .land-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="orbis-intro" id="orbisIntro" role="dialog" aria-label="Космическое приветствие ORBIS" aria-modal="true">
@@ -1920,14 +1926,14 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
  </div>
 </section><section class="land-about" id="about"><div><small class="land-kicker">БОЛЬШЕ, ЧЕМ ПРОСТО ЛЕНТА</small><h2>Открой пространство<br><em>для своих идей.</em></h2></div><p>ORBIS объединяет публикации, темы и личные страницы в понятном и красивом интерфейсе. Без перегруженных меню — только самое главное.</p></section>
-<section class="land-features" id="features"><small class="land-kicker">ТРИ ПРОСТЫХ НАПРАВЛЕНИЯ</small><h2>Всё важное — <em>под рукой.</em></h2><div class="land-grid"><article><div class="feature-symbol">◉</div><small>01 / FEED</small><h3>Лента</h3><p>Создавай текстовые публикации, добавляй фото и видео, ставь реакции и обсуждай записи в комментариях.</p></article><article><div class="feature-symbol">⌁</div><small>02 / EXPLORE</small><h3>Navigator</h3><p>Ищи пользователей и публикации, фильтруй ленту по темам и открывай новостные RSS-источники.</p></article><article><div class="feature-symbol">◎</div><small>03 / PROFILE</small><h3>Профиль</h3><p>Редактируй имя и описание, управляй своими публикациями и сохраняй интересные записи.</p></article></div></section>
+<section class="land-features" id="features"><small class="land-kicker">ВОЗМОЖНОСТИ ORBIS</small><h2>Всё важное — <em>под рукой.</em></h2><div class="land-grid"><article><div class="feature-symbol">◉</div><small>01 / FEED</small><h3>Лента и обсуждения</h3><p>Публикации, фотографии и видео. Реакции, комментарии, ответы отдельными постами и закладки.</p></article><article><div class="feature-symbol">⌁</div><small>02 / EXPLORE</small><h3>Навигатор</h3><p>Поиск людей и публикаций, тематические разделы и новостные RSS-источники с переходом к оригиналу.</p></article><article><div class="feature-symbol">◎</div><small>03 / IDENTITY</small><h3>Профили и подписки</h3><p>Регистрация через Telegram, личная страница, редактирование описания и подписки на авторов.</p></article><article><div class="feature-symbol">✦</div><small>04 / STORIES</small><h3>Истории на 24 часа</h3><p>Короткие текстовые истории, фото и видео, которые автоматически исчезают через сутки.</p></article></div></section>
 <section class="land-creator" id="creator"><div class="land-monogram">ММ<span>✳</span></div><div><small class="land-kicker">ЗА ИДЕЕЙ СТОИТ ЧЕЛОВЕК</small><h2>Создаётся с идеей.<br><em>Растёт вместе с людьми.</em></h2><p>Меня зовут Мехти Мурадлы. ORBIS — проект о новых возможностях, интересных мыслях и цифровом пространстве, которое развивается шаг за шагом.</p><div class="land-social"><a href="https://www.youtube.com/@mehdimuradli" target="_blank" rel="noopener">▶ <span><small>YOUTUBE</small><b>Жизнь Мехти</b></span> ↗</a><a href="https://www.instagram.com/lifemehti/" target="_blank" rel="noopener">◎ <span><small>INSTAGRAM</small><b>@lifemehti</b></span> ↗</a></div></div></section>
 <section class="land-roadmap" id="land-roadmap">
  <div class="roadmap-heading"><small class="land-kicker">ВОЗМОЖНОСТИ</small><h2>Всё важное.<br><em>В одном пространстве.</em></h2><p>Открывай новые идеи, находи людей и создавай собственную историю.</p></div>
  <div class="roadmap-grid">
-  <article class="roadmap-card is-current"><span class="roadmap-index">01</span><span class="roadmap-state">DISCOVER</span><h3>Живая лента</h3><p>Публикуй мысли, фотографии и видео. Отвечай отдельными публикациями и сохраняй интересные обсуждения.</p><div class="roadmap-line"><i></i></div><small>ТВОИ ИДЕИ — ТВОЙ ГОЛОС</small></article>
-  <article class="roadmap-card is-current"><span class="roadmap-index">02</span><span class="roadmap-state">EXPLORE</span><h3>Навигатор</h3><p>Исследуй темы, находи авторов и следи за новостными источниками в одном месте.</p><div class="roadmap-line"><i></i></div><small>ОТКРЫВАЙ НОВОЕ КАЖДЫЙ ДЕНЬ</small></article>
-  <article class="roadmap-card"><span class="roadmap-index">03</span><span class="roadmap-state">IDENTITY</span><h3>Твой профиль</h3><p>Создай свой username, расскажи о себе и собирай все свои публикации на личной странице.</p><div class="roadmap-line"><i></i></div><small>ТВОЁ ПРОСТРАНСТВО В ORBIS</small></article>
+  <article class="roadmap-card is-current"><span class="roadmap-index">01</span><span class="roadmap-state">DISCOVER</span><h3>Живая лента</h3><p>Публикуй мысли, фотографии и видео. Получай реакции, обсуждай публикации в комментариях и сохраняй понравившееся.</p><div class="roadmap-line"><i></i></div><small>ТВОИ ИДЕИ — ТВОЙ ГОЛОС</small></article>
+  <article class="roadmap-card is-current"><span class="roadmap-index">02</span><span class="roadmap-state">EXPLORE</span><h3>Навигатор</h3><p>Ищи людей и публикации, исследуй темы и читай заголовки новостных источников с переходом к оригиналам.</p><div class="roadmap-line"><i></i></div><small>ОТКРЫВАЙ НОВОЕ КАЖДЫЙ ДЕНЬ</small></article>
+  <article class="roadmap-card is-current"><span class="roadmap-index">03</span><span class="roadmap-state">STORIES</span><h3>Истории на сутки</h3><p>Делись короткими историями, фотографиями и видео. Истории доступны в течение 24 часов.</article><article class="roadmap-card"><span class="roadmap-index">04</span><span class="roadmap-state">IDENTITY</span><h3>Твой профиль</h3><p>Создай username, редактируй описание, находи авторов и управляй своими подписками.</p><div class="roadmap-line"><i></i></div><small>ТВОЁ ПРОСТРАНСТВО В ORBIS</small></article>
  </div>
 </section>
 <section class="land-faq" id="faq">
