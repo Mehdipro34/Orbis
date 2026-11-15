@@ -2152,7 +2152,8 @@ document.addEventListener("click",event=>{
    const data=await api("/api/posts");
    const feed=$("feed");if(!feed)return;
    feed.querySelectorAll(".api-post").forEach(x=>x.remove());
-   data.posts.forEach(post=>{const el=card(post);el.classList.add("api-post");feed.prepend(el)});
+   feed.querySelectorAll(".post").forEach(x=>{if(x.querySelector(".sample"))x.remove()});
+   data.posts.slice().reverse().forEach(post=>{const el=card(post);el.classList.add("api-post");feed.append(el)});
   }catch(error){if(error.message!=="Не подключено хранилище ORBIS_KV. Создай KV namespace и добавь binding ORBIS_KV.")console.warn("ORBIS feed:",error.message)}
  }
  async function loadCurrentProfile(){
