@@ -3,39 +3,52 @@
 ORBIS is a Telegram-first social network with a cinematic orbital identity.
 
 ## Product rules
+
 - Telegram Mini App is the only registration and sign-in method.
-- Telegram Web App `initData` is verified server-side; never trust client-supplied Telegram IDs.
-- Supabase Auth provides durable sessions and PostgreSQL stores account/profile and social metadata.
-- Main feed, posts, reactions, replies, follows, bookmarks, Stories and topic Navigator are core product areas.
-- Stories expire after 24 hours; daily publication limits are enforced by database unique indexes.
-- Supabase Storage stores uploaded photos and videos for posts and Stories (one optional media file per Story).
-- Private Telegram channels are optional archive destinations for posts, media and Stories; archive failure must not lose a successfully saved post. Configure `POSTS_CHANNEL_ID`, optionally `MEDIA_CHANNEL_ID` and `STORIES_CHANNEL_ID`.
-- The app must never claim support for a traffic target until load tests prove it.
+- Telegram Web App `initData` is verified server-side before an account is created or a session is issued.
+- Supabase Auth provides durable sessions; PostgreSQL stores profiles and social data.
+- The feed uses paginated queries. Posts support likes, comments, post replies, media and bookmarks.
+- Comments are stored separately from posts and loaded 20 at a time.
+- Stories support text, photo or video and expire after 24 hours.
+- Supabase Storage is the only media store. A Story can include one media file; a post can include up to four.
+- Private Telegram channels are optional archive destinations for posts, media and Stories.
+- Rate limits protect sign-in, comments, likes, search, media uploads, reports, follows and bookmarks.
+- Aggregate database views keep like/comment/topic counts out of large row-by-row scans.
+- Do not claim a traffic target until load tests prove it.
 
 ## Repository structure
-- `public/index.html` — responsive web and Telegram Mini App UI, orbital intro, auth client and social screens.\n- `public/manifest.webmanifest`, `public/sw.js`, `public/orbis-icon.svg` — installable PWA shell and app icon.
-- `src/index.js` — Cloudflare Worker serving static assets and RSS/news endpoints. Legacy KV-based social/auth endpoints are disabled.
-- `wrangler.toml` — Cloudflare Worker and static asset configuration.
-- `docs/ARCHITECTURE.md` — product and technical architecture.\n- `docs/DEPLOYMENT.md` — Cloudflare, Supabase and Telegram launch checklist.
+
+- `public/index.html` — responsive web and Telegram Mini App UI, orbital intro, Telegram sign-in, feed, comments, Stories, profile and Navigator.
+- `public/manifest.webmanifest`, `public/sw.js`, `public/orbis-icon.svg` — installable PWA shell and icon.
+- `src/index.js` — Cloudflare Worker serving static assets and RSS/news endpoints only.
+- `wrangler.toml` — Cloudflare Worker, static assets and RSS KV configuration.
+- `docs/ARCHITECTURE.md` — product and technical architecture.
+- `docs/DEPLOYMENT.md` — Cloudflare, Supabase and Telegram launch checklist.
 
 ## Supabase project
+
 - Project ref: `wdwvcvpgovvkoodozbxf`
 - Edge Functions: `orbis-telegram-auth`, `orbis-api`
-- Tables: `profiles`, `account_lookup`, `posts`, `post_likes`, `follows`, `bookmarks`, `stories`, `post_reports`
+- Core tables: `profiles`, `account_lookup`, `posts`, `post_likes`, `post_comments`, `follows`, `bookmarks`, `stories`, `post_reports`
+- Internal rate-limit table: `api_rate_limits`
+- Aggregate views: `post_like_counts`, `post_comment_counts`, `post_topic_counts`
 - Storage bucket: `orbis-media`
-- RLS is enabled on all public application tables. The private account lookup table denies direct client access, and Telegram IDs in profiles are not readable by browser roles.
-- The browser only receives the Supabase publishable key. The service-role key and Telegram bot token must remain in Edge Function secrets.
+- RLS is enabled on application tables. The private account lookup, comments and rate-limit data are not directly accessible to browser roles.
+- The browser only receives the Supabase publishable key. The service-role key and Telegram bot token remain in Edge Function secrets.
 
 ## Required owner configuration before live use
+
 1. Set `TELEGRAM_BOT_TOKEN` in Supabase Edge Function secrets.
 2. Configure the official Telegram bot's Mini App URL to the deployed HTTPS frontend.
-3. Configure Cloudflare Worker deployment and the required KV binding for RSS cache/rate limiting.
-4. Verify the deployed site opens inside Telegram and returns valid `Telegram.WebApp.initData`.
-5. Run the end-to-end checklist in `docs/SUPABASE_SETUP.md`.
+3. In Cloudflare Worker settings, remove any stale `ORBIS_MEDIA` R2 binding. ORBIS uses Supabase Storage and does not require an R2 bucket.
+4. Confirm the `ORBIS_KV` namespace ID in `wrangler.toml`.
+5. Deploy with `npx wrangler deploy`.
+6. Run the end-to-end checklist in `docs/DEPLOYMENT.md`.
 
 ## Known limits
-- The repository being public on GitHub does not mean a website is deployed.
-- The database currently has no user profiles, posts or Stories; the first real Telegram sign-in creates the first account.
-- No full browser E2E suite or load test has been completed in this session.
-- Free-tier quotas can pause or throttle a project. Zero-budget operation is the target, not a guarantee of unlimited usage.
-- RSS/news still runs through the Cloudflare Worker and its KV cache.
+
+- A GitHub commit does not automatically publish the site.
+- The database had no user profiles, posts or Stories at the last inspection; the first real Telegram sign-in has not yet been verified.
+- No complete browser E2E suite or load test has been completed.
+- Free-tier quotas can pause or throttle a project. Zero-budget operation is the target, not a guarantee of unlimited capacity.
+- A complete human moderation console, direct messages, notification center, clans, Stars/Premium and ad management are not yet implemented.
