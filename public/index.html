@@ -2448,6 +2448,79 @@ document.addEventListener("click",event=>{
  api("/api/auth/me").then(data=>{window.orbisUser=data.user;syncUserUI(data.user);window.orbisEnterApp?.();loadFeed()}).catch(()=>{});
 })();
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style id="orbis-supabase-auth-ui">
+#orbisAuthForm,.auth-tabs,.auth-legal{display:none!important}
+#orbisTelegramLogin{width:100%;min-height:54px;border:0;border-radius:15px;color:#fff;font-weight:850;font-size:14px;background:linear-gradient(105deg,#705cf0,#a06fe9 65%,#f08d92);box-shadow:0 9px 22px #8068e844;cursor:pointer}
+#orbisTelegramLogin:disabled{opacity:.6;cursor:wait}
+#orbisTelegramHelp{margin-top:12px;color:#aeb8d4;font-size:11px;line-height:1.6;text-align:center}
+</style>
+<script>
+(function(){
+ const SUPABASE_URL="https://wdwvcvpgovvkoodozbxf.supabase.co";
+ const SUPABASE_KEY="sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx";
+ const EDGE_AUTH=SUPABASE_URL+"/functions/v1/orbis-telegram-auth";
+ const EDGE_API=SUPABASE_URL+"/functions/v1/orbis-api";
+ const nativeFetch=window.fetch.bind(window);
+ let client=null, session=null;
+ window.orbisSupabaseReady=(async()=>{
+   if(!window.supabase?.createClient)throw new Error("Не удалось загрузить Supabase SDK.");
+   client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+   const result=await client.auth.getSession();session=result.data.session;
+   client.auth.onAuthStateChange((_event,next)=>{session=next});
+   window.orbisSupabase=client;
+   return client;
+ })();
+ window.fetch=async function(input,init){
+   const raw=typeof input==="string"?input:(input&&input.url)||"";
+   let parsed;try{parsed=new URL(raw,location.href)}catch{return nativeFetch(input,init)}
+   if(!parsed.pathname.startsWith("/api/")||parsed.pathname==="/api/news"||parsed.pathname==="/api/news/sources")return nativeFetch(input,init);
+   if(parsed.pathname==="/api/media")return new Response(JSON.stringify({error:"Загрузка медиа будет включена после настройки Supabase Storage."}),{status:503,headers:{"content-type":"application/json"}});
+   try{
+     await window.orbisSupabaseReady;
+     const current=await client.auth.getSession();session=current.data.session;
+     const headers=new Headers(init?.headers||((input instanceof Request)?input.headers:undefined));
+     headers.set("apikey",SUPABASE_KEY);
+     if(session?.access_token)headers.set("Authorization","Bearer "+session.access_token);
+     else headers.set("Authorization","Bearer "+SUPABASE_KEY);
+     let body=init?.body;
+     if(input instanceof Request&&!init)body=input.body;
+     const target=EDGE_API+parsed.pathname+parsed.search;
+     return await nativeFetch(target,{...init,method:init?.method||((input instanceof Request)?input.method:"GET"),headers,body,credentials:"omit"});
+   }catch(e){return new Response(JSON.stringify({error:e.message||"Ошибка соединения с ORBIS."}),{status:503,headers:{"content-type":"application/json"}})}
+ };
+ document.addEventListener("DOMContentLoaded",async()=>{
+   const form=document.getElementById("orbisAuthForm"),tabs=document.querySelector(".auth-tabs"),legal=document.querySelector(".auth-legal"),note=document.getElementById("authFormNote");
+   if(!form)return;
+   form.hidden=true;if(tabs)tabs.hidden=true;if(legal)legal.textContent="Вход и регистрация доступны только через Telegram.";
+   const button=document.createElement("button");button.type="button";button.id="orbisTelegramLogin";button.textContent="✈ Продолжить через Telegram";
+   const help=document.createElement("div");help.id="orbisTelegramHelp";help.textContent="Открой ORBIS внутри Telegram через официального бота. Так мы проверим аккаунт и сохраним профиль.";
+   form.parentNode.insertBefore(button,form);form.parentNode.insertBefore(help,form);
+   button.addEventListener("click",async()=>{
+     button.disabled=true;button.textContent="Проверяем Telegram...";
+     try{
+       await window.orbisSupabaseReady;
+       const tg=window.Telegram?.WebApp;
+       const initData=tg?.initData||"";
+       if(!initData){throw new Error("Открой ORBIS из Telegram Mini App, а не во внешнем браузере.")}
+       tg.ready();tg.expand();
+       const response=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY},body:JSON.stringify({initData})});
+       const data=await response.json();
+       if(!response.ok)throw new Error(data.error||"Не удалось войти через Telegram.");
+       const {error}=await client.auth.setSession({access_token:data.session.access_token,refresh_token:data.session.refresh_token});
+       if(error)throw error;
+       session=data.session;window.orbisUser=data.user;
+       if(typeof window.orbisEnterApp==="function")window.orbisEnterApp();
+       window.dispatchEvent(new Event("orbis:login"));
+       if(note)note.textContent="Добро пожаловать в ORBIS!";
+     }catch(e){if(note)note.textContent=e.message;help.textContent=e.message}
+     finally{button.disabled=false;button.textContent="✈ Продолжить через Telegram"}
+   });
+ });
+})();
+</script>
+
 </body></html>
 <style id="orbis-auth-and-layout-fix">
 /* Keep the signed-in experience balanced and centered on wide displays. */
