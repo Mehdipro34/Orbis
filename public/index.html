@@ -2731,6 +2731,59 @@ document.addEventListener("click",event=>{
  const EDGE_API=SUPABASE_URL+"/functions/v1/orbis-api";
  const nativeFetch=window.fetch.bind(window);
  let client=null, session=null;
+ const OIDC_PENDING_KEY="orbis.telegram.oidc.pending.v1";
+ function randomBase64Url(bytes=32){
+   const data=new Uint8Array(bytes);crypto.getRandomValues(data);
+   return btoa(String.fromCharCode(...data)).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/g,"");
+ }
+ async function sha256Base64Url(value){
+   const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
+   return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/g,"");
+ }
+ async function beginBrowserTelegramLogin(){
+   const configResponse=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({action:"oidc_config"})});
+   const config=await configResponse.json();
+   if(!configResponse.ok)throw new Error(config.error||"Не удалось подготовить вход через Telegram.");
+   const redirect=new URL(config.redirect_uri);
+   if(redirect.origin!==location.origin)throw new Error("Адрес возврата Telegram должен совпадать с адресом сайта ORBIS.");
+   const state=randomBase64Url(32),nonce=randomBase64Url(32),verifier=randomBase64Url(64);
+   sessionStorage.setItem(OIDC_PENDING_KEY,JSON.stringify({state,nonce,verifier,createdAt:Date.now()}));
+   const challenge=await sha256Base64Url(verifier);
+   const authUrl=new URL("https://oauth.telegram.org/auth");
+   authUrl.search=new URLSearchParams({
+     client_id:String(config.client_id),
+     redirect_uri:config.redirect_uri,
+     response_type:"code",
+     scope:"openid profile",
+     state,
+     nonce,
+     code_challenge:challenge,
+     code_challenge_method:"S256"
+   }).toString();
+   location.assign(authUrl.toString());
+ }
+ async function finishBrowserTelegramLogin(){
+   const params=new URLSearchParams(location.search);
+   const code=params.get("code"),returnedState=params.get("state"),oauthError=params.get("error");
+   if(!code&&!oauthError)return false;
+   const pendingRaw=sessionStorage.getItem(OIDC_PENDING_KEY);
+   sessionStorage.removeItem(OIDC_PENDING_KEY);
+   history.replaceState({},document.title,location.pathname+location.hash);
+   if(oauthError)throw new Error("Вход через Telegram отменён или не выполнен.");
+   let pending;
+   try{pending=JSON.parse(pendingRaw||"null")}catch{pending=null}
+   if(!pending||!returnedState||returnedState!==pending.state||Date.now()-pending.createdAt>10*60*1000)throw new Error("Проверка безопасности входа не пройдена. Нажми кнопку входа ещё раз.");
+   const response=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({action:"oidc_exchange",code,codeVerifier:pending.verifier,nonce:pending.nonce})});
+   const data=await response.json();
+   if(!response.ok)throw new Error(data.error||"Telegram не подтвердил вход.");
+   const {error}=await client.auth.setSession({access_token:data.session.access_token,refresh_token:data.session.refresh_token});
+   if(error)throw error;
+   session=data.session;window.orbisUser=data.user;
+   if(typeof window.orbisEnterApp==="function")window.orbisEnterApp();
+   window.dispatchEvent(new Event("orbis:login"));
+   const note=document.getElementById("authFormNote");if(note)note.textContent="Добро пожаловать в ORBIS!";
+   return true;
+ }
  window.orbisSupabaseReady=(async()=>{
    if(!window.supabase?.createClient)throw new Error("Не удалось загрузить Supabase SDK.");
    client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -2760,9 +2813,10 @@ document.addEventListener("click",event=>{
  document.addEventListener("DOMContentLoaded",async()=>{
    const form=document.getElementById("orbisAuthForm"),tabs=document.querySelector(".auth-tabs"),legal=document.querySelector(".auth-legal"),note=document.getElementById("authFormNote");
    if(!form)return;
+   try{await window.orbisSupabaseReady;await finishBrowserTelegramLogin()}catch(error){if(note)note.textContent=error.message}
    form.hidden=true;if(tabs)tabs.hidden=true;if(legal)legal.textContent="Вход и регистрация доступны только через Telegram.";
    const button=document.createElement("button");button.type="button";button.id="orbisTelegramLogin";button.textContent="✈ Продолжить через Telegram";
-   const help=document.createElement("div");help.id="orbisTelegramHelp";help.textContent="Открой ORBIS внутри Telegram через официального бота. Так мы проверим аккаунт и сохраним профиль.";
+   const help=document.createElement("div");help.id="orbisTelegramHelp";help.textContent="В браузере подтверди вход через Telegram. Внутри Telegram Mini App вход подтвердится автоматически.";
    form.parentNode.insertBefore(button,form);form.parentNode.insertBefore(help,form);
    button.addEventListener("click",async()=>{
      button.disabled=true;button.textContent="Проверяем Telegram...";
@@ -2770,7 +2824,10 @@ document.addEventListener("click",event=>{
        await window.orbisSupabaseReady;
        const tg=window.Telegram?.WebApp;
        const initData=tg?.initData||"";
-       if(!initData){throw new Error("Открой ORBIS из Telegram Mini App, а не во внешнем браузере.")}
+       if(!initData){
+         await beginBrowserTelegramLogin();
+         return;
+       }
        tg.ready();tg.expand();
        const response=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({initData})});
        const data=await response.json();
