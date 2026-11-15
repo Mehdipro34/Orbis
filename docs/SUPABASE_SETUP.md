@@ -1,46 +1,48 @@
 # ORBIS — Supabase setup
 
-## What is deployed
-- Supabase project: `Orbis` (`wdwvcvpgovvkoodozbxf`)
-- PostgreSQL schema: profiles, account_lookup, posts, post_likes, post_comments, follows, bookmarks, stories, post_reports, api_rate_limits
-- RLS enabled on all ten application tables
-- Direct client reads of `profiles` are column-restricted: legacy Telegram identifiers are only readable by the server-side service role
-- `account_lookup` stores the username/email mapping and is blocked from direct `anon` and `authenticated` client access
-- Edge Function: `orbis-api` (the legacy Telegram auth function is unused)
-- Frontend: Supabase client + email/password authentication + API routing to Edge Functions
+## Deployed components
 
-## Required one-time configuration
-1. In Supabase Dashboard, open Authentication → Sign In / Providers and ensure the Email provider is enabled.
-2. Keep email confirmation enabled. Set Authentication → URL Configuration → Site URL to the deployed ORBIS HTTPS origin and add the exact origin/path used by the frontend to Redirect URLs.
-3. Confirm the Edge Function runtime has its standard `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` secrets. Never expose the service-role key in browser code.
-4. Configure the frontend hosting domain and HTTPS. The GitHub repository alone is source code; it does not publish a website automatically.
+- Supabase project: `Orbis` (`wdwvcvpgovvkoodozbxf`).
+- Edge Function: `orbis-api` (active version 27 at the latest verification).
+- Storage bucket: `orbis-media`.
+- Authentication: email + password, with a unique username stored in the public profile.
+- Username-to-email lookup: `account_lookup`, blocked from direct `anon` and `authenticated` access.
+- Application tables have Row Level Security enabled. Tables accessed only through the service-role Edge Function intentionally have no direct browser policies; the function must validate the JWT and enforce ownership or conversation membership before every operation.
 
-## Important current limitations
-- The hosting URL and Supabase Auth redirect allow-list must be configured by the project owner; no passwords or service-role secrets are embedded in the repository.
-- The `orbis-media` Supabase Storage bucket exists. The API uploads through the server-side service-role client; the bucket is public-read for media URLs. Confirm the bucket configuration before production use. Cloudflare R2 is not required.
-- The RSS news pages still use the existing Worker endpoints; their KV binding must remain configured or those pages will fail.
-- Stories, bookmarks and comments have UI and API routes. Stories support text plus one photo/video and expire after 24 hours; one Story per author per UTC day is enforced by a unique index. Comments are paginated at 20 per request and stored separately from posts.
-- No load test has been run. Free-tier capacity is not a promise of support for 10,000 concurrent users.
-- Never expose the Supabase service-role key in frontend JavaScript. Only the publishable key belongs in the browser.
+## Account flow
 
-## Account model
-Supabase Auth stores email/password credentials and issues persistent sessions. A database trigger creates the profile and a private username/email lookup row at signup. Login accepts email or username; username login is resolved inside `orbis-api`, which returns the Supabase session without exposing the account email. Passwords are never stored in public tables.
+1. A user signs up with email, username and password through Supabase Auth.
+2. The `on_auth_user_created_orbis` database trigger creates the profile and a private `account_lookup` row.
+3. Login accepts either an email address or username. For username login, `orbis-api` resolves the email server-side and exchanges the credentials with Supabase Auth.
+4. The browser receives the resulting Supabase session, not the account email belonging to another user.
+5. Passwords are never stored in public profile or lookup tables.
 
-## Current end-to-end checks
-- Frontend inline JavaScript blocks were syntax-compiled successfully.
-- HTML document tags and CSS brace pairs were checked.
-- Supabase project reports ACTIVE_HEALTHY.
-- The `orbis-api` Edge Function is ACTIVE at version 19. The legacy Telegram auth function is not called by the current frontend.
-- Security Advisor currently returns no findings.
-- All ten application tables have RLS enabled. The latest Security Advisor run returned no findings.
-- Database currently has zero profiles, posts and Stories; no live user registration has yet been verified.
-- A real email registration cannot be tested until the owner configures the Supabase Auth Site URL/Redirect URLs and confirms the email provider settings.
-- The Cloudflare Worker remains responsible for RSS/news only. Core social/auth endpoints are disabled there to prevent a second KV-based account store.
+## Required Auth configuration
 
+1. In Authentication → Sign In / Providers, ensure the Email provider is enabled.
+2. Keep email confirmation enabled.
+3. In Authentication → URL Configuration, set the Site URL and Redirect URLs to include `https://orbis-mehdipro34.vercel.app`.
+4. Enable leaked-password protection in Auth password security settings.
+5. Never expose the service-role key in browser JavaScript.
 
-## Profile privacy hardening
-The `profiles` table retains nullable legacy Telegram identifier columns from the previous account model. They are not used by the email-first frontend. Direct `anon` and `authenticated` table-wide SELECT was revoked; only safe profile columns are granted. Do not add legacy identifier fields to public profile responses.
+## Media
 
+- The `orbis-media` bucket exists and is public-read for media URLs.
+- Uploads are performed by `orbis-api` using the server-side service-role client.
+- The API validates the authenticated user, allowed MIME types, file sizes and ownership of uploaded object keys.
+- Cloudflare R2 is not required for the current storage design.
 
-## Installable app
-ORBIS includes a web app manifest, SVG app icon and service worker; installation is available through the browser menu on supported devices. The service worker caches only the static app shell; account, feed and media actions still require a network connection. The site must be served over HTTPS for browser installation. The landing-page CTA opens the email/password sign-in flow; installation remains available through the browser menu.
+## Verification status
+
+- Supabase project status: `ACTIVE_HEALTHY`.
+- The latest migration adds the private username/email mapping and updates the auth-user trigger.
+- The database currently contains one profile, one private account lookup row, zero posts and zero Stories.
+- The Edge Function is active at version 27 and includes the email/username login endpoint.
+- The latest Vercel production deployment reported `READY`.
+- A real end-to-end account registration, email confirmation, username login and media upload test has not yet been completed.
+- Supabase Security Advisor reports leaked-password protection disabled. Enable it before broad public launch.
+- The Security Advisor also reports some RLS-enabled service-only tables without direct client policies. This is intentional for tables accessed only through the authenticated Edge Function; do not grant direct browser access as a shortcut.
+
+## Capacity
+
+No load test has been run. Free-tier quotas can pause or throttle the project. Do not claim a specific supported number of users or concurrent sessions until measured.
