@@ -2022,11 +2022,7 @@ const $=id=>document.getElementById(id),modal=$("modal"),toast=$("toast");let to
 function notify(s){toast.textContent=s;toast.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.style.display="none",2800)}
 function openComposer(){
  if(!window.orbisUser){
-  const landing=$("orbisLanding"),gateway=$("authGateway");
-  if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;
-  document.body.classList.add("orbis-auth-open");
-  document.querySelector('[data-auth-mode="signup"]')?.click();
-  notify("Сначала создай аккаунт или войди в ORBIS.");
+  notify("ORBIS ещё подключается. Подожди пару секунд и попробуй снова.");
   return;
  }
  $("dialogTitle").textContent="Новая публикация";modal.classList.add("open");$("postTitle").focus();
