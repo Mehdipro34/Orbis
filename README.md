@@ -13,13 +13,13 @@ ORBIS is a news-first social reading PWA. It has no user-authored posts, public 
 - Anonymous reaction API: Supabase Edge Function `orbis-api`
 
 ## Product features
-- **568 RSS feed URLs** from international publishers plus additional curated feeds. URLs are catalogued by topic, country, and an approximate source-language label. A URL in the catalogue does not guarantee that the publisher currently serves it.
+- **568 RSS feed URLs across 151 unique host domains** from international publishers plus additional curated feeds. These are feed URLs, not 568 separate publisher companies; one publisher can expose many topic feeds. URLs are catalogued by topic, country, and an approximate source-language label. A URL in the catalogue does not guarantee that the publisher currently serves it.
 - **15 topic catalogs:** World, Politics, Business, Technology, Science, Movies & Series, Culture, Gaming, Sports, Auto, Health, Education, Environment, Travel, Food.
 - **For You:** all topics are present. Chosen interests and liked categories affect ranking; the app does not hide all other topics.
 - **Latest:** cross-category chronological feed.
 - **Navigator:** filter and open countries, categories, and individual publisher RSS feeds. The complete source directory is searchable.
 - **Media cards:** show RSS-supplied images, video enclosure links, or YouTube video references where the publisher provides them. When there is no source image, ORBIS displays a topic-themed graphic cover rather than inventing a photo.
-- **Translation:** choose a target language in settings or the feed controls, then translate an individual card. The original article link remains available. The translation provider is a best-effort third-party endpoint and can temporarily fail or change.
+- **Translation:** choose from 62 target languages in settings. Auto-translation is enabled by default for the first eight visible cards when a feed opens; further cards can be translated on demand. Each card can toggle back to its original text. Results are cached on the device. The translation provider is an external best-effort service and can temporarily fail or change.
 - **Encyclopedia:** search Wikipedia in the selected language and save relevant entries.
 - **Article actions:** like/unlike and save; no user comments, replies or posting.
 - **Offline:** the latest feed metadata is kept in IndexedDB; saved articles are kept in a separate IndexedDB store. The app attempts to save the image with an article when the image host allows cross-origin access. Text/metadata is the reliable offline part.

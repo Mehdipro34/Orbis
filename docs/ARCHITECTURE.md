@@ -6,9 +6,9 @@ Status: news-only responsive PWA. No user-authored posts, comments, replies, sto
 - **For You:** cross-topic feed from a rotating sample of the 15 category catalogs. Interest preferences and liked categories rank relevant stories higher without hiding the other categories.
 - **Latest:** cross-topic feed sorted by publication time.
 - **Category feeds:** 15 topics: World, Politics, Business, Technology, Science, Movies & Series, Culture, Gaming, Sports, Auto, Health, Education, Environment, Travel, Food.
-- **Navigator:** search the 568-entry RSS catalog by source, category, country or language metadata. A source can be opened directly.
+- **Navigator:** search the 568-URL RSS catalog across 151 host domains by source, category, country or language metadata. A source can be opened directly.
 - **Media:** RSS image/thumbnail/enclosure extraction; direct video enclosure and YouTube video links when present. Topic-art fallback is used when the publisher has not provided a photo.
-- **Translation:** per-card title and summary translation to a reader-selected language. Translation results are cached in local storage. Translation is third-party, best-effort, and not certified.
+- **Translation:** per-card title and summary translation to a reader-selected language from a 62-language target list. Auto-translation covers the first eight visible cards by default; further cards can be translated on demand. Results are cached in local storage. Translation is third-party, best-effort, and not certified.
 - **Encyclopedia:** Wikipedia API search in the selected language. Search result excerpts and thumbnails are linked to the original Wikipedia page.
 - **Saved:** IndexedDB stores explicitly saved articles. Image blobs are saved only when browser cross-origin access succeeds and image size is within the local limit. The saved cache is per browser/device.
 - **Feed cache:** last 160 article records are stored in IndexedDB for offline reading.
