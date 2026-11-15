@@ -1,0 +1,17 @@
+{
+  "provider": "Google AdMob",
+  "status": "configured_for_future_native_integration",
+  "android": {
+    "app_id": "ca-app-pub-9946397950500083~3195122396",
+    "ad_units": {
+      "launch_or_entry": "ca-app-pub-9946397950500083/8255877389"
+    }
+  },
+  "notes": [
+    "These identifiers were supplied by the ORBIS project owner.",
+    "The App ID and Ad Unit ID are different identifiers and must be used in their corresponding native Android SDK settings.",
+    "This file only records configuration; it does not activate ads.",
+    "The current ORBIS web page and Telegram Mini App do not become AdMob-enabled by adding these IDs. Web and Mini App advertising require a separately supported integration.",
+    "Before release, verify the ad format, placement, app registration, consent/privacy requirements, and test ads in the Google AdMob console."
+  ]
+}
