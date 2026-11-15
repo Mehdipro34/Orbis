@@ -1,47 +1,41 @@
 # ORBIS
 
-A focused social-network project built around three core areas: a continuously refreshed post feed, recent-only Stories, and a topic-based Navigator.
+ORBIS is a Telegram-first social network with a cinematic orbital identity.
 
 ## Product rules
-
-- ORBIS accounts do not require Telegram or Google login.
-- Gmail is collected as plain text in the initial registration flow; no confirmation email is sent.
-- Profiles stay minimal: display name, unique username, short description.
-- Main feed mixes eligible new and older posts and refreshes continuously.
-- Stories are a separate recent-only stream.
-- One post and one Story per account per day.
-- Target platform intake: up to 100,000 posts and 100,000 Stories per day. This is a target, not a load-tested guarantee.
-- Navigator is divided into topic streams with independent service boundaries.
-- General Search is excluded.
+- Telegram Mini App is the only registration and sign-in method.
+- Telegram Web App `initData` is verified server-side; never trust client-supplied Telegram IDs.
+- Supabase Auth provides durable sessions and PostgreSQL stores account/profile and social metadata.
+- Main feed, posts, reactions, replies, follows, bookmarks, Stories and topic Navigator are core product areas.
+- Stories expire after 24 hours; daily publication limits are enforced by database unique indexes.
+- Supabase Storage stores uploaded photos and videos.
+- Private Telegram channels are optional archive destinations; archive failure must not lose a successfully saved post.
+- The app must never claim support for a traffic target until load tests prove it.
 
 ## Repository structure
+- `public/index.html` — responsive web and Telegram Mini App UI, orbital intro, auth client and social screens.
+- `src/index.js` — Cloudflare Worker serving static assets and RSS/news endpoints. Legacy KV-based social/auth endpoints are disabled.
+- `wrangler.toml` — Cloudflare Worker and static asset configuration.
+- `docs/ARCHITECTURE.md` — product and technical architecture.
 
-- `public/index.html` — responsive ORBIS interface.
-- `src/index.js` — Cloudflare Worker API and Telegram webhook foundation.
-- `wrangler.toml` — Worker and static asset configuration.
-- `docs/ARCHITECTURE.md` — current product and technical specification.
+## Supabase project
+- Project ref: `wdwvcvpgovvkoodozbxf`
+- Edge Functions: `orbis-telegram-auth`, `orbis-api`
+- Tables: `profiles`, `account_lookup`, `posts`, `post_likes`, `follows`, `bookmarks`, `stories`, `post_reports`
+- Storage bucket: `orbis-media`
+- RLS is enabled on all public application tables. The private account lookup table denies direct client access.
+- The browser only receives the Supabase publishable key. The service-role key and Telegram bot token must remain in Edge Function secrets.
 
-## Current implementation status
+## Required owner configuration before live use
+1. Set `TELEGRAM_BOT_TOKEN` in Supabase Edge Function secrets.
+2. Configure the official Telegram bot's Mini App URL to the deployed HTTPS frontend.
+3. Configure Cloudflare Worker deployment and the required KV binding for RSS cache/rate limiting.
+4. Verify the deployed site opens inside Telegram and returns valid `Telegram.WebApp.initData`.
+5. Run the end-to-end checklist in `docs/SUPABASE_SETUP.md`.
 
-The interface now reflects the clarified product direction: main feed, fresh Stories, topic Navigator, minimal profile preview, and no Search section.
-
-The UI is still a front-end foundation. Registration, username reservation, persistent posts, Stories, Navigator APIs, Telegram archive integration, moderation and production monitoring are not implemented yet. Sample feed cards are explicitly marked as examples.
-
-## Infrastructure notes
-
-- GitHub stores source code.
-- Cloudflare Workers serves the website and API.
-- Telegram private channels are intended as internal archive storage, not as a user login method.
-- A metadata database/index is required; Telegram channels alone are not a queryable database.
-- Keep bot tokens, webhook secrets and database credentials in Cloudflare secrets. Never commit or send them in chat.
-- Free-tier quotas must be measured. Do not infer concurrency or million-user capacity from the number of Worker deployments.
-
-## Next engineering milestones
-
-1. Add a metadata database and migrations.
-2. Implement secure account creation, login and atomic username uniqueness.
-3. Implement Posts API, daily quota and Telegram archive pipeline.
-4. Implement cursor-based main feed assembly.
-5. Implement Stories API, expiry and daily quota.
-6. Implement independent topic Navigator services.
-7. Add monitoring, moderation and load tests.
+## Known limits
+- The repository being public on GitHub does not mean a website is deployed.
+- The database currently has no user profiles, posts or Stories; the first real Telegram sign-in creates the first account.
+- No full browser E2E suite or load test has been completed in this session.
+- Free-tier quotas can pause or throttle a project. Zero-budget operation is the target, not a guarantee of unlimited usage.
+- RSS/news still runs through the Cloudflare Worker and its KV cache.
