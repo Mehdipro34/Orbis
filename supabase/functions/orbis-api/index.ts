@@ -96,6 +96,12 @@ Deno.serve(async (req: Request) => {
   const apiMarker = pathname.lastIndexOf("/api/");
   const path = apiMarker >= 0 ? pathname.slice(apiMarker) : (pathname.endsWith("/health") ? "/health" : (pathname.replace(/^\/functions\/v1\/orbis-api/,"") || "/"));
   let body:any = {}, form:FormData|null=null;
+  if (req.method==="GET" && path==="/api/guest/me") {
+    if(!uid)return out({error:"Гостевой профиль не найден."},401);
+    const {data:p,error}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
+    if(error)return out({error:"Не удалось загрузить гостевой профиль."},500);
+    return p?out({authenticated:true,user:{id:uid,...safeProfile(p)}}):out({error:"Гостевой профиль не найден."},404);
+  }
   if (req.method==="POST" && path==="/api/media") { try { form=await req.formData(); } catch { return out({error:"Invalid form data"},400); } }
   else if (["POST","PUT","PATCH"].includes(req.method)) { try { body = await req.json(); } catch { return out({error:"Invalid JSON"},400); } }
 
