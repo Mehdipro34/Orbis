@@ -2,7 +2,19 @@ const SOURCES = {
   "bbc-ru": { name: "BBC News · Русский", url: "https://feeds.bbci.co.uk/russian/rss.xml", language: "Русский", credit: "BBC News", hosts: ["bbc.com", "bbc.co.uk"] },
   "oxu-az": { name: "Oxu.az", url: "https://oxu.az/feed", language: "Азербайджанский", credit: "Oxu.az", hosts: ["oxu.az"] },
   "bbc-world": { name: "BBC News · Мир", url: "https://feeds.bbci.co.uk/news/world/rss.xml", language: "English", credit: "BBC News", hosts: ["bbc.com", "bbc.co.uk"] },
-  "aljazeera-en": { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", language: "English", credit: "Al Jazeera", hosts: ["aljazeera.com"] }
+  "aljazeera-en": { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", language: "English", credit: "Al Jazeera", hosts: ["aljazeera.com"] },
+  "dw-en": { name: "Deutsche Welle · Мир", url: "https://rss.dw.com/xml/rss-en-all", language: "English", credit: "Deutsche Welle", hosts: ["dw.com"] },
+  "guardian-world": { name: "The Guardian · Мир", url: "https://www.theguardian.com/world/rss", language: "English", credit: "The Guardian", hosts: ["theguardian.com"] },
+  "france24-en": { name: "France 24", url: "https://www.france24.com/en/rss", language: "English", credit: "France 24", hosts: ["france24.com"] },
+  "euronews": { name: "Euronews", url: "https://www.euronews.com/rss", language: "English", credit: "Euronews", hosts: ["euronews.com"] },
+  "techcrunch": { name: "TechCrunch · Технологии", url: "https://techcrunch.com/feed/", language: "English", credit: "TechCrunch", hosts: ["techcrunch.com"] },
+  "the-verge": { name: "The Verge · Технологии", url: "https://www.theverge.com/rss/index.xml", language: "English", credit: "The Verge", hosts: ["theverge.com"] },
+  "wired": { name: "Wired · Технологии", url: "https://www.wired.com/feed/rss", language: "English", credit: "Wired", hosts: ["wired.com"] },
+  "ars-technica": { name: "Ars Technica", url: "https://feeds.arstechnica.com/arstechnica/index", language: "English", credit: "Ars Technica", hosts: ["arstechnica.com"] },
+  "science-daily": { name: "ScienceDaily · Наука", url: "https://www.sciencedaily.com/rss/top/science.xml", language: "English", credit: "ScienceDaily", hosts: ["sciencedaily.com"] },
+  "nasa": { name: "NASA · Космос", url: "https://www.nasa.gov/rss/dyn/breaking_news.rss", language: "English", credit: "NASA", hosts: ["nasa.gov"] },
+  "npr": { name: "NPR · Новости", url: "https://feeds.npr.org/1001/rss.xml", language: "English", credit: "NPR", hosts: ["npr.org"] },
+  "bbc-tech": { name: "BBC News · Технологии", url: "https://feeds.bbci.co.uk/news/technology/rss.xml", language: "English", credit: "BBC News", hosts: ["bbc.com", "bbc.co.uk"] }
 };
 function decode(value) {
   return String(value || "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
@@ -43,7 +55,7 @@ module.exports = async function handler(req,res) {
     const xml=await response.text();
     if(!xml||!/<(?:rss|feed|rdf:RDF)\b/i.test(xml))throw new Error("Источник вернул неизвестный формат ленты.");
     const items=parse(xml,source);if(!items.length)throw new Error("В ленте пока нет доступных публикаций.");
-    res.setHeader("Cache-Control","s-maxage=300, stale-while-revalidate=300");
+    res.setHeader("Cache-Control","s-maxage=900, stale-while-revalidate=3600, stale-if-error=86400");
     return res.status(200).json({source:source.name,language:source.language,items,cached:false,fetchedAt:Date.now()});
   }catch(error){return res.status(502).json({error:"Не удалось загрузить "+source.name+": "+error.message});}
 };
