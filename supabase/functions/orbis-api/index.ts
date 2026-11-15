@@ -27,17 +27,15 @@ async function enrichPostCounts(admin:any, uid:string, rows:any[]){
   if(!rows.length)return rows;
   const ids=rows.map((p:any)=>p.id).filter(Boolean);
   if(!ids.length)return rows;
-  const [{data:likes},{data:mine},{data:comments},{data:bookmarks}]=await Promise.all([
+  const [{data:likes},{data:mine},{data:bookmarks}]=await Promise.all([
     admin.from("post_like_counts").select("post_id,like_count").in("post_id",ids),
     admin.from("post_likes").select("post_id").eq("user_id",uid).in("post_id",ids),
-    admin.from("post_comment_counts").select("post_id,comment_count").in("post_id",ids),
     admin.from("bookmarks").select("post_id").eq("user_id",uid).in("post_id",ids)
   ]);
   const likeMap=new Map((likes||[]).map((x:any)=>[x.post_id,Number(x.like_count)||0]));
-  const commentMap=new Map((comments||[]).map((x:any)=>[x.post_id,Number(x.comment_count)||0]));
   const liked=new Set((mine||[]).map((x:any)=>x.post_id));
   const saved=new Set((bookmarks||[]).map((x:any)=>x.post_id));
-  return rows.map((p:any)=>({...p,likes:likeMap.get(p.id)||0,comments:commentMap.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
+  return rows.map((p:any)=>({...p,likes:likeMap.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
 }
 
 
@@ -187,17 +185,15 @@ Deno.serve(async (req: Request) => {
     const topic=u.searchParams.get("topic"); if(topic) q=q.ilike("topic",topic);
     const {data,error}=await q; if(error)return out({error:error.message},400);
     const ids=(data||[]).map((p:any)=>p.id);
-    const [{data:likes},{data:mine},{data:commentRows},{data:bookmarks}]=await Promise.all([
+    const [{data:likes},{data:mine},{data:bookmarks}]=await Promise.all([
       ids.length?admin.from("post_like_counts").select("post_id,like_count").in("post_id",ids):Promise.resolve({data:[]}),
       ids.length?admin.from("post_likes").select("post_id").eq("user_id",uid).in("post_id",ids):Promise.resolve({data:[]}),
-      ids.length?admin.from("post_comment_counts").select("post_id,comment_count").in("post_id",ids):Promise.resolve({data:[]}),
       ids.length?admin.from("bookmarks").select("post_id").eq("user_id",uid).in("post_id",ids):Promise.resolve({data:[]})
     ]);
     const counts=new Map((likes||[]).map((x:any)=>[x.post_id,Number(x.like_count)||0]));
-    const commentCounts=new Map((commentRows||[]).map((x:any)=>[x.post_id,Number(x.comment_count)||0]));
     const liked=new Set((mine||[]).map((x:any)=>x.post_id));
     const saved=new Set((bookmarks||[]).map((x:any)=>x.post_id));
-    const posts=(data||[]).map((p:any)=>({id:p.id,title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,avatar_url:p.profiles?.avatar_url,createdAt:p.created_at,replyTo:p.reply_to,media:p.media||[],likes:counts.get(p.id)||0,comments:commentCounts.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
+    const posts=(data||[]).map((p:any)=>({id:p.id,title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,avatar_url:p.profiles?.avatar_url,createdAt:p.created_at,replyTo:p.reply_to,media:p.media||[],likes:counts.get(p.id)||0,liked:liked.has(p.id),saved:saved.has(p.id)}));
     return out({posts,hasMore:posts.length===limit,nextOffset:offset+posts.length});
   }
   const singlePost=path.match(/^\/api\/posts\/([0-9a-f-]+)$/i);
@@ -207,17 +203,16 @@ Deno.serve(async (req: Request) => {
       .eq("id",singlePost[1]).eq("status","published").maybeSingle();
     if(error)return out({error:error.message},400);
     if(!p)return out({error:"Публикация не найдена."},404);
-    const [{data:likes},{data:mine},{data:comments},{data:saved}]=await Promise.all([
+    const [{data:likes},{data:mine},{data:saved}]=await Promise.all([
       admin.from("post_like_counts").select("like_count").eq("post_id",p.id).maybeSingle(),
       admin.from("post_likes").select("post_id").eq("post_id",p.id).eq("user_id",uid).maybeSingle(),
-      admin.from("post_comment_counts").select("comment_count").eq("post_id",p.id).maybeSingle(),
       admin.from("bookmarks").select("post_id").eq("post_id",p.id).eq("user_id",uid).maybeSingle()
     ]);
     return out({post:{
       id:p.id,title:p.title,topic:p.topic,body:p.body,
       username:p.profiles?.username,author:p.profiles?.display_name,avatar_url:p.profiles?.avatar_url,
       createdAt:p.created_at,replyTo:p.reply_to,media:p.media||[],
-      likes:Number(likes?.like_count)||0,comments:Number(comments?.comment_count)||0,liked:!!mine,saved:!!saved
+      likes:Number(likes?.like_count)||0,liked:!!mine,saved:!!saved
     }});
   }
   if (req.method==="POST" && path==="/api/posts") {
@@ -239,7 +234,7 @@ Deno.serve(async (req: Request) => {
     return out({ok:true,post:{
       ...post,username:me.username,author:me.display_name,
       createdAt:post.created_at,replyTo:post.reply_to,
-      likes:0,comments:0,liked:false,saved:false,
+      likes:0,liked:false,saved:false,
     }},201);
   }
   const like=path.match(/^\/api\/posts\/([0-9a-f-]+)\/like$/i);
@@ -257,59 +252,8 @@ Deno.serve(async (req: Request) => {
     const {data,error}=await admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name)").eq("reply_to",replies[1]).eq("status","published").order("created_at",{ascending:true}).limit(20);
     if(error)return out({error:error.message},400);
     const counted=await enrichPostCounts(admin,uid,data||[]);
-    return out({replies:counted.map((p:any)=>({id:p.id,title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,createdAt:p.created_at,replyTo:p.reply_to,likes:p.likes,comments:p.comments,liked:p.liked}))});
+    return out({replies:counted.map((p:any)=>({id:p.id,title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,createdAt:p.created_at,replyTo:p.reply_to,likes:p.likes,liked:p.liked}))});
   }
-  const commentsRoute=path.match(/^\/api\/posts\/([0-9a-f-]+)\/comments$/i);
-  if(req.method==="GET"&&commentsRoute){
-    const rawOffset=Number(u.searchParams.get("offset")||0),rawLimit=Number(u.searchParams.get("limit")||20);
-    const offset=Number.isSafeInteger(rawOffset)?Math.max(0,Math.min(rawOffset,1000000)):0;
-    const limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
-    const {data,error}=await admin.from("post_comments")
-      .select("id,post_id,body,created_at,author_id,profiles!post_comments_author_id_fkey(username,display_name,avatar_url)")
-      .eq("post_id",commentsRoute[1]).eq("status","published")
-      .order("created_at",{ascending:true}).order("id",{ascending:true})
-      .range(offset,offset+limit);
-    if(error)return out({error:error.message},400);
-    const rows=data||[];
-    const hasMore=rows.length>limit;
-    return out({comments:rows.slice(0,limit).map((c:any)=>({
-      id:c.id,postId:c.post_id,body:c.body,createdAt:c.created_at,
-      username:c.profiles?.username,author:c.profiles?.display_name,
-      avatar_url:c.profiles?.avatar_url,own:c.author_id===uid
-    })),hasMore,nextOffset:offset+Math.min(rows.length,limit)});
-  }
-  if(req.method==="POST"&&commentsRoute){
-    if(await isRateLimited(admin,uid,"comment",8,60))return out({error:"Слишком много комментариев. Подожди минуту."},429);
-    const text=String(body.body||"").trim();
-    if(!text||text.length>1000)return out({error:"Комментарий должен содержать от 1 до 1000 символов."},400);
-    const moderation=basicTextGuard(text);if(moderation)return out({error:moderation},422);
-    const {data:parent}=await admin.from("posts").select("id").eq("id",commentsRoute[1]).eq("status","published").maybeSingle();
-    if(!parent)return out({error:"Публикация не найдена."},404);
-    const {data:comment,error}=await admin.from("post_comments")
-      .insert({post_id:commentsRoute[1],author_id:uid,body:text})
-      .select("id,post_id,body,created_at,author_id,profiles!post_comments_author_id_fkey(username,display_name,avatar_url)")
-      .single();
-    if(error)return out({error:error.message},400);
-    const {count}=await admin.from("post_comments").select("id",{count:"exact",head:true})
-      .eq("post_id",commentsRoute[1]).eq("status","published");
-    return out({ok:true,comment:{
-      id:comment.id,postId:comment.post_id,body:comment.body,createdAt:comment.created_at,
-      username:comment.profiles?.username,author:comment.profiles?.display_name,
-      avatar_url:comment.profiles?.avatar_url,own:true
-    },comments:count||0},201);
-  }
-  const deleteComment=path.match(/^\/api\/comments\/([0-9a-f-]+)$/i);
-  if(req.method==="DELETE"&&deleteComment){
-    const {data,error}=await admin.from("post_comments")
-      .update({status:"removed"}).eq("id",deleteComment[1]).eq("author_id",uid)
-      .eq("status","published").select("id,post_id").maybeSingle();
-    if(error)return out({error:error.message},400);
-    if(!data)return out({error:"Комментарий не найден или уже удалён."},404);
-    const {count}=await admin.from("post_comments").select("id",{count:"exact",head:true})
-      .eq("post_id",data.post_id).eq("status","published");
-    return out({ok:true,comments:count||0});
-  }
-
   if(req.method==="PUT"&&path==="/api/profile"){
     const name=String(body.name||"").trim(),bio=String(body.bio||"").trim();
     if(name.length<2||name.length>32||bio.length>180)return out({error:"Проверь имя и описание профиля."},400);
