@@ -3,7 +3,7 @@
 ## What is deployed
 - Supabase project: `Orbis` (`wdwvcvpgovvkoodozbxf`)
 - PostgreSQL schema: profiles, account_lookup, posts, post_likes, follows, bookmarks, stories, post_reports
-- RLS enabled on every public table
+- RLS enabled on every public table\n- Direct client reads of `profiles` are column-restricted: Telegram identifiers are only readable by the server-side service role
 - Edge Functions: `orbis-telegram-auth` and `orbis-api`
 - Frontend: Supabase client + Telegram Mini App authentication + API routing to Edge Functions
 
@@ -35,3 +35,7 @@ Telegram Mini App initData is verified server-side using the bot token. A corres
 - Database currently has zero profiles, posts and Stories; no live user registration has yet been verified.
 - A real Telegram sign-in cannot be tested until the owner sets the bot token secret and configures the official Mini App URL.
 - The Cloudflare Worker remains responsible for RSS/news only. Core social/auth endpoints are disabled there to prevent a second KV-based account store.
+
+
+## Profile privacy hardening
+The `profiles` table contains Telegram identifiers for server-side account matching. Direct `anon` and `authenticated` table-wide SELECT was revoked; only safe profile columns are granted. `telegram_id` and `telegram_username` remain available to Edge Functions using the service-role key and are not exposed through the browser Data API. Do not add these fields to public profile responses.
