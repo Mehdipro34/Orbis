@@ -2174,7 +2174,7 @@ document.addEventListener("click",event=>{
    window.orbisUser=data.user;
    const name=$("profileNameInput"),handle=$("profileHandleInput"),bio=$("profileBioInput");
    if(name&&handle&&bio){
-    name.value=data.user.name||data.user.username;handle.value=data.user.username;bio.value=data.user.bio||"";
+    name.value=data.user.name||data.user.username;handle.value=data.user.username;handle.readOnly=true;handle.title="Username нельзя изменить после регистрации.";bio.value=data.user.bio||"";
     $("profileNamePreview").textContent=name.value;$("profileHandlePreview").textContent="@"+handle.value;$("profileAvatarPreview").textContent=name.value.slice(0,1).toUpperCase();
    }
    const profile=await api("/api/profile/"+encodeURIComponent(data.user.username));
@@ -2226,7 +2226,7 @@ document.addEventListener("click",event=>{
     const row=document.createElement("div");row.className="post";row.style.margin="8px 0";
     const name=document.createElement("b");name.textContent=user.name+" · @"+user.username;
     const bio=document.createElement("p");bio.className="post-body";bio.textContent=user.bio||"Без описания";
-    const follow=document.createElement("button");follow.className="secondary";follow.type="button";follow.dataset.action="follow";follow.dataset.username=user.username;follow.textContent="Подписаться";
+    const follow=document.createElement("button");follow.className="secondary";follow.type="button";follow.dataset.action="follow";follow.dataset.username=user.username;follow.textContent=user.isFollowing?"Вы подписаны":"Подписаться";
     row.append(name,bio,follow);results.append(row);
    });
    const postHeading=document.createElement("h3");postHeading.textContent="Публикации";results.append(postHeading);
