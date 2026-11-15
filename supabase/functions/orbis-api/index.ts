@@ -127,12 +127,6 @@ Deno.serve(async (req: Request) => {
     const signed=await issueGuestToken(deviceId,service);
     return out({ok:true,token:signed,user:{id:deviceId,...safeProfile(profile)}});
   }
-  if (req.method==="GET" && path==="/api/auth/me") {
-    if(!uid)return out({authenticated:false},401);
-    const {data:p,error}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
-    if(error)return out({error:"Не удалось загрузить гостевой профиль."},500);
-    return p?out({authenticated:true,user:{id:uid,...safeProfile(p)}}):out({authenticated:false},404);
-  }
   if (req.method==="POST" && path==="/api/media") {
     if (!uid) return out({error:"Войди в ORBIS, чтобы загружать медиа."},401);
     if(await isRateLimited(admin,uid,"media",10,60))return out({error:"Слишком много загрузок. Подожди минуту."},429);
