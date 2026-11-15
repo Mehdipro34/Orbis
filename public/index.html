@@ -1829,6 +1829,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <button class="active" data-view="Лента"><span class="nav-icon">⌂</span>Лента</button>
   
   <button data-view="Навигатор"><span class="nav-icon">✳</span>Навигатор</button>
+  <button data-view="Закладки"><span class="nav-icon">⌑</span>Закладки</button>
   <button data-view="Профиль"><span class="nav-icon">◎</span>Профиль</button>
   <button class="create" id="openComposer"><span class="nav-icon">＋</span>Создать публикацию</button>
  </nav>
@@ -1862,7 +1863,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
  <section class="side-card"><h3>Принципы ORBIS</h3><div class="stat-line"><span>Главная лента</span><b>Живая</b></div><div class="stat-line"><span>Навигатор</span><b>По темам</b></div><div class="stat-line"><span>Навигатор</span><b>По темам</b></div><p class="side-copy">Никакого перегруженного профиля и лишних разделов. Только то, ради чего люди приходят.</p></section>
 </aside>
 </div>
-<nav class="mobile-nav"><button class="active" data-view="Лента" aria-label="Лента">⌂</button><button id="mobileCreate" aria-label="Создать">＋</button><button data-view="Навигатор" aria-label="Навигатор">✳</button><button data-view="Профиль" aria-label="Профиль">◎</button></nav>
+<nav class="mobile-nav"><button class="active" data-view="Лента" aria-label="Лента">⌂</button><button id="mobileCreate" aria-label="Создать">＋</button><button data-view="Навигатор" aria-label="Навигатор">✳</button><button data-view="Закладки" aria-label="Закладки">⌑</button><button data-view="Профиль" aria-label="Профиль">◎</button></nav>
 <div class="modal" id="modal"><div class="dialog"><h2 id="dialogTitle">Новая публикация</h2><p class="sub">Поделись мыслью с сообществом ORBIS.</p><input id="postTitle" maxlength="120" placeholder="Название публикации"><input id="postTopic" maxlength="48" placeholder="Тема, например: Технологии"><textarea id="postBody" maxlength="4000" placeholder="Текст публикации..."></textarea><label style="display:block;margin:12px 0;color:#777e96;font-size:12px">Фото и видео (до 4 файлов)<input id="postMedia" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" style="display:block;width:100%;margin-top:8px;padding:10px;border:1px dashed #aaa;border-radius:12px;background:#fafaff"></label><div id="postMediaNote" class="post-meta">Фото до 12 МБ, видео до 50 МБ на файл.</div><div class="dialog-actions"><button class="secondary" id="cancel">Отмена</button><button class="primary" id="publish">Продолжить</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -1914,6 +1915,9 @@ function setOrbisScreen(view){
   }));
   const newsSelect=$("newsSourceSelect");
   if(newsSelect)loadNews(newsSelect.value);
+ }else if(view==="Закладки"){
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SAVED IDEAS</span><h2>Закладки</h2><p>Публикации, которые ты сохранил, всегда под рукой.</p></div><div id="orbisBookmarksList" aria-live="polite"><div class="post">Загружаем сохранённые публикации…</div></div>';
+  api("/api/bookmarks").then(data=>{const list=$("orbisBookmarksList");if(!list)return;list.replaceChildren();if(!data.posts.length){const empty=document.createElement("div");empty.className="post";empty.textContent="Здесь пока пусто. Сохраняй интересные публикации из ленты.";list.append(empty)}else data.posts.forEach(item=>list.append(card(item))) }).catch(error=>{const list=$("orbisBookmarksList");if(list){list.textContent=error.message}});
  }else if(view==="Профиль"){
   orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button">Выйти из аккаунта</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
  } 
@@ -2188,8 +2192,9 @@ document.addEventListener("click",event=>{
   const reply=document.createElement("button");reply.type="button";reply.dataset.action="reply";reply.textContent="↩ Ответить";
   const showReplies=document.createElement("button");showReplies.type="button";showReplies.dataset.action="show-replies";showReplies.textContent="◌ Ответы";
   const share=document.createElement("button");share.type="button";share.dataset.action="share";share.textContent="↗ Поделиться";
+  const save=document.createElement("button");save.type="button";save.dataset.action="bookmark";save.textContent="⌑ Сохранить";
   const report=document.createElement("button");report.type="button";report.dataset.action="report";report.textContent="⚑ Пожаловаться";
-  actions.append(like,reply,showReplies,share,report);article.append(top,title,topic,body,actions);return article;
+  actions.append(like,reply,showReplies,share,save,report);article.append(top,title,topic,body,actions);return article;
  }
  let feedOffset=0,feedHasMore=false,feedLoading=false,feedTopic="";
  async function loadFeed(reset=true,topic=feedTopic){
@@ -2319,6 +2324,13 @@ document.addEventListener("click",event=>{
   if(target.id==="profileLogout"){
    event.preventDefault();target.disabled=true;
    try{if(window.orbisSupabase?.auth){const signedOut=await window.orbisSupabase.auth.signOut();if(signedOut.error)throw signedOut.error;}window.orbisUser=null;const shell=$("orbisAppShell"),gateway=$("authGateway"),landing=$("orbisLanding");if(shell)shell.hidden=true;if(gateway)gateway.hidden=false;if(landing)landing.hidden=true;document.body.classList.remove("orbis-app-open","orbis-demo-open");document.body.classList.add("orbis-auth-open");document.querySelector('[data-auth-mode="login"]')?.click();window.notify?.("Ты вышел из ORBIS.")}catch(error){window.notify?.(error.message)}finally{target.disabled=false}return;
+  }
+  if(target.dataset.action==="bookmark"){
+   const article=target.closest("[data-post-id]");if(!article)return;
+   target.disabled=true;
+   try{const data=await api("/api/bookmarks",{method:"POST",body:JSON.stringify({postId:article.dataset.postId})});target.textContent=data.saved?"✓ Сохранено":"⌑ Сохранить";target.setAttribute("aria-pressed",String(data.saved));window.notify?.(data.saved?"Добавлено в закладки.":"Удалено из закладок.")}
+   catch(error){window.notify?.(error.message)}finally{target.disabled=false}
+   return;
   }
   if(target.dataset.action==="like"){
    const article=target.closest("[data-post-id]");if(!article)return;
