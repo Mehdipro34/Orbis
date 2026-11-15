@@ -70,7 +70,7 @@ This binding is stored in Cloudflare account settings, not in the GitHub reposit
 
 The browser OIDC flow will return a clear configuration error until all three `TELEGRAM_LOGIN_*` secrets are set in Supabase and the matching URLs are registered in BotFather.
 
-The server validates Telegram `initData`; do not accept Telegram IDs supplied by the browser.
+The server validates signed Mini App `initData` or the OIDC authorization code and signed ID token; never accept Telegram IDs supplied directly by the browser.
 
 ## 4. First live smoke test
 
