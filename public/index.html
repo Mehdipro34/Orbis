@@ -1911,16 +1911,8 @@ function setOrbisScreen(view){
   const newsSelect=$("newsSourceSelect");
   if(newsSelect)loadNews(newsSelect.value);
  }else if(view==="Профиль"){
-  $("profileSave").addEventListener("click",()=>{
-   const name=nameInput.value.trim(),username=handleInput.value.trim().replace(/^@/,""),bio=bioInput.value.trim();
-   if(name.length<2||name.length>32){notify("Имя должно содержать от 2 до 32 символов.");return}
-   if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username)){notify("Username: 3–24 символа, латиница, цифры, точка или _.");return}
-   const next={name,username,bio};
-   try{localStorage.setItem("orbis-profile-v1",JSON.stringify(next))}catch(e){notify("Не удалось сохранить профиль в браузере.");return}
-   $("profileNamePreview").textContent=name;$("profileHandlePreview").textContent="@"+username;$("profileAvatarPreview").textContent=name.slice(0,1).toUpperCase();
-   const note=$("profileSaveNote");note.textContent="Изменения сохранены на этом устройстве.";
-   if($("avatar"))$("avatar").textContent=name.slice(0,1).toUpperCase();
- }
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button">Выйти из аккаунта</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
+ } 
 }
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setOrbisScreen(b.dataset.view)));
 if(tg?.initDataUnsafe?.user){const u=tg.initDataUnsafe.user;$("avatar").textContent=(u.first_name||"O").slice(0,1).toUpperCase()}
