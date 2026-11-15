@@ -1878,10 +1878,7 @@ function openComposer(){
 $("cancel").addEventListener("click",()=>modal.classList.remove("open"));
 modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
 
-// Local-first publishing: posts are stored in this browser and survive refreshes.
-const ORBIS_PROFILE_KEY="orbis-profile-v1";
-function getOrbisProfile(){try{return JSON.parse(localStorage.getItem(ORBIS_PROFILE_KEY)||"{}")}catch(e){return{}}}
-const ORBIS_POSTS_KEY="orbis-local-posts-v1";
+// Account data and publications are loaded from the ORBIS server.
 const orbisScreen=$("orbisScreen");
 const homeScreenNodes=[...document.querySelector("main").children].filter(el=>el.id!=="topbar"&&el!==orbisScreen);
 const orbisTopics=[
@@ -2075,7 +2072,7 @@ document.addEventListener("click",event=>{
 /* ORBIS access screen interactions — server-backed accounts and persistent sessions. */
 (function(){
  const intro=document.getElementById("orbisIntro"),gateway=document.getElementById("authGateway"),shell=document.getElementById("orbisAppShell");
- const skip=document.getElementById("introSkip"),form=document.getElementById("orbisAuthForm");
+ const skip=document.getElementById("introSkip");
  const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs"),username=document.getElementById("authUsername"),emailField=document.getElementById("authEmailField"),email=document.getElementById("authEmail");
  let mode="login";
  function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}}
@@ -2233,8 +2230,8 @@ document.addEventListener("click",event=>{
   note.className="auth-form-note";note.textContent="Подключаем аккаунт...";
   try{
    const data=await api(mode==="signup"?"/api/auth/register":"/api/auth/login",{method:"POST",body:JSON.stringify(payload)});
-   window.orbisUser=data.user;note.textContent="Успешно!";
-   $("authDemo")?.click();
+   window.orbisUser=data.user;note.textContent="Готово. Добро пожаловать в ORBIS.";
+   window.orbisEnterApp?.();
    loadFeed();
   }catch(error){note.className="auth-form-note error";note.textContent=error.message}
  },true);
