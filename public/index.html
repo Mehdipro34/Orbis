@@ -6,7 +6,9 @@
 <meta name="theme-color" content="#f7f8fc">
 <meta name="description" content="ORBIS — цифровое пространство идей, публикаций и открытий. Проект Мехти Мурадлы.">
 <title>ORBIS — твой мир идей | Мехти Мурадлы</title>
-<script src="https://telegram.org/js/telegram-web-app.js">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
 /* Cinematic nebula layer + gentle pointer depth (disabled on touch/reduced motion). */
 (function(){
   const nebula=document.createElement("div");nebula.id="orbNebula";nebula.setAttribute("aria-hidden","true");
@@ -1688,7 +1690,7 @@ body{overflow-x:hidden}
     <button class="auth-submit" type="submit"><span id="authSubmitText">Войти</span><b>↗</b></button>
    </form>
    <button class="auth-demo auth-quick-demo" id="authDemo" type="button"><span class="quick-orbit-icon">✳</span> Быстрый просмотр ORBIS <b>→</b></button>
-   <div class="auth-legal">Демонстрационный вход не создаёт аккаунт.</div>
+   <div class="auth-legal">Аккаунт защищён паролем. Почта необязательна.</div>
   </div></div>
  </div>
  <div class="auth-copyright">© 2026 ORBIS</div>
@@ -2070,12 +2072,14 @@ document.addEventListener("click",event=>{
  }));
  const eye=document.getElementById("authEye");if(eye)eye.addEventListener("click",()=>{const reveal=password.type==="password";password.type=reveal?"text":"password";eye.textContent=reveal?"◎":"◉";eye.setAttribute("aria-label",reveal?"Скрыть пароль":"Показать пароль")});
  if(form)form.addEventListener("submit",e=>{
-  e.preventDefault();note.className="auth-form-note error";
-  if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username.value.trim())){note.textContent="Username: 3–24 символа, латинские буквы, цифры, точка или _.";username.focus();return}
-  if(password.value.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";password.focus();return}
-  if(mode==="signup"&&email.value.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())){note.textContent="Проверь адрес почты или оставь поле пустым.";email.focus();return}
-  if(mode==="signup"&&password.value!==confirmInput.value){note.textContent="Пароли не совпадают.";confirmInput.focus();return}
-  note.textContent="Форма готова. Настоящий вход появится после подключения защищённой авторизации.";
+  e.preventDefault();
+  note.className="auth-form-note";
+  note.textContent="Подключение...";
+  const endpoint=mode==="signup"?"/api/auth/register":"/api/auth/login";
+  fetch(endpoint,{method:"POST",headers:{"content-type":"application/json"},credentials:"same-origin",body:JSON.stringify({username:username.value.trim(),password:password.value,email:email.value.trim()})})
+   .then(async r=>{const data=await r.json();if(!r.ok)throw new Error(data.error||"Не удалось войти.");return data})
+   .then(data=>{window.orbisUser=data.user;note.textContent="Готово. Добро пожаловать в ORBIS.";if(demo)demo.click();window.dispatchEvent(new Event("orbis:login"));})
+   .catch(error=>{note.className="auth-form-note error";note.textContent=error.message});
  });
  if(demo)demo.addEventListener("click",enterDemo);
 })();
@@ -2112,6 +2116,127 @@ document.addEventListener("click",event=>{
   });
   art.addEventListener("pointerleave",()=>{art.style.setProperty("--land-pointer-x","0px");art.style.setProperty("--land-pointer-y","0px")});
  }
+})();
+});
+</script>
+
+<script>
+/* ORBIS single-worker connection: API, Telegram archive and shared profiles. */
+(function(){
+ const $=id=>document.getElementById(id);
+ const api=async(path,options={})=>{
+  const response=await fetch(path,{credentials:"same-origin",...options,headers:{"content-type":"application/json",...(options.headers||{})}});
+  const data=await response.json().catch(()=>({error:"Ответ сервера не распознан."}));
+  if(!response.ok)throw new Error(data.error||"Ошибка запроса.");
+  return data;
+ };
+ function card(post){
+  const article=document.createElement("article");article.className="post";
+  const top=document.createElement("div");top.className="post-top";
+  const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=(post.author||post.username||"O").slice(0,1).toUpperCase();
+  const identity=document.createElement("div");
+  const author=document.createElement("div");author.className="author";author.textContent=post.author||post.username;
+  const handle=document.createElement("span");handle.className="handle";handle.textContent="@"+post.username;author.appendChild(handle);
+  const meta=document.createElement("div");meta.className="post-meta";meta.textContent=new Date(post.createdAt).toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+  identity.append(author,meta);top.append(avatar,identity);
+  const title=document.createElement("div");title.className="post-title";title.textContent=post.title;
+  const topic=document.createElement("span");topic.className="topic";topic.textContent=(post.topic||"Идеи").toLocaleUpperCase("ru");
+  const body=document.createElement("div");body.className="post-body";body.textContent=post.body;
+  const actions=document.createElement("div");actions.className="post-actions";
+  const like=document.createElement("button");like.type="button";like.textContent="♡ Реакция";
+  const share=document.createElement("button");share.type="button";share.textContent="↗ Поделиться";
+  actions.append(like,share);article.append(top,title,topic,body,actions);return article;
+ }
+ async function loadFeed(){
+  try{
+   const data=await api("/api/posts");
+   const feed=$("feed");if(!feed)return;
+   feed.querySelectorAll(".api-post").forEach(x=>x.remove());
+   data.posts.forEach(post=>{const el=card(post);el.classList.add("api-post");feed.prepend(el)});
+  }catch(error){if(error.message!=="Не подключено хранилище ORBIS_KV. Создай KV namespace и добавь binding ORBIS_KV.")console.warn("ORBIS feed:",error.message)}
+ }
+ async function loadCurrentProfile(){
+  try{
+   const data=await api("/api/auth/me");
+   window.orbisUser=data.user;
+   const name=$("profileNameInput"),handle=$("profileHandleInput"),bio=$("profileBioInput");
+   if(name&&handle&&bio){
+    name.value=data.user.name||data.user.username;handle.value=data.user.username;bio.value=data.user.bio||"";
+    $("profileNamePreview").textContent=name.value;$("profileHandlePreview").textContent="@"+handle.value;$("profileAvatarPreview").textContent=name.value.slice(0,1).toUpperCase();
+   }
+   const profile=await api("/api/profile/"+encodeURIComponent(data.user.username));
+   const card=document.querySelector(".profile-screen-card");
+   if(card){
+    let list=card.querySelector(".profile-publications");
+    if(!list){list=document.createElement("div");list.className="profile-publications";list.style.marginTop="22px";card.appendChild(list)}
+    list.innerHTML="<h3>Публикации пользователя</h3>";
+    if(!profile.posts.length){const empty=document.createElement("p");empty.className="profile-only-note";empty.textContent="Пока нет публикаций.";list.appendChild(empty)}
+    profile.posts.forEach(post=>list.appendChild(cardPostMini(post)));
+   }
+  }catch(error){}
+ }
+ function cardPostMini(post){
+  const box=document.createElement("article");box.className="post";box.style.marginTop="12px";
+  const h=document.createElement("b");h.textContent=post.title;
+  const p=document.createElement("p");p.className="post-body";p.textContent=post.body;
+  const t=document.createElement("span");t.className="topic";t.textContent=post.topic;
+  box.append(h,t,p);return box;
+ }
+ document.addEventListener("submit",async event=>{
+  if(event.target.id!=="orbisAuthForm")return;
+  event.preventDefault();event.stopImmediatePropagation();
+  const note=$("authFormNote"),mode=document.querySelector("[data-auth-mode].active")?.dataset.authMode||"login";
+  const payload={username:$("authUsername").value.trim(),password:$("authPassword").value,email:$("authEmail").value.trim()};
+  if(!/^[a-zA-Z0-9_.]{3,24}$/.test(payload.username)){note.textContent="Username: 3–24 символа, латиница, цифры, точка или _.";return}
+  if(payload.password.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";return}
+  if(mode==="signup"&&payload.password!==$("authConfirm").value){note.textContent="Пароли не совпадают.";return}
+  note.className="auth-form-note";note.textContent="Подключаем аккаунт...";
+  try{
+   const data=await api(mode==="signup"?"/api/auth/register":"/api/auth/login",{method:"POST",body:JSON.stringify(payload)});
+   window.orbisUser=data.user;note.textContent="Успешно!";
+   $("authDemo")?.click();
+   loadFeed();
+  }catch(error){note.className="auth-form-note error";note.textContent=error.message}
+ },true);
+ document.addEventListener("click",async event=>{
+  const target=event.target.closest("button");if(!target)return;
+  if(target.id==="publish"){
+   event.preventDefault();event.stopImmediatePropagation();
+   const title=$("postTitle").value.trim(),topic=$("postTopic").value.trim(),body=$("postBody").value.trim();
+   if(!title||!topic||!body){window.notify?.("Добавь название, тему и текст публикации.");return}
+   target.disabled=true;target.textContent="Сохраняем...";
+   try{
+    const data=await api("/api/posts",{method:"POST",body:JSON.stringify({title,topic,body})});
+    const feed=$("feed"),el=card(data.post);el.classList.add("api-post");feed.prepend(el);
+    ["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
+    $("modal").classList.remove("open");window.notify?.("Публикация сохранена в ORBIS и архивирована в Telegram.");
+   }catch(error){window.notify?.(error.message)}
+   finally{target.disabled=false;target.textContent="Продолжить"}
+  }
+  if(target.id==="profileSave"){
+   event.preventDefault();event.stopImmediatePropagation();
+   const name=$("profileNameInput").value.trim(),bio=$("profileBioInput").value.trim();
+   try{
+    const data=await api("/api/profile",{method:"PUT",body:JSON.stringify({name,bio})});
+    window.orbisUser=data.user;$("profileNamePreview").textContent=data.user.name;$("profileHandlePreview").textContent="@"+data.user.username;$("profileAvatarPreview").textContent=data.user.name.slice(0,1).toUpperCase();
+    $("profileSaveNote").textContent="Профиль сохранён на сервере ORBIS.";
+    window.notify?.("Профиль обновлён.");
+   }catch(error){window.notify?.(error.message)}
+  }
+  if(target.dataset.view==="Профиль"){setTimeout(loadCurrentProfile,120)}
+  if(target.dataset.view==="Лента"){setTimeout(loadFeed,80)}
+  if(target.dataset.view==="Навигатор"){
+   setTimeout(async()=>{
+    try{
+     const data=await api("/api/navigator");
+     const heading=document.querySelector(".navigator-section-title span");
+     if(heading)heading.textContent=data.topics.length+" ТЕМ";
+    }catch(error){}
+   },100);
+  }
+ },true);
+ window.addEventListener("orbis:login",()=>{loadFeed()});
+ api("/api/auth/me").then(data=>{window.orbisUser=data.user;$("authDemo")?.click();loadFeed()}).catch(()=>{});
 })();
 </script>
 </body></html>
