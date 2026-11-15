@@ -316,19 +316,6 @@ Deno.serve(async (req: Request) => {
     const r=exists?await admin.from("follows").delete().eq("follower_id",uid).eq("following_id",target.id):await admin.from("follows").insert({follower_id:uid,following_id:target.id});
     if(r.error)return out({error:r.error.message},400);if(!exists)await notifyUser(admin,target.id,uid,"follow",null,"Новый подписчик: @"+me.username);return out({ok:true,following:!exists});
   }
-  if(req.method==="POST"&&path==="/api/search"){
-    if(await isRateLimited(admin,uid,"search",30,60))return out({error:"Слишком много поисковых запросов. Попробуй позже."},429);
-    const q=String(body.q||"").trim().slice(0,80).replace(/[^\p{L}\p{N}_\-.@ ]/gu," ").replace(/\s+/g," ").trim();if(q.length<2)return out({users:[],posts:[]});
-    const [{data:users},{data:posts}]=await Promise.all([
-      admin.from("profiles").select("*").or("username.ilike.%"+q+"%,display_name.ilike.%"+q+"%,bio.ilike.%"+q+"%").limit(20),
-      admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name)").eq("status","published").or("title.ilike.%"+q+"%,body.ilike.%"+q+"%,topic.ilike.%"+q+"%").order("created_at",{ascending:false}).limit(30)
-    ]);
-    const userIds=(users||[]).map((p:any)=>p.id);
-    const {data:followRows}=userIds.length?await admin.from("follows").select("following_id").eq("follower_id",uid).in("following_id",userIds):{data:[]};
-    const following=new Set((followRows||[]).map((x:any)=>x.following_id));
-    const countedPosts=await enrichPostCounts(admin,uid,posts||[]);
-    return out({users:(users||[]).map((p:any)=>({...safeProfile(p),isFollowing:following.has(p.id)})),posts:countedPosts.map((p:any)=>({...p,username:p.profiles?.username,author:p.profiles?.display_name,createdAt:p.created_at}))});
-  }
   if(req.method==="GET"&&path==="/api/navigator"){
     const {data,error}=await admin.from("post_topic_counts").select("topic,post_count").order("post_count",{ascending:false}).limit(30);
     if(error)return out({error:error.message},400);
