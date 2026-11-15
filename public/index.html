@@ -379,8 +379,11 @@ function renderError(message){
 async function renderSaved(){
  await loadSaved();const feed=$("feed");feed.replaceChildren();
  if(!state.saved.length){const empty=document.createElement("div");empty.className="empty-state";const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="▣";const strong=document.createElement("strong");strong.textContent="Кэш пока пуст";const p=document.createElement("p");p.textContent="Нажимай «Сохранить» под новостью — материалы останутся на устройстве и будут доступны без интернета.";empty.append(icon,strong,p);feed.append(empty);return}
- const toolbar=document.createElement("div");toolbar.className="saved-tools";const note=document.createElement("p");note.textContent="Сохранённые материалы · "+state.saved.length;const clear=document.createElement("button");clear.textContent="Очистить кэш";clear.addEventListener("click",async()=>{if(!confirm("Удалить все сохранённые новости с этого устройства?"))return;for(const item of state.saved)await cacheDelete(item.key);await loadSaved();renderSaved();updateStats();toast("Локальный кэш очищен")});toolbar.append(note,clear);feed.append(toolbar);
- state.saved.forEach((item,index)=>feed.append(makeNewsCard(item,index)));
+ const query=state.search.trim().toLocaleLowerCase();
+ const filtered=state.saved.filter(item=>!query||[item.title,item.summary,item.source,item.credit,category(item.category).name].join(" ").toLocaleLowerCase().includes(query));
+ const toolbar=document.createElement("div");toolbar.className="saved-tools";const note=document.createElement("p");note.textContent="Сохранённые материалы · "+filtered.length+" из "+state.saved.length;const clear=document.createElement("button");clear.textContent="Очистить кэш";clear.addEventListener("click",async()=>{if(!confirm("Удалить все сохранённые новости с этого устройства?"))return;for(const item of state.saved)await cacheDelete(item.key);await loadSaved();renderSaved();updateStats();toast("Локальный кэш очищен")});toolbar.append(note,clear);feed.append(toolbar);
+ if(!filtered.length){const empty=document.createElement("div");empty.className="empty-state";empty.textContent="В сохранённых новостях ничего не найдено.";feed.append(empty);return}
+ filtered.forEach((item,index)=>feed.append(makeNewsCard(item,index)));
 }
 function renderNavigator(){
  const feed=$("feed");feed.replaceChildren();
