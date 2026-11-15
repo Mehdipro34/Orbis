@@ -130,7 +130,7 @@ let state={
 };
 const $=id=>document.getElementById(id);
 const nativeFetch=window.fetch.bind(window);
-let guestToken=localStorage.getItem(TOKEN_KEY)||"",toastTimer=0,refreshTimer=null,dbPromise=null;
+let guestToken=localStorage.getItem(TOKEN_KEY)||"",toastTimer=0,refreshTimer=null,dbPromise=null,feedLoadVersion=0,renderVersion=0;
 
 function readJson(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||"null");return value===null?fallback:value}catch{return fallback}}
 function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(error){console.warn("ORBIS storage:",error)}}
@@ -192,7 +192,7 @@ async function loadSources(){
 }
 function preferredCategories(){
  const prefs=state.interests.length?state.interests:["technology","science","business","world"];
- return prefs.slice().sort((a,b)=>(Number(state.weights[b])||0)-(Number(state.weights[a])||0)).slice(0,4);
+ return prefs.slice().sort((a,b)=>(Number(state.weights[b])||0)-(Number(state.weights[a])||0));
 }
 async function fetchCategory(id){
  const response=await nativeFetch("/api/news?category="+encodeURIComponent(id),{cache:"no-store"});
@@ -285,25 +285,33 @@ function openView(view,cat){
  loadFeed();
 }
 async function loadFeed(){
- if(state.loading)return;state.loading=true;
+ const version=++feedLoadVersion;
+ state.loading=true;
  $("feed").replaceChildren();for(let i=0;i<3;i++){const sk=document.createElement("div");sk.className="skeleton";$("feed").append(sk)}
  $("statusText").textContent=navigator.onLine?"Собираем новости по темам…":"Офлайн · показываем сохранённые материалы";
  $("refreshBtn").classList.add("busy");
  try{
-  const result=await fetchNewsForView();state.articles=result.items;
+  const result=await fetchNewsForView();
+  if(version!==feedLoadVersion)return;
+  state.articles=result.items;
   if(!navigator.onLine&&state.view!=="saved")state.articles=state.saved.slice();
-  await syncReactions(state.articles);applySearch();
+  await syncReactions(state.articles);
+  if(version!==feedLoadVersion)return;
+  applySearch();
   state.lastUpdated=new Date();$("lastUpdate").textContent="Обновлено "+state.lastUpdated.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
   const count=state.articles.length;
-  $("statusText").textContent=count?(result.failed?"Источники доступны · часть RSS временно не ответила":"Источники синхронизированы"):"По выбранным темам пока нет доступных новостей";
+  $("statusText").textContent=count?(result.failed?"Источники доступны · часть RSS временно не ответила":"Источники синхронизированы"): "По выбранным темам пока нет доступных новостей";
   $("sideSync").textContent=navigator.onLine?"Синхронизация активна":"Офлайн-режим";
   await loadSaved();updateStats();
  }catch(error){
+  if(version!==feedLoadVersion)return;
   console.warn("ORBIS news:",error.message);
   state.articles=state.saved.slice();applySearch();
   $("statusText").textContent=state.saved.length?"Показан локальный кэш · подключение недоступно":"Нет подключения к новостным источникам";
   if(!state.saved.length)renderError(error.message);
- }finally{state.loading=false;$("refreshBtn").classList.remove("busy")}
+ }finally{
+  if(version===feedLoadVersion){state.loading=false;$("refreshBtn").classList.remove("busy")}
+ }
 }
 function applySearch(){
  const query=state.search.trim().toLocaleLowerCase();
@@ -354,10 +362,12 @@ async function getFeedAd(){
  try{return (await api("/api/ads/feed")).ad||null}catch(error){return null}
 }
 async function renderArticles(items){
+ const sequence=++renderVersion;
  const feed=$("feed");feed.replaceChildren();
  if(!items.length){const empty=document.createElement("div");empty.className="empty-state";const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="✧";const strong=document.createElement("strong");strong.textContent="Пока ничего не найдено";const note=document.createElement("span");note.textContent="Попробуй другую тему или измени поисковый запрос.";empty.append(icon,strong,note);feed.append(empty);return}
  let ad=null;
  if(items.length>=5)ad=await getFeedAd();
+ if(sequence!==renderVersion)return;
  items.forEach((item,index)=>{
   feed.append(makeNewsCard(item,index));
   if((index+1)%5===0)feed.append(makeAdCard(ad,index));
