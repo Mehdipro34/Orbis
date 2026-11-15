@@ -106,7 +106,7 @@ async function postView(env, post, user) {
 const NEWS_SOURCES = {
   "bbc-ru": { name: "BBC News · Русский", url: "https://feeds.bbci.co.uk/russian/rss.xml", language: "Русский", credit: "BBC News", allowedHosts: ["bbc.com", "bbc.co.uk"] },
   "oxu-az": { name: "Oxu.az", url: "https://oxu.az/feed", language: "Азербайджанский", credit: "Oxu.az", allowedHosts: ["oxu.az"] },
-  "trend-en": { name: "Trend News Agency", url: "https://en.trend.az/feeds/index.rss", language: "English", credit: "© Trend News Agency 2026", noCache: true, teaserLimit: 140, allowedHosts: ["trend.az"] },
+  "bbc-world": { name: "BBC News · Мир", url: "https://feeds.bbci.co.uk/news/world/rss.xml", language: "English", credit: "BBC News", allowedHosts: ["bbc.com", "bbc.co.uk"] },
   "aljazeera-en": { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", language: "English", credit: "Al Jazeera", allowedHosts: ["aljazeera.com"] }
 };
 function decodeXml(value) {
@@ -206,11 +206,11 @@ async function api(request, env, url) {
     const query = String(url.searchParams.get("q") || "").trim().toLocaleLowerCase("ru");
     const pageSize = Math.min(30, Math.max(1, Number.parseInt(url.searchParams.get("limit") || "20", 10) || 20));
     const offset = Math.max(0, Number.parseInt(url.searchParams.get("offset") || "0", 10) || 0);
-    let posts = await allPosts(env, topic || query ? 1000 : pageSize + 1, topic || query ? 0 : offset);
+    let posts = await allPosts(env, topic || query ? 10000 : pageSize + 1, topic || query ? 0 : offset);
     if (topic) posts = posts.filter(post => String(post.topic || "").toLocaleLowerCase("ru") === topic);
     if (query) posts = posts.filter(post => [post.title, post.body, post.topic, post.author, post.username].join(" ").toLocaleLowerCase("ru").includes(query));
-    const hasMore = !topic && !query && posts.length > pageSize;
-    posts = posts.slice(0, pageSize);
+    const hasMore = posts.length > offset + pageSize;
+    posts = posts.slice(offset, offset + pageSize);
     const views = await Promise.all(posts.map(post => postView(env, post, user)));
     return json({ posts: views, hasMore, nextOffset: offset + views.length });
   }
@@ -414,6 +414,7 @@ export default {
         const headers = new Headers();
         object.writeHttpMetadata(headers);
         headers.set("etag", object.httpEtag);
+        headers.set("content-length", String(object.size));
         headers.set("cache-control", "public, max-age=31536000, immutable");
         headers.set("x-content-type-options", "nosniff");
         return new Response(request.method === "HEAD" ? null : object.body, { headers });
