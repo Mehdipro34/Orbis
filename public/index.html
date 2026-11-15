@@ -2821,8 +2821,8 @@ document.addEventListener("click",event=>{
       if(!upload.ok)throw new Error(uploaded.error||"Не удалось загрузить медиа.");
       media=uploaded.media||[];
      }
-     await request("/api/stories",{method:"POST",body:JSON.stringify({body,media})});
-     layer.classList.remove("open");window.notify?.("История опубликована на 24 часа.");await refresh();
+     const published=await request("/api/stories",{method:"POST",body:JSON.stringify({body,media})});
+     layer.classList.remove("open");window.notify?.(published.archiveWarning?"История сохранена в ORBIS.":"История опубликована и отправлена в Telegram.");if(published.archiveWarning)window.notify?.(published.archiveWarning);await refresh();
     }catch(err){error.textContent=err.message}
     finally{submit.disabled=false;submit.innerHTML='Опубликовать историю <span>↗</span>'}
    });
