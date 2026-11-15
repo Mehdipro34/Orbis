@@ -317,8 +317,8 @@ async function loadSources(){
   if(Array.isArray(data.categories)&&data.categories.length)CATEGORIES.splice(0,CATEGORIES.length,...data.categories);
   fillFilterOptions("countrySelect",data.countries||[],state.country,"all","🌐 Весь мир");
   fillFilterOptions("sourceLanguageSelect",data.languages||[],state.sourceLanguage,"all","Все языки");
-  fillFilterOptions("translationLanguageSelect",data.languages||[],state.translationLang,"ru","Русский");
-  fillFilterOptions("settingsTranslationSelect",data.languages||[],state.translationLang,"ru","Русский");
+  fillFilterOptions("translationLanguageSelect",data.translationLanguages||data.languages||[],state.translationLang,"ru","Русский");
+  fillFilterOptions("settingsTranslationSelect",data.translationLanguages||data.languages||[],state.translationLang,"ru","Русский");
  }catch(error){
   $("sourceCount").textContent=String(SOURCES_FALLBACK);
   renderCategoryNav();

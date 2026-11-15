@@ -1,6 +1,6 @@
 "use strict";
-const {LANGUAGES}=require("../lib/news-catalog");
-const SUPPORTED=new Set(LANGUAGES.filter(x=>x.id!=="all").map(x=>x.id));
+const {WIKI_LANGUAGES}=require("../lib/news-catalog");
+const SUPPORTED=new Set(WIKI_LANGUAGES.map(x=>x.id));
 module.exports=async function handler(req,res){
  if(req.method!=="GET"){res.setHeader("Allow","GET");return res.status(405).json({error:"Method not allowed"})}
  const query=String(req.query.q||"").trim().slice(0,140);

@@ -1,6 +1,6 @@
 "use strict";
-const {LANGUAGES}=require("../lib/news-catalog");
-const SUPPORTED=new Set(LANGUAGES.filter(x=>x.id!=="all").map(x=>x.id));
+const {TRANSLATION_LANGUAGES}=require("../lib/news-catalog");
+const SUPPORTED=new Set(TRANSLATION_LANGUAGES.map(x=>x.id));
 module.exports=async function handler(req,res){
  if(req.method!=="POST"){res.setHeader("Allow","POST");return res.status(405).json({error:"Method not allowed"})}
  const target=String(req.body?.target||"ru").toLowerCase();
