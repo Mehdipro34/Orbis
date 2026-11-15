@@ -31,7 +31,7 @@ Telegram Mini App initData is verified server-side using the bot token. A corres
 - Frontend inline JavaScript blocks were syntax-compiled successfully.
 - HTML document tags and CSS brace pairs were checked.
 - Supabase project reports ACTIVE_HEALTHY.
-- Both Edge Functions are ACTIVE; `orbis-telegram-auth` is deployed at version 4 and `orbis-api` at version 10.
+- Both Edge Functions are ACTIVE; `orbis-telegram-auth` is deployed at version 4 and `orbis-api` at version 12.
 - Security Advisor currently returns no findings.
 - All ten application tables have RLS enabled. The latest Security Advisor run returned no findings.
 - Database currently has zero profiles, posts and Stories; no live user registration has yet been verified.
