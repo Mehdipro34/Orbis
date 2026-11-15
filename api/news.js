@@ -31,6 +31,11 @@ function tag(block,names) {
   }
   return "";
 }
+function isFamilySafe(item) {
+  const text=(String(item.title||"")+" "+String(item.summary||"")).toLocaleLowerCase();
+  const blocked=/(\\bporn(?:ography)?\\b|\\brape\\b|\\bsexual assault\\b|\\bsex trafficking\\b|\\bchild abuse\\b|\\bmurder(?:ed)?\\b|\\bmassacre\\b|\\bsuicide\\b|\\bself[- ]harm\\b|\\bdrug trafficking\\b|\\boverdose\\b|\\bshooting\\b|\\bbombing\\b|\\bbeheading\\b|\\btorture\\b|\\bterror attack\\b|порно|изнасил|сексуальн.{0,12}насил|домогательств|убийств|убит[аоы]?|труп|самоубийств|суицид|самоповрежден|наркотик|наркобанд|расстрел|взрыв|бомб|обезглав|пытк|теракт|cinsi zorakılıq|zorlama|qətl|öldür|intihar|narkotik|partlayış|terror)/iu;
+  return !blocked.test(text);
+}
 function parse(xml,source) {
   const blocks=[...xml.matchAll(/<(item|entry)(?:\s[^>]*)?>([\s\S]*?)<\/\1\s*>/gi)].map(x=>x[2]);
   const items=[];
@@ -54,7 +59,7 @@ module.exports = async function handler(req,res) {
     if(!response.ok)throw new Error("Источник ответил HTTP "+response.status);
     const xml=await response.text();
     if(!xml||!/<(?:rss|feed|rdf:RDF)\b/i.test(xml))throw new Error("Источник вернул неизвестный формат ленты.");
-    const items=parse(xml,source);if(!items.length)throw new Error("В ленте пока нет доступных публикаций.");
+    const items=parse(xml,source).filter(isFamilySafe);if(!items.length)throw new Error("В этой ленте сейчас нет материалов, подходящих для всех возрастов.");
     res.setHeader("Cache-Control","s-maxage=900, stale-while-revalidate=3600, stale-if-error=86400");
     return res.status(200).json({source:source.name,language:source.language,items,cached:false,fetchedAt:Date.now()});
   }catch(error){return res.status(502).json({error:"Не удалось загрузить "+source.name+": "+error.message});}
