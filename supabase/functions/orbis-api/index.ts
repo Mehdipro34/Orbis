@@ -39,6 +39,36 @@ async function enrichPostCounts(admin:any, uid:string, rows:any[]){
 }
 
 
+const encoder=new TextEncoder();
+function bytesToBase64Url(bytes:Uint8Array){
+  let binary="";for(const byte of bytes)binary+=String.fromCharCode(byte);
+  return btoa(binary).replace(/=/g,"").replace(/\\+/g,"-").replace(/\\//g,"_");
+}
+function base64UrlToBytes(value:string){
+  const normalized=value.replace(/-/g,"+").replace(/_/g,"/");
+  const binary=atob(normalized+"=".repeat((4-normalized.length%4)%4));
+  return Uint8Array.from(binary,c=>c.charCodeAt(0));
+}
+async function guestHmacKey(secret:string){
+  return await crypto.subtle.importKey("raw",encoder.encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign","verify"]);
+}
+async function issueGuestToken(uid:string,secret:string){
+  const payload=bytesToBase64Url(encoder.encode(JSON.stringify({sub:uid,exp:Date.now()+365*24*60*60*1000})));
+  const signature=new Uint8Array(await crypto.subtle.sign("HMAC",await guestHmacKey(secret),encoder.encode(payload)));
+  return payload+"."+bytesToBase64Url(signature);
+}
+async function verifyGuestToken(token:string,secret:string){
+  try{
+    const parts=token.split(".");if(parts.length!==2)return null;
+    const signature=base64UrlToBytes(parts[1]);
+    const valid=await crypto.subtle.verify("HMAC",await guestHmacKey(secret),signature,encoder.encode(parts[0]));
+    if(!valid)return null;
+    const payload=JSON.parse(new TextDecoder().decode(base64UrlToBytes(parts[0])));
+    if(typeof payload.sub!=="string"||! /^[0-9a-f-]{36}$/i.test(payload.sub)||!Number.isFinite(payload.exp)||payload.exp<Date.now())return null;
+    return payload.sub as string;
+  }catch{return null}
+}
+
 async function notifyUser(admin:any, recipientId:string, actorId:string, kind:string, entityId:string|null, body:string){
   if(!recipientId || recipientId===actorId)return;
   const {error}=await admin.from("notifications").insert({recipient_id:recipientId,actor_id:actorId,kind,entity_id:entityId,body});
@@ -58,10 +88,8 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get("SUPABASE_URL"), service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !service) return out({ error: "Supabase server secrets are not configured." }, 503);
   const admin = createClient(url, service, { auth: { persistSession:false, autoRefreshToken:false } });
-  const token = (req.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");
-  let uid: string|null = null;
-  let authUser:any = null;
-  if (token) { const { data } = await admin.auth.getUser(token); authUser = data.user || null; uid = authUser?.id || null; }
+  const token = (req.headers.get("Authorization")||"").replace(/^Bearer\\s+/i,"");
+  let uid: string|null = token ? await verifyGuestToken(token,service) : null;
   const u = new URL(req.url);
   const pathname = u.pathname;
   const apiMarker = pathname.lastIndexOf("/api/");
@@ -78,31 +106,31 @@ Deno.serve(async (req: Request) => {
     if(error)return out({available:false,error:"Не удалось проверить username. Попробуй ещё раз."},503);
     return out({available:!data});
   }
+  if (req.method==="POST" && path==="/api/guest/session") {
+    const deviceId=String(body.deviceId||"").trim().toLowerCase();
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(deviceId))
+      return out({error:"Некорректный идентификатор устройства."},400);
+    if(uid&&uid!==deviceId)return out({error:"Идентификатор устройства не совпадает с текущей сессией."},403);
+    const {data:existing,error:loadError}=await admin.from("profiles").select("*").eq("id",deviceId).maybeSingle();
+    if(loadError)return out({error:"Не удалось загрузить гостевой профиль."},500);
+    let profile=existing;
+    if(!profile){
+      const username="guest_"+deviceId.replace(/-/g,"").slice(0,16);
+      const {data:created,error}=await admin.from("profiles").insert({id:deviceId,username,display_name:"Гость ORBIS"}).select("*").single();
+      if(error){
+        const {data:retry}=await admin.from("profiles").select("*").eq("id",deviceId).maybeSingle();
+        if(!retry)return out({error:"Не удалось создать гостевой профиль: "+error.message},500);
+        profile=retry;
+      }else profile=created;
+    }
+    const signed=await issueGuestToken(deviceId,service);
+    return out({ok:true,token:signed,user:{id:deviceId,...safeProfile(profile)}});
+  }
   if (req.method==="GET" && path==="/api/auth/me") {
-    if (!uid || !authUser) return out({authenticated:false},401);
-    let {data:p}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
-    if(!p){
-      const metadata=authUser.user_metadata||{};
-      const isAnonymous=authUser.is_anonymous===true;
-      const username=String(metadata.username||(isAnonymous?"guest_"+uid.replace(/-/g,"").slice(0,12):"member_"+uid.replace(/-/g,"").slice(0,12))).trim().toLowerCase();
-      const displayName=String(metadata.display_name||(isAnonymous?"Гость":"Участник ORBIS")).trim().slice(0,32);
-      if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username))return out({error:"Не удалось создать профиль. Повтори вход."},422);
-      const created=await admin.from("profiles").insert({id:uid,username,display_name:displayName}).select("*").single();
-      if(created.error){
-        const {data:existing}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
-        if(existing)p=existing;
-        else return out({error:created.error.code==="23505"?"Этот username уже занят. Зарегистрируйся с другим username.":created.error.message},created.error.code==="23505"?409:400);
-      }else p=created.data;
-    }
-    // Keep the legacy username index synchronized for Telegram and email/password accounts.
-    if(p && authUser.email){
-      const {error:lookupError}=await admin.from("account_lookup").upsert({
-        user_id:uid,username:p.username,email:String(authUser.email).trim().toLowerCase(),
-        telegram_id:p.telegram_id??null
-      },{onConflict:"user_id"});
-      if(lookupError)console.error("ORBIS account index sync:",lookupError.message);
-    }
-    return p ? out({authenticated:true,user:{id:uid,...safeProfile(p)}}) : out({authenticated:false},401);
+    if(!uid)return out({authenticated:false},401);
+    const {data:p,error}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
+    if(error)return out({error:"Не удалось загрузить гостевой профиль."},500);
+    return p?out({authenticated:true,user:{id:uid,...safeProfile(p)}}):out({authenticated:false},404);
   }
   if (req.method==="POST" && path==="/api/media") {
     if (!uid) return out({error:"Войди в ORBIS, чтобы загружать медиа."},401);
