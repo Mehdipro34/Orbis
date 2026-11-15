@@ -25,32 +25,32 @@ const NEWS_SOURCES = {
 
 function decodeXml(value) {
   return String(value || "")
-    .replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, "$1")
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
     .replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (_, code) => {
       const n = code[0].toLowerCase() === "x" ? parseInt(code.slice(1), 16) : parseInt(code, 10);
       try { return Number.isFinite(n) ? String.fromCodePoint(n) : ""; } catch { return ""; }
     })
     .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'")
-    .replace(/<[^>]*>/g, " ").replace(/\\s+/g, " ").trim();
+    .replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function xmlTag(block, names) {
   for (const name of names) {
-    const match = block.match(new RegExp("<" + name + "(?:\\\\s[^>]*)?>([\\\\s\\\\S]*?)</" + name + "\\\\s*>", "i"));
+    const match = block.match(new RegExp("<" + name + "(?:\\s[^>]*)?>([\\s\\S]*?)</" + name + "\\s*>", "i"));
     if (match) return decodeXml(match[1]);
   }
   return "";
 }
 
 function parseNewsXml(xml, source, limit = 30) {
-  const blocks = [...xml.matchAll(/<(item|entry)(?:\\s[^>]*)?>([\\s\\S]*?)<\\/\\1\\s*>/gi)].map(match => match[2]);
+  const blocks = [...xml.matchAll(/<(item|entry)(?:\s[^>]*)?>([\s\S]*?)<\/\1\s*>/gi)].map(match => match[2]);
   const entries = [];
   for (const block of blocks.slice(0, limit)) {
     const title = xmlTag(block, ["title"]);
     let link = xmlTag(block, ["link"]);
     if (!link) {
-      const linkMatch = block.match(/<link\\b[^>]*href=["\\']([^"\\']+)["\\'][^>]*\\/?\\s*>/i);
+      const linkMatch = block.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*\/?\s*>/i);
       if (linkMatch) link = decodeXml(linkMatch[1]);
     }
     const description = xmlTag(block, ["description", "summary", "content:encoded", "content"]);
@@ -99,14 +99,14 @@ async function api(request, env, url) {
       });
       if (!response.ok) throw new Error("Источник ответил HTTP " + response.status);
       const xml = await response.text();
-      if (!xml || !/<(?:rss|feed|rdf:RDF)\\b/i.test(xml)) throw new Error("Источник вернул неизвестный формат ленты.");
+      if (!xml || !/<(?:rss|feed|rdf:RDF)\b/i.test(xml)) throw new Error("Источник вернул неизвестный формат ленты.");
       const items = parseNewsXml(xml, source, 30);
       if (!items.length) throw new Error("В ленте пока нет доступных публикаций.");
       const fetchedAt = Date.now();
       await env.ORBIS_KV.put(cacheKey, JSON.stringify({ fetchedAt, items }), { expirationTtl: 300 });
       return json({ source: source.name, language: source.language, items, cached: false, fetchedAt });
     } catch (error) {
-      if (cached?.items?.length) {
+      if (cached && cached.items && cached.items.length) {
         return json({
           source: source.name, language: source.language, items: cached.items, cached: true, stale: true,
           warning: "Не удалось обновить источник. Показаны последние сохранённые заголовки.",
