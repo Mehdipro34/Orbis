@@ -1,159 +1,104 @@
-# ORBIS — product and architecture specification
+# ORBIS — current product and technical architecture
 
-Status: implementation specification; deployment and scale claims remain unverified.
+Status: active implementation with deployed Supabase Edge Functions. Public launch and end-to-end Telegram registration are not yet verified.
 
-## Product definition
+## Product
 
-ORBIS is a Telegram-first social network. Its primary experience is a continuously refreshed post feed, a Stories stream containing only recent Stories, and a topic-based Navigator. Telegram is the only sign-in method. Do not add a general Search section unless product scope is explicitly changed.
+ORBIS is a Telegram-first social network with a cinematic orbital identity. Registration and sign-in are only through the official Telegram Mini App. The main experience includes a live feed, profiles, topic Navigator, Stories, reactions, comments, post replies, bookmarks and follows.
 
-Clients:
-- Responsive website.
-- Optional Telegram Mini App.
-- Later Android and iOS clients using the same APIs and account model.
+## User-facing features in the current build
 
-Telegram is the only identity provider and is also an optional internal archive destination. Users must open ORBIS from the official Telegram Mini App to register or sign in.
+- **Telegram account:** server verifies Telegram Mini App `initData`, creates or recovers a Supabase Auth user, creates a profile and issues a Supabase session.
+- **Feed:** server-paginated posts, up to 20 per page, topic filters and refresh.
+- **Posts:** title, topic, text, up to four media files, daily per-account publication quota.
+- **Reactions:** likes stored separately and toggled by the signed-in user.
+- **Comments:** separate `post_comments` table; 20 comments per request; owners can remove their own comments.
+- **Post replies:** a reply is a separate post linked by `reply_to`, distinct from a short comment.
+- **Profiles:** display name, username, short bio, own posts and follow/unfollow.
+- **Stories:** text or one photo/video; visible only while unexpired; one Story per account per UTC day.
+- **Bookmarks:** private per-user saved posts.
+- **Navigator:** people/posts search, topic counts and attributed RSS headlines from the Worker.
+- **Sharing:** post links use a post ID fragment; the client fetches the real post when a shared link is opened.
+- **PWA:** browser-installable app shell; service worker caches static assets only. Social actions require an internet connection.
 
-## Core experience
+## Architecture
 
-### 1. Main post feed
-- One central feed, continuously refreshed.
-- Feed can mix recent and older eligible posts; it must not be limited to only the newest items.
-- The feed service chooses and orders posts server-side; the client receives cursor-based pages.
-- A post card displays, in order: author/profile label, post title, topic, post body, then actions.
-- Owner-authored posts show the owner as **Admin**.
-- The feed must not pretend demo/sample posts are real user posts.
+### Client
+- `public/index.html` is the responsive web and Telegram Mini App client.
+- The browser contains only the Supabase publishable key.
+- Telegram `initData` is sent to `orbis-telegram-auth`; Telegram IDs supplied by the browser are never accepted as proof of identity.
+- API requests go directly to Supabase Edge Functions, not through a second Worker social API.
 
-### 2. Stories
-- A separate Stories stream.
-- Show only currently recent/active Stories; expired Stories are excluded.
-- Target platform-wide intake ceiling: up to 100,000 new Stories per day.
-- Per-account target: at most one Story publication per day.
-- Expiration and daily quota must be enforced server-side, not only in the browser.
+### Supabase
+- PostgreSQL is the canonical store for profiles and social metadata.
+- Supabase Auth stores the account and session.
+- Supabase Storage bucket `orbis-media` stores post and Story media.
+- Edge Function `orbis-telegram-auth` verifies Telegram, creates/repairs the account and issues a session.
+- Edge Function `orbis-api` verifies the Supabase session and serves social routes.
+- Private `account_lookup` contains Telegram-to-account mapping and is not readable by browser roles.
+- `post_comments` and `api_rate_limits` are not directly accessible to browser roles.
+- Aggregate views `post_like_counts`, `post_comment_counts`, and `post_topic_counts` avoid scanning every reaction/comment/post row when rendering feed counters.
+- `consume_orbis_rate_limit` is a database-side atomic per-user rate limiter.
 
-### 3. Navigator
-- A distinct topic discovery area, divided into topic-specific streams.
-- Each topic stream has its own independently deployable Navigator service boundary.
-- Topic streams refresh continuously and may include editorial/news items where the source and attribution are clear.
-- No general-purpose Search feature.
-- Navigator components must be independently deployable and independently observable; do not claim that a separate deployment automatically guarantees separate physical capacity.
+### Cloudflare
+- Worker `orbissocial` serves static assets and RSS/news proxy endpoints only.
+- `ORBIS_KV` is used for RSS cache and Worker news rate limiting.
+- No R2 bucket is required. The current `wrangler.toml` and Worker source contain no R2 binding.
+- A stale dashboard R2 binding named `ORBIS_MEDIA` caused the reported Cloudflare error 10085. Remove it from Worker Settings → Bindings before deploying again.
 
-### 4. Minimal profile
-Only show:
-- Display name
-- Chosen unique username
-- Short description
-- Owner's posts
-The profile is intentionally minimal. Do not add follower counts, profile galleries, biography sections, or other fields without approval.
+### Telegram archive
+- Telegram private channels are optional archive/mirror destinations for posts, media and Stories.
+- Supabase remains the canonical searchable database and media store in this implementation.
+- Archive failure does not discard a post or Story already saved in Supabase; the API returns an archive warning.
+- Required for sign-in: `TELEGRAM_BOT_TOKEN`.
+- Optional archive IDs: `POSTS_CHANNEL_ID`, `MEDIA_CHANNEL_ID`, `STORIES_CHANNEL_ID`.
 
-### 5. Registration
-- ORBIS accounts, independent of Telegram and Google sign-in.
-- User enters a Gmail address as plain account information; no email is sent and no verification is performed in the agreed first version.
-- User chooses password, display name, and unique username.
-- Username uniqueness must be enforced atomically by the backend.
-- Never store plaintext passwords. Use a modern password hashing scheme and secure session handling.
-- Because the email is unverified, do not present it as proof of ownership or promise email-based account recovery.
+## Data model
 
-### 6. Publishing limits and capacity targets
-- Per account: maximum one post per day and one Story per day.
-- Platform-wide target: up to 100,000 posts per day and up to 100,000 Stories per day.
-- These are product targets, not verified capacity guarantees. Enforce quotas centrally and load-test before claiming support.
-- Older posts remain eligible for the main feed; Stories are time-limited/recent only.
+Core tables:
+- `profiles`
+- `account_lookup`
+- `posts`
+- `post_likes`
+- `post_comments`
+- `follows`
+- `bookmarks`
+- `stories`
+- `post_reports`
+- `api_rate_limits`
 
-## Service boundaries
+RLS is enabled on all ten tables. Browser roles cannot read Telegram identifiers, account lookup mappings, comment rows or rate-limit rows directly. Security Advisor returned no findings at the latest inspection.
 
-Initial independently deployable logical services:
-1. Edge/API Gateway
-2. Auth and sessions
-3. Username reservation
-4. Minimal Profile
-5. Posts write/API
-6. Posts Navigator/feed assembly
-7. Stories write/API
-8. Stories Navigator
-9. Topic Registry / Hashtag Names
-10. Topic Feed / Topic Navigator (one independently deployable instance per topic group as traffic requires)
-11. Interests / topic preferences
-12. Notifications
-13. Moderation and abuse controls
-14. Telegram Storage Manager
-15. Referrals / access rules (only after exact rules are approved)
-16. Monitoring, health checks and failover coordination
+## Performance and abuse controls
 
-The user previously emphasized separate Navigator services. Preserve independent deployment boundaries for each Navigator/topic stream. Do not invent a fixed number of physical servers: Workers are deployments, not dedicated machines, and free-tier quotas may be shared at account level.
+- Feed pages are limited to 20 posts; comments to 20 per request; replies and profile posts are bounded.
+- Search, media uploads, likes, comments, follows, bookmarks, reports and Telegram sign-in have per-user rate limits.
+- Post and Story daily quotas are enforced by database unique indexes, not just UI code.
+- Media type and size checks happen server-side.
+- The Worker caches RSS responses; it does not proxy social API traffic.
+- The performance advisor currently reports unused indexes. This is expected while the database has no real user traffic; do not remove indexes needed by the intended query patterns without measured evidence.
 
-## Storage
+## Not implemented yet
 
-Telegram private channels are the intended archive for post and Story payloads/media. Storage Manager assigns storage shards and records references.
+- Direct messages.
+- A notification center.
+- Clans.
+- Stars/Premium and paid packages.
+- Advertising management and ad-reward flows.
+- Full human moderation dashboard and proven AI moderation.
+- Independent per-topic deployments and distributed queues.
+- Production monitoring/alerting and load-tested failover.
 
-A queryable metadata index is still required for:
-- account IDs and username uniqueness
-- post/story IDs, author IDs, timestamps and expiry
-- topic assignments and feed cursors
-- Telegram channel/message/file references
-- moderation state and quota counters
+Do not show these as available product features until they are actually implemented.
 
-Telegram channels are not a database and cannot efficiently replace an index. Keep credentials, password hashes, sessions and security-critical state in a proper database/security store, not as publicly readable channel messages. Never expose bot tokens or channel identifiers to clients.
+## Launch blockers
 
-## Explicitly excluded for now
-- General Search.
-- Reels/short-video section (not part of the clarified core scope).
-- Complex public profiles and follower-centric profile UI.
-- Mandatory Telegram login.
-- Email confirmation or sending registration emails.
-- Any claim of guaranteed 100,000 concurrent users or million-user scale before testing.
+1. Owner must set `TELEGRAM_BOT_TOKEN` in Supabase Edge Function secrets.
+2. Owner must set the official Telegram bot's Mini App URL to the deployed HTTPS Worker URL.
+3. Owner must remove the stale Cloudflare `ORBIS_MEDIA` R2 binding from Worker Settings → Bindings.
+4. Deploy the Worker and confirm the new build lists only `ASSETS` and `ORBIS_KV`.
+5. Run real Telegram sign-in and the full post/comment/media/Story/logout smoke test.
 
-## Scale and reliability plan
+## Capacity claims
 
-- Stateless request handlers where possible.
-- Cursor pagination; bounded response sizes.
-- Queue-based asynchronous media/archive work.
-- Caching for hot topic/feed metadata.
-- Sharded Telegram archives with retry and dead-letter handling.
-- Idempotent writes and server-side per-user/day quotas.
-- Independent health checks and circuit breakers between services.
-- Load tests for realistic request mix, media sizes, feed refresh rates and failure scenarios.
-- Publish measured throughput/latency and provider quotas; do not equate daily item volume with concurrent users.
-
-## Current repository state (verified from files)
-
-- Repository: https://github.com/Mehdipro34/Orbis
-- Cloudflare Worker name: orbissocial
-- `src/index.js`: health endpoint, protected setup route and minimal Telegram webhook only.
-- `public/index.html`: visual prototype; no persistent post creation, Stories, real Navigator or real account system.
-- `wrangler.toml`: static assets + Worker configuration.
-- No verified working Telegram webhook, persistent metadata index, Telegram archive pipeline, account registration, or load-tested services.
-
-## Build sequence
-
-1. Replace the prototype navigation/design with the clarified three-part experience: Posts, Stories, Navigator; remove Search.
-2. Define and create the metadata database schema and migrations.
-3. Implement authentication, atomic username reservation and minimal profiles.
-4. Implement Posts write path, one-post-per-day enforcement, Telegram archival and metadata indexing.
-5. Implement main feed assembly with cursor pagination and recent/older mixing.
-6. Implement Stories write path, one-Story-per-day enforcement, expiry and recent-only stream.
-7. Implement topic registry and independent topic Navigator deployments.
-8. Add moderation, notifications, monitoring, referral/ad rules only after their exact business rules and providers are confirmed.
-9. Connect website and optional Telegram Mini App; later mobile clients.
-10. Load-test and report measured limits before increasing launch audience.
-
-## Decisions retained from the owner
-
-- Zero mandatory budget is a strong requirement; warn before any paid dependency.
-- Telegram is internal storage, not user authentication.
-- Gmail is collected as text only in the initial registration flow; no email is sent.
-- No general Search.
-- Keep profile minimal.
-- Separate backend deployment boundary for every Navigator.
-- Maximum one post and one Story per account per day; target maximum 100,000 platform-wide per format per day.
-
-
-## Current implementation status (2026-11-15)
-
-The active implementation differs from the older proposal above in these ways:
-- `public/index.html` contains the current responsive client, Telegram-only sign-in, Supabase API bridge, feed, profile, topic Navigator, bookmark UI, and text Stories UI.
-- `orbis-telegram-auth` and `orbis-api` are deployed Supabase Edge Functions.
-- Supabase currently has eight application tables and an `orbis-media` Storage bucket. The profiles/posts/Stories tables were empty at the last inspection; no real user content should be implied.
-- The Cloudflare Worker is retained for static assets and RSS/news only. Its legacy KV-based auth and social API routes are disabled to avoid two competing account stores.
-- The orbital intro is a client-side animation (canvas starfield, ORBIS planet, orbital stations, shuttles, asteroid belt and meteor trails); reduced-motion preferences are respected.
-- Production use still requires the owner to configure the Telegram bot token secret, the official bot Mini App URL and the HTTPS deployment, then complete end-to-end testing.
-- No claim of production readiness, unlimited free capacity, or 10,000+ concurrent users is made without tests.
+The database was empty at the last inspection. No first live Telegram sign-in, full browser end-to-end test or load test has been completed. Free tiers have quotas and may pause or throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users. Publish measured latency, throughput, error rates and provider limits before increasing launch traffic.
