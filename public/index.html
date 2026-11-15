@@ -2457,6 +2457,16 @@ document.addEventListener("click",event=>{
   }catch(error){results.textContent=error.message}
  }
 
+ async function openSharedPostFromHash(){
+  const match=location.hash.match(/^#post-([0-9a-f-]{36})$/i);if(!match)return;
+  const id=match[1];let article=document.getElementById("post-"+id);
+  if(!article){
+   try{const data=await api("/api/posts/"+encodeURIComponent(id));article=card(data.post);article.classList.add("api-post","shared-post");$("feed")?.prepend(article)}
+   catch(error){window.notify?.("Не удалось открыть публикацию: "+error.message);return}
+  }
+  setOrbisScreen("Лента");
+  requestAnimationFrame(()=>article.scrollIntoView({behavior:"smooth",block:"center"}));
+ }
  async function appendCommentRows(article,list,items){
   items.forEach(item=>{
    const row=document.createElement("div");row.className="orbis-comment";row.dataset.commentId=item.id;
@@ -2693,8 +2703,8 @@ document.addEventListener("click",event=>{
  },300000);
  const searchInput=$("orbisSearchInput");
  document.addEventListener("keydown",event=>{if(event.key==="Enter"&&event.target===$("orbisSearchInput")){event.preventDefault();runSearch()}});
- window.addEventListener("orbis:login",()=>{loadFeed()});
- api("/api/auth/me").then(data=>{window.orbisUser=data.user;syncUserUI(data.user);window.orbisEnterApp?.();loadFeed()}).catch(()=>{});
+ window.addEventListener("orbis:login",()=>{loadFeed().then(openSharedPostFromHash)});
+ api("/api/auth/me").then(data=>{window.orbisUser=data.user;syncUserUI(data.user);window.orbisEnterApp?.();loadFeed().then(openSharedPostFromHash)}).catch(()=>{});
 })();
 </script>
 
@@ -2732,7 +2742,7 @@ document.addEventListener("click",event=>{
      const headers=new Headers(init?.headers||((input instanceof Request)?input.headers:undefined));
      headers.set("apikey",SUPABASE_KEY);
      if(session?.access_token)headers.set("Authorization","Bearer "+session.access_token);
-     else headers.set("Authorization","Bearer "+SUPABASE_KEY);
+     else headers.delete("Authorization");
      let body=init?.body;
      if(input instanceof Request&&!init)body=input.body;
      const target=EDGE_API+parsed.pathname+parsed.search;
@@ -2754,7 +2764,7 @@ document.addEventListener("click",event=>{
        const initData=tg?.initData||"";
        if(!initData){throw new Error("Открой ORBIS из Telegram Mini App, а не во внешнем браузере.")}
        tg.ready();tg.expand();
-       const response=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY},body:JSON.stringify({initData})});
+       const response=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({initData})});
        const data=await response.json();
        if(!response.ok)throw new Error(data.error||"Не удалось войти через Telegram.");
        const {error}=await client.auth.setSession({access_token:data.session.access_token,refresh_token:data.session.refresh_token});
