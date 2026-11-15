@@ -6,15 +6,12 @@ This repository contains the application source. A GitHub commit does not automa
 
 Open the ORBIS Supabase project → Authentication → Sign In / Providers.
 
-1. Enable **Anonymous Sign-Ins**. ORBIS creates a guest session automatically; visitors do not enter an email, password or username.
-2. Do not require email confirmation for guest access. The email provider is not used by the current guest-first frontend.
-3. Anonymous users are real Supabase Auth users with their own guest profile, posts, likes and media. Their session is remembered in that browser.
-4. Important: a guest cannot recover the same identity after clearing browser data, signing out, or switching devices. Do not clear site data if you want to keep access to a guest profile.
-5. Supabase recommends anti-abuse protection such as CAPTCHA/Turnstile for public anonymous sign-in. Add it before promoting ORBIS broadly.
-
-The frontend calls Supabase Auth `signInAnonymously()`. The Edge Function creates a stable guest username from the anonymous user's UUID. Passwords and email addresses are not requested.
-
-Supabase Edge Functions use their project environment for `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Never place the service-role key in frontend code.
+1. Ensure the **Email** provider is enabled.
+2. Keep email confirmation enabled and configure Authentication → URL Configuration → Site URL and Redirect URLs for the deployed HTTPS origin.
+3. Registration uses email, username and password. Login accepts either email or username plus password.
+4. Username-to-email mapping is held in the server-only `account_lookup` table; the browser never receives another user's email address.
+5. Supabase Auth stores credentials and issues persistent sessions. The public profile table does not store passwords or expose email addresses.
+6. The Edge Function uses `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; never place the service-role key in frontend code.
 
 ## 2. Cloudflare Worker
 
@@ -48,13 +45,14 @@ In Cloudflare Dashboard:
 
 This binding is stored in Cloudflare account settings, not in the GitHub repository. Changing source files alone will not remove it.
 
-## 3. Guest access and first post
+## 3. Registration, login and first post
 
-1. Open the ORBIS HTTPS site. It should create a guest session and enter the app without showing a registration screen.
-2. Confirm a profile appears in Supabase `profiles` with a username beginning `guest_`.
+1. Open the ORBIS HTTPS site and create an account using email, username and password.
+2. Confirm the email using the message sent by Supabase Auth, then sign in using either the email address or username and password.
+3. Confirm the profile appears in Supabase `profiles` and the username/email mapping is stored in the server-only `account_lookup` table.
 3. Publish a text post, then test a like, comment, bookmark and follow.
 4. Upload a photo or video. The upload endpoint stores it in `orbis-media` under the guest user's UUID; the feed renders the media with the post.
-5. Refresh the page. The same guest profile and its posts should still be available in that browser.
+5. Refresh the page. The authenticated account and its posts should still be available in that browser.
 
 ## 4. First live smoke test
 
@@ -62,8 +60,9 @@ After deployment and configuration:
 
 - Open `/health` on the Worker URL; expect `ok: true`.
 - Open `/api/news/sources`; expect four configured news sources.
-- Open the site and verify it enters guest mode without asking for registration.
-- Confirm one profile appears in Supabase `profiles` with the selected username.
+- Register with email, username and password, confirm the email, and sign in.
+- Repeat login using the username instead of the email.
+- Confirm the profile appears in `profiles` and its private lookup row appears in `account_lookup`.
 - Publish one test post; confirm it appears in the Supabase feed.
 - Add a comment and a like; confirm counts update and comments load 20 at a time.
 - Upload a photo to a post and a Story; confirm media appears in the `orbis-media` bucket.
