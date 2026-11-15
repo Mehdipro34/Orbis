@@ -139,7 +139,7 @@ Deno.serve(async (req: Request) => {
     return out({ok:true,token:signed,user:{id:deviceId,...safeProfile(profile)}});
   }
   if (req.method==="POST" && path==="/api/media") {
-    if (!uid) return out({error:"Войди в ORBIS, чтобы загружать медиа."},401);
+    if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
     if(await isRateLimited(admin,uid,"media",10,60))return out({error:"Слишком много загрузок. Подожди минуту."},429);
     const files=(form?.getAll("files")||[]).filter((f:any)=>f && typeof f.size==="number") as File[];
     if (!files.length || files.length>4) return out({error:"Выбери от 1 до 4 файлов."},400);
@@ -158,9 +158,9 @@ Deno.serve(async (req: Request) => {
     }
     return out({ok:true,media:uploaded},201);
   }
-  if (!uid) return out({error:"Войди в ORBIS, чтобы продолжить."},401);
+  if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
   const {data:me}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
-  if (!me) return out({error:"Профиль ORBIS не найден. Повтори вход в аккаунт."},401);
+  if (!me) return out({error:"Профиль ORBIS не найден. Обнови страницу, чтобы восстановить гостевую сессию."},401);
 
   if (req.method==="GET" && path==="/api/posts") {
     const rawOffset=Number(u.searchParams.get("offset")||0),rawLimit=Number(u.searchParams.get("limit")||20);
