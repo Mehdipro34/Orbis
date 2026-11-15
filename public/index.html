@@ -1961,6 +1961,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     <label class="auth-field"><span>ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authPassword" type="password" autocomplete="current-password" placeholder="Твой пароль" minlength="8" required><button class="auth-eye" id="authEye" type="button" aria-label="Показать пароль">◉</button></span></label>
     <label class="auth-field auth-confirm-field" id="authConfirmField" hidden><span>ПОВТОРИ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Ещё раз пароль"></span></label>
     <div class="auth-form-note" id="authFormNote" aria-live="polite"> </div>
+    <button id="authResetButton" class="auth-reset-button" type="button">Забыли пароль?</button>
     <button class="auth-submit" type="submit"><span id="authSubmitText">Войти</span><b>↗</b></button>
    </form>
    
@@ -2248,6 +2249,7 @@ document.addEventListener("click",event=>{
   usernameField.hidden=mode!=="signup";username.required=mode==="signup";
   emailField.hidden=false;email.required=true;
   password.autocomplete=mode==="login"?"current-password":"new-password";
+  const resetButton=document.getElementById("authResetButton");if(resetButton)resetButton.hidden=mode!=="login";
   submitText.textContent=mode==="login"?"Войти":"Создать аккаунт";
   note.className="auth-form-note";note.textContent="";
  }));
@@ -2786,6 +2788,9 @@ document.addEventListener("click",event=>{
 #orbisAuthForm{display:grid;gap:12px}
 .auth-tabs{display:flex}
 .auth-legal{display:block}
+.auth-reset-button{justify-self:start;border:0;background:transparent;color:#b9adff;font:inherit;font-size:11px;padding:2px 0;cursor:pointer}
+.auth-reset-button:hover{text-decoration:underline;color:#fff}
+.auth-reset-button:disabled{opacity:.55;cursor:wait}
 </style>
 <script>
 (function(){
@@ -2829,7 +2834,23 @@ document.addEventListener("click",event=>{
  document.addEventListener("DOMContentLoaded",async()=>{
   const form=document.getElementById("orbisAuthForm");
   const note=document.getElementById("authFormNote");
+  const resetButton=document.getElementById("authResetButton");
   if(!form)return;
+  try{
+   await window.orbisSupabaseReady;
+   if(resetButton)resetButton.addEventListener("click",async()=>{
+    const email=document.getElementById("authEmail")?.value.trim().toLowerCase()||"";
+    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){if(note){note.className="auth-form-note error";note.textContent="Сначала введи электронную почту, на которую зарегистрирован аккаунт."}return}
+    resetButton.disabled=true;
+    if(note){note.className="auth-form-note";note.textContent="Отправляем письмо для восстановления…"}
+    try{
+     const result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+     if(result.error)throw result.error;
+     if(note){note.className="auth-form-note success";note.textContent="Если аккаунт с таким адресом существует, письмо для восстановления уже отправлено. Проверь входящие и папку «Спам»."}
+    }catch(error){if(note){note.className="auth-form-note error";note.textContent=error.message||"Не удалось отправить письмо."}}
+    finally{resetButton.disabled=false}
+   });
+  }catch(error){if(note)note.textContent=error.message||"Не удалось подключить авторизацию.";return}
   try{
    await window.orbisSupabaseReady;
    const current=await client.auth.getSession();
