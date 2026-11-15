@@ -75,9 +75,10 @@ Deno.serve(async (req: Request) => {
     let {data:p}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
     if(!p){
       const metadata=authUser.user_metadata||{};
-      const username=String(metadata.username||"").trim().toLowerCase();
-      const displayName=String(metadata.display_name||username||"ORBIS member").trim().slice(0,32);
-      if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username))return out({error:"Не удалось создать профиль: проверь username и повтори вход."},422);
+      const isAnonymous=authUser.is_anonymous===true;
+      const username=String(metadata.username||(isAnonymous?"guest_"+uid.replace(/-/g,"").slice(0,12):"")).trim().toLowerCase();
+      const displayName=String(metadata.display_name||(isAnonymous?"Гость":username||"ORBIS member")).trim().slice(0,32);
+      if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username))return out({error:"Не удалось создать профиль. Повтори вход."},422);
       const created=await admin.from("profiles").insert({id:uid,username,display_name:displayName}).select("*").single();
       if(created.error){
         const {data:existing}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
