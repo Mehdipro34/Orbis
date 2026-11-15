@@ -442,7 +442,61 @@ $("cancel").addEventListener("click",()=>modal.classList.remove("open"));
 modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
 $("publish").addEventListener("click",()=>{if(!$("postTitle").value.trim()||!$("postTopic").value.trim()||!$("postBody").value.trim()){notify("Добавь название, тему и текст публикации.");return}notify("Форма заполнена. Сохранение появится после подключения Posts API.")});
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-view]").forEach(x=>x.classList.remove("active"));document.querySelectorAll('[data-view="'+b.dataset.view+'"]').forEach(x=>x.classList.add("active"));$("pageTitle").textContent=b.dataset.view==="Лента"?"Твоя лента":b.dataset.view;notify("Раздел «"+b.dataset.view+"»: следующий этап — подключение реальных данных.")}));
-document.querySelectorAll("#topicFilter button").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("#topicFilter button").forEach(x=>x.classList.remove("active"));b.classList.add("active");notify("Тема «"+b.textContent+"» выбрана. Фильтрация подключится к Navigator API.")}));
+document.querySelectorAll("#topicFilter button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#topicFilter button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  const chosen=b.textContent.trim().toLocaleLowerCase("ru");
+  let shown=0;
+  document.querySelectorAll("#feed .post").forEach(post=>{
+    const topic=(post.querySelector(".topic")?.textContent||"").toLocaleLowerCase("ru");
+    const visible=chosen==="все темы"||topic.includes(chosen);
+    post.hidden=!visible;
+    if(visible)shown++;
+  });
+  let empty=document.getElementById("orbisEmptyFeed");
+  if(!empty){
+    empty=document.createElement("div");empty.id="orbisEmptyFeed";empty.className="post";
+    empty.textContent="В этой теме пока нет примеров публикаций.";
+    empty.style.color="#8582a2";empty.style.textAlign="center";
+    $("feed").appendChild(empty);
+  }
+  empty.hidden=shown!==0;
+}));
+/* Local prototype interactions: reactions, bookmarks and sharing. These are saved only in this browser, not on the ORBIS server. */
+document.querySelectorAll("#feed .post").forEach((post,index)=>{
+  const key="orbis-demo-bookmark-"+index;
+  const saved=(()=>{try{return localStorage.getItem(key)==="1"}catch(e){return false}})();
+  const saveButton=[...post.querySelectorAll(".post-actions button")].find(b=>b.textContent.includes("Сохранить"));
+  if(saveButton&&saved){saveButton.textContent="⌑ Сохранено";saveButton.setAttribute("aria-pressed","true")}
+});
+$("feed").addEventListener("click",async event=>{
+  const button=event.target.closest(".post-actions button");
+  if(!button)return;
+  const post=button.closest(".post");
+  if(button.textContent.includes("Реакция")||button.textContent.includes("Понравилось")){
+    const liked=button.getAttribute("aria-pressed")==="true";
+    button.setAttribute("aria-pressed",String(!liked));
+    button.textContent=liked?"♡ Реакция":"♥ Понравилось";
+    button.style.color=liked?"":"#e36c91";
+    notify(liked?"Реакция отменена":"Тебе понравилась публикация");
+  }else if(button.textContent.includes("Сохранить")||button.textContent.includes("Сохранено")){
+    const buttons=[...document.querySelectorAll("#feed .post")];
+    const index=buttons.indexOf(post),key="orbis-demo-bookmark-"+index;
+    const saved=button.getAttribute("aria-pressed")==="true";
+    button.setAttribute("aria-pressed",String(!saved));
+    button.textContent=saved?"⌑ Сохранить":"⌑ Сохранено";
+    try{localStorage.setItem(key,saved?"0":"1")}catch(e){}
+    notify(saved?"Убрано из сохранённого":"Добавлено в сохранённое");
+  }else if(button.textContent.includes("Поделиться")){
+    const title=post.querySelector(".post-title")?.textContent||"Публикация ORBIS";
+    const body=post.querySelector(".post-body")?.textContent||"";
+    try{
+      if(navigator.share)await navigator.share({title:"ORBIS",text:title+"\n"+body});
+      else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(title+"\n"+body);notify("Текст публикации скопирован")}
+      else notify("Поделиться можно после подключения публичных ссылок");
+    }catch(e){if(e.name!=="AbortError")notify("Не удалось открыть меню отправки")}
+  }
+});
 if(tg?.initDataUnsafe?.user){const u=tg.initDataUnsafe.user;$("avatar").textContent=(u.first_name||"O").slice(0,1).toUpperCase()}
 
 /* ORBIS tactile motion: attach after the page has loaded */
