@@ -4,14 +4,15 @@
   "android": {
     "app_id": "ca-app-pub-9946397950500083~3195122396",
     "ad_units": {
-      "launch_or_entry": "ca-app-pub-9946397950500083/8255877389"
+      "launch_or_entry": "ca-app-pub-9946397950500083/8255877389",
+      "additional_placement": "ca-app-pub-9946397950500083/6022585386"
     }
   },
   "notes": [
     "These identifiers were supplied by the ORBIS project owner.",
-    "The App ID and Ad Unit ID are different identifiers and must be used in their corresponding native Android SDK settings.",
+    "The App ID is shared by the supplied ad units; each Ad Unit ID identifies a separate placement.",
     "This file only records configuration; it does not activate ads.",
-    "The current ORBIS web page and Telegram Mini App do not become AdMob-enabled by adding these IDs. Web and Mini App advertising require a separately supported integration.",
-    "Before release, verify the ad format, placement, app registration, consent/privacy requirements, and test ads in the Google AdMob console."
+    "AdMob's mobile SDK identifiers cannot directly display ads on the current website or Telegram Mini App. A web-compatible advertising integration is required for those clients.",
+    "Before release, verify each ad unit's format and intended placement, app registration, consent/privacy requirements, and test ads in the Google AdMob console."
   ]
 }
