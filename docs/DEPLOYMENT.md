@@ -7,7 +7,16 @@ This repository contains the application source. A GitHub commit does not automa
 Open the ORBIS Supabase project → Project Settings → Edge Functions → Secrets.
 
 Required:
-- `TELEGRAM_BOT_TOKEN` — token of the official ORBIS bot. Never commit it or paste it into chat.
+- `TELEGRAM_BOT_TOKEN` — token of the official ORBIS bot for Mini App `initData` verification. Never commit it or paste it into chat.
+
+For browser sign-in through Telegram Login (OIDC), also add these three secrets:
+- `TELEGRAM_LOGIN_CLIENT_ID` — public Client ID shown in BotFather → your bot → Login Widget.
+- `TELEGRAM_LOGIN_CLIENT_SECRET` — matching Client Secret from the same BotFather screen. Keep it server-side; never put it in frontend code.
+- `TELEGRAM_LOGIN_REDIRECT_URI` — exact HTTPS callback URL, for example `https://YOUR-WORKER-DOMAIN/`. Replace the example with the real deployed ORBIS URL, including the trailing slash if registered that way.
+
+The browser login code uses Authorization Code + PKCE, validates Telegram's ID-token signature, issuer, audience, expiry and nonce, then maps the Telegram user ID to the same ORBIS profile used by Mini Apps. Cloudflare Worker secrets and Supabase Edge Function secrets are separate: a value stored in Cloudflare is not automatically readable by Supabase. Add the same Telegram Login Client Secret in Supabase under the exact name above; do not paste it into GitHub or chat.
+
+In BotFather → Login Widget, register both the ORBIS website origin (for example `https://YOUR-WORKER-DOMAIN`) and the exact `TELEGRAM_LOGIN_REDIRECT_URI`. They must match the deployed website and callback URL.
 
 Optional Telegram archive destinations:
 - `POSTS_CHANNEL_ID` — private channel for post text.
@@ -50,12 +59,16 @@ In Cloudflare Dashboard:
 
 This binding is stored in Cloudflare account settings, not in the GitHub repository. Changing source files alone will not remove it.
 
-## 3. Telegram Mini App
+## 3. Telegram Mini App and browser login
 
 1. Open the official bot in Telegram and use BotFather to configure its Menu Button / Mini App URL.
 2. Set the URL to the HTTPS Worker URL from step 2.
-3. Open ORBIS from that Telegram bot, not by typing the URL into a normal browser for first-time sign-in.
-4. Tap **Continue through Telegram** and approve the Mini App launch.
+3. For browser login, configure Telegram Login in BotFather → Login Widget and add the website origin plus the exact callback URL from Supabase secrets.
+4. Open ORBIS in a normal browser and test **Continue through Telegram**. Telegram should return to the registered HTTPS callback; ORBIS then exchanges the authorization code server-side.
+5. Open ORBIS from the Telegram bot and test the Mini App path. It continues to verify signed Telegram `initData`.
+6. Confirm both paths resolve to the same Telegram-linked ORBIS profile.
+
+The browser OIDC flow will return a clear configuration error until all three `TELEGRAM_LOGIN_*` secrets are set in Supabase and the matching URLs are registered in BotFather.
 
 The server validates Telegram `initData`; do not accept Telegram IDs supplied by the browser.
 
