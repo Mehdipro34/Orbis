@@ -379,7 +379,7 @@ async function api(request, env, url) {
       const response = await fetch(source.url, { headers: { "accept": "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5", "user-agent": "ORBIS News Reader/1.0" } });
       if (!response.ok) throw new Error("Источник ответил HTTP " + response.status);
       const xml = await response.text();
-      if (!xml || !/<(?:rss|feed|rdf:RDF)\\b/i.test(xml)) throw new Error("Источник вернул неизвестный формат ленты.");
+      if (!xml || !/<(?:rss|feed|rdf:RDF)\b/i.test(xml)) throw new Error("Источник вернул неизвестный формат ленты.");
       const items = parseNewsXml(xml, source, 30);
       if (!items.length) throw new Error("В ленте пока нет доступных публикаций.");
       const fetchedAt = Date.now();
