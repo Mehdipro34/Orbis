@@ -413,22 +413,6 @@ async function api(request, env, url) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith("/media/")) {
-      try {
-        if (!env.ORBIS_MEDIA) return new Response("Media storage is not configured", { status: 503 });
-        const key = decodeURIComponent(url.pathname.slice("/media/".length));
-        if (!/^[a-z0-9_.-]{3,24}\/[a-f0-9-]+\.(jpg|png|webp|gif|mp4|webm)$/i.test(key)) return new Response("Not found", { status: 404 });
-        const object = await env.ORBIS_MEDIA.get(key);
-        if (!object) return new Response("Not found", { status: 404 });
-        const headers = new Headers();
-        object.writeHttpMetadata(headers);
-        headers.set("etag", object.httpEtag);
-        headers.set("content-length", String(object.size));
-        headers.set("cache-control", "public, max-age=31536000, immutable");
-        headers.set("x-content-type-options", "nosniff");
-        return new Response(request.method === "HEAD" ? null : object.body, { headers });
-      } catch (error) { return new Response("Media unavailable", { status: 500 }); }
-    }
     if (url.pathname.startsWith("/api/") && !["/api/news", "/api/news/sources"].includes(url.pathname)) {
       return json({ error: "Основной ORBIS API работает через Supabase. Обнови приложение и повтори запрос." }, 410);
     }
