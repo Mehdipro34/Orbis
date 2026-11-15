@@ -39,3 +39,7 @@ Telegram Mini App initData is verified server-side using the bot token. A corres
 
 ## Profile privacy hardening
 The `profiles` table contains Telegram identifiers for server-side account matching. Direct `anon` and `authenticated` table-wide SELECT was revoked; only safe profile columns are granted. `telegram_id` and `telegram_username` remain available to Edge Functions using the service-role key and are not exposed through the browser Data API. Do not add these fields to public profile responses.
+
+
+## Installable app
+ORBIS now includes a web app manifest, SVG app icon, service worker and an install action. The service worker caches only the static app shell; account, feed and media actions still require a network connection. The site must be served over HTTPS for browser installation.
