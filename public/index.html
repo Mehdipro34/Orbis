@@ -1944,7 +1944,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <details><summary>Можно ли открыть ORBIS на телефоне?<span>＋</span></summary><p>Да, текущую веб-страницу можно открыть в мобильном браузере. Отдельное приложение пока не выпущено.</p></details>
  </div>
 </section>
-<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере или Telegram Mini App. Установка на главный экран доступна через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS <b>↗</b></button><small id="downloadNote">Регистрация и вход — по электронной почте и паролю.</small></div></section></main>
+<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере и устанавливай на главный экран через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS <b>↗</b></button><small id="downloadNote">Регистрация и вход — по электронной почте и паролю.</small></div></section></main>
 <footer class="land-footer"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><span>ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</span><span>© 2026 ORBIS · Мехти Мурадлы</span></footer></section>
 <section class="auth-gateway auth-minimal" id="authGateway" hidden aria-label="Вход в ORBIS">
  <button class="auth-back-landing" id="authBackLanding" type="button" aria-label="Назад">←</button>
@@ -2729,7 +2729,7 @@ document.addEventListener("click",event=>{
     ["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
     if($("postMedia"))$("postMedia").value="";
     replyToPostId=null;$("dialogTitle").textContent="Новая публикация";
-    $("modal").classList.remove("open");await loadFeed(true,feedTopic);window.notify?.(data.archiveWarning?"Публикация сохранена в ORBIS и добавлена в ленту.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
+    $("modal").classList.remove("open");await loadFeed(true,feedTopic);window.notify?.("Публикация сохранена в ORBIS и добавлена в ленту.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
    }catch(error){window.notify?.(error.message)}
    finally{target.disabled=false;target.textContent="Опубликовать"}
   }
@@ -3005,7 +3005,7 @@ document.addEventListener("click",event=>{
       media=uploaded.media||[];
      }
      const published=await request("/api/stories",{method:"POST",body:JSON.stringify({body,media})});
-     layer.classList.remove("open");window.notify?.(published.archiveWarning?"История сохранена в ORBIS.");if(published.archiveWarning)window.notify?.(published.archiveWarning);await refresh();
+     layer.classList.remove("open");window.notify?.("История сохранена в ORBIS.");if(published.archiveWarning)window.notify?.(published.archiveWarning);await refresh();
     }catch(err){error.textContent=err.message}
     finally{submit.disabled=false;submit.innerHTML='Опубликовать историю <span>↗</span>'}
    });
