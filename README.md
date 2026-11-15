@@ -1,71 +1,78 @@
 # ORBIS
 
-ORBIS is a social network with a dark, orbital visual identity and an installable PWA interface.
+ORBIS is a guest-first social network with a dark orbital visual identity and an installable PWA interface.
 
-## Current production deployment
+## Production
 
-- Production URL: https://orbis-mehdipro34.vercel.app
-- Vercel production deployments are connected to the GitHub `main` branch.
-- Vercel serves the static app from `public/` and the RSS endpoint from `api/news.js`.
-- Supabase project: `wdwvcvpgovvkoodozbxf` (`Orbis`).
-- Supabase Edge Function: `orbis-api` (active version 27 at the latest verification).
+- URL: https://orbis-mehdipro34.vercel.app
+- Vercel production is connected to GitHub `main`.
+- Supabase project: `wdwvcvpgovvkoodozbxf`.
+- Edge Function: `orbis-api`.
 
-## Account model
+## No-account access
 
-- Registration: email + unique username + password.
-- Login: email or username + password.
-- Email confirmation is required when enabled in Supabase Auth.
-- Username-to-email lookup is performed server-side through `account_lookup`; that table is not readable by browser roles.
-- Passwords are stored and verified by Supabase Auth, never in public profile rows.
-- Password reset is sent to the account email.
+- The site opens directly in guest mode.
+- No registration, email, password or Telegram login is required.
+- Each browser receives a persistent device UUID and a signed guest session.
+- Each guest profile receives a unique sequential ORBIS number.
+- Each post receives its own unique sequential post number.
+- Clearing browser data or changing devices creates a new guest identity. Guest profiles cannot be recovered without a separate account/recovery mechanism.
 
-## Implemented social features
+## Social features
 
-- Paginated home feed and topic navigation.
-- Text, photo and video posts; up to four media files per post.
-- Likes, separate comments, post replies, follows and bookmarks.
-- User profiles and profile editing.
-- Search for users and posts.
-- 24-hour Stories with text or one photo/video.
-- One-to-one direct messages.
-- Notifications with read/unread state.
-- Clans, with one clan membership per user.
-- Post reports and basic rule-based anti-spam checks.
-- Basic ad-campaign API and screens.
-- Per-user API rate limits.
-- Installable PWA shell and app icon.
+- “For you”, “Following” and “Fresh” feed modes.
+- Cursor-based feed pagination and topic filters.
+- Text, photo and video posts, post replies and 2–6 option polls.
+- Likes, bookmarks, follows, sharing and reports.
+- 24-hour Stories.
+- Topic Navigator with 16 RSS news sources.
+- One-to-one messages, notifications and clans.
+- Ad Center campaigns with review status, feed placements, impression and click tracking.
+- Installable PWA shell.
 
-## Media storage
+## Performance design
+
+- Keyset/cursor pagination avoids deep SQL offsets.
+- Indexed chronological, topic and engagement-ranked feed paths.
+- Engagement scores are maintained by database triggers.
+- RSS responses use CDN caching.
+- Server-side rate limits protect guest sessions and high-frequency actions.
+- This design improves query efficiency but does not establish a concurrent-user capacity. No load test has been completed.
+
+## Ads
+
+- Owner-supplied AdMob Android App ID and ad-unit IDs are in `config/admob.json`.
+- Publisher record is in `public/app-ads.txt`.
+- AdMob mobile IDs cannot directly display ads on the current web client. The live web feed supports approved ORBIS Ad Center campaigns; campaigns must be approved before they appear.
+- Ad content is labelled in the feed and impression/click events are recorded.
+
+## All-ages safeguards
+
+- Basic rule-based checks apply to text posts and ad copy.
+- RSS headlines use a conservative all-ages keyword filter.
+- Reports are available.
+- Image/video uploads are type/size checked but do not yet have automated visual content moderation. The product is not yet a fully moderated all-ages platform.
+
+## Media
 
 - Supabase Storage bucket: `orbis-media`.
 - Photos: JPEG, PNG, WebP or GIF, up to 12 MB each.
 - Videos: MP4 or WebM, up to 50 MB each.
-- A post can include up to four files; a Story can include one file.
-- Media uploads are authenticated and stored under the user's UUID.
+- Up to four media files per post.
 
 ## Repository structure
 
-- `public/index.html` — responsive ORBIS interface, authentication screen, feed, Stories, profiles and social screens.
-- `public/orbis-social.js` — direct messages, notifications and clans UI.
-- `public/manifest.webmanifest`, `public/sw.js`, `public/orbis-icon.svg` — installable PWA shell.
-- `api/news.js` — Vercel serverless RSS/news endpoint.
-- `supabase/functions/orbis-api/index.ts` — authenticated social API, media upload, account lookup and social actions.
-- `src/index.js` and `wrangler.toml` — optional Cloudflare Worker deployment path; not required for the current Vercel production deployment.
-- `docs/` — architecture, deployment and Supabase setup notes.
+- `public/index.html` — responsive web app client.
+- `public/orbis-social.js` — messages, notifications and clans UI.
+- `public/sw.js`, `public/manifest.webmanifest`, `public/orbis-icon.svg` — PWA.
+- `api/news.js` — RSS/news endpoint.
+- `api/news/sources.js` — RSS source directory.
+- `supabase/functions/orbis-api/index.ts` — guest sessions and social API.
+- `config/admob.json` — owner-supplied future Android AdMob configuration.
+- `docs/ARCHITECTURE.md` — architecture and known limitations.
 
-## Required owner configuration
+## Verification
 
-1. In Supabase Authentication → Sign In / Providers, ensure Email is enabled.
-2. In Supabase Authentication → URL Configuration, set the Site URL and Redirect URLs to include `https://orbis-mehdipro34.vercel.app`.
-3. Keep the Supabase service-role key only in Edge Function secrets. Never put it in browser code.
-4. Enable leaked-password protection in Supabase Auth password security settings before inviting a wider audience.
-5. Confirm that the Supabase Storage bucket `orbis-media` remains available and public-read for media URLs.
+Latest checks confirmed a READY Vercel production deployment, HTTP 200 API health, active Supabase Edge Function, 16 RSS sources, and database indexes for unique public numbers and feed pagination/ranking. The new RSS feeds returned HTTP 200 in live checks.
 
-## Known limits and verification status
-
-- The database currently has one profile and no posts or Stories. A real end-to-end registration, email confirmation, username login and media-upload test has not yet been completed.
-- The latest Vercel production deployment reported `READY`; this confirms deployment completion, not a full browser test of every feature.
-- Direct messages are one-to-one; group chats and live real-time message delivery are not implemented.
-- A full human moderation console, advanced moderation workflows and Stars/Premium are not yet implemented.
-- No load test has been completed. Do not claim support for a specific number of concurrent users until measured.
-- Free-tier quotas can pause or throttle a project. Zero-budget operation is a target, not a guarantee of unlimited capacity.
+A full browser end-to-end test across multiple devices and a load test have not been completed. Free-tier provider limits still apply; do not assume unlimited traffic or a specific concurrent-user count.
