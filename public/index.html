@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090d18">
+  <title>ORBIS — твоя лента</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#090d18;--panel:#111827;--panel2:#172235;--line:#25334a;--text:#f4f7fb;--muted:#91a0b7;--accent:#6c8cff;--cyan:#5de0d0}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a2b50 0,transparent 45%),var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+    button,input,textarea{font:inherit}button{cursor:pointer;color:inherit}.shell{max-width:1120px;margin:auto;min-height:100dvh;display:grid;grid-template-columns:220px minmax(0,1fr) 260px;gap:22px;padding:22px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:22px;letter-spacing:2px;padding:7px 4px 25px}.orb{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--cyan));display:grid;place-items:center;color:#08111d;font-weight:1000}
+    .nav{display:grid;gap:7px;position:sticky;top:18px}.nav button,.mobile-nav button{background:transparent;border:0;text-align:left;padding:12px 14px;border-radius:13px;color:var(--muted);display:flex;gap:12px;align-items:center}.nav button.active,.nav button:hover{background:var(--panel2);color:var(--text)}.nav .create{background:linear-gradient(110deg,#6c8cff,#526ee4);color:white;justify-content:center;font-weight:750;margin-top:14px}
+    main{min-width:0}.top{display:flex;justify-content:space-between;align-items:center;padding:7px 2px 17px}.top h1{font-size:21px;margin:0}.pill{font-size:12px;color:var(--cyan);border:1px solid #285c62;background:#103039;padding:5px 9px;border-radius:99px}
+    .composer{background:linear-gradient(145deg,#15223a,#111827);border:1px solid var(--line);padding:16px;border-radius:18px;margin-bottom:18px}.compose-row{display:flex;gap:12px;align-items:center}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8a9fff,#54d8c8);color:#09111c;font-weight:900;flex:none}.fake-input{border:1px solid var(--line);background:#0d1524;border-radius:13px;color:var(--muted);padding:12px 14px;text-align:left;flex:1}.compose-actions{display:flex;gap:8px;margin:13px 0 0 52px}.chip{border:1px solid var(--line);background:#121e31;color:#aebbd0;padding:7px 10px;border-radius:10px;font-size:12px}
+    .filters{display:flex;gap:8px;overflow:auto;padding:2px 0 14px}.filter{white-space:nowrap;border:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 13px;border-radius:99px}.filter.active{background:#263b68;color:#fff;border-color:#4d6fba}
+    .post{background:rgba(17,24,39,.92);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:12px}.post-head{display:flex;align-items:center;gap:10px}.post-name{font-weight:750}.handle,.time,.muted{color:var(--muted);font-size:12px}.post-text{margin:14px 0 13px;white-space:pre-wrap}.tag{color:#82a4ff}.post-foot{display:flex;gap:8px;flex-wrap:wrap}.post-foot button{border:1px solid var(--line);background:#111d30;color:#b6c3d8;border-radius:10px;padding:7px 10px;font-size:12px}
+    aside .side-card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:13px}.side-card h3{font-size:14px;margin:0 0 12px}.trend{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid #202c40}.trend b{font-size:13px}.trend span{font-size:11px;color:var(--muted)}.note{font-size:12px;color:var(--muted)}
+    .mobile-nav{display:none}.modal{position:fixed;inset:0;background:#030711cc;display:none;place-items:center;padding:18px;z-index:5}.modal.open{display:grid}.dialog{width:min(540px,100%);background:#111a2a;border:1px solid var(--line);border-radius:20px;padding:18px}.dialog h2{margin:0 0 14px}.dialog textarea{width:100%;min-height:150px;resize:vertical;background:#0a1220;color:var(--text);border:1px solid var(--line);border-radius:13px;padding:13px;outline:none}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:12px}.primary{background:var(--accent);border:0;border-radius:11px;padding:10px 16px;font-weight:750}.secondary{background:#202c40;border:1px solid var(--line);border-radius:11px;padding:10px 16px}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c2c45;border:1px solid #425b85;padding:10px 15px;border-radius:12px;display:none;z-index:8}
+    @media(max-width:850px){.shell{grid-template-columns:68px minmax(0,1fr);padding:14px;gap:14px}.brand{font-size:0;justify-content:center}.brand .orb{width:40px;height:40px}.nav button{justify-content:center;font-size:0;padding:13px}.nav button span{font-size:19px}.nav .create{font-size:0}.nav .create span{font-size:20px}aside{display:none}}
+    @media(max-width:560px){.shell{display:block;padding:12px 12px 82px}.left{display:none}.top{padding-top:5px}.top h1{font-size:19px}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#0c1423f2;border-top:1px solid var(--line);justify-content:space-around;padding:8px 5px calc(8px + env(safe-area-inset-bottom));z-index:4;backdrop-filter:blur(15px)}.mobile-nav button{font-size:18px;padding:8px 12px}.compose-actions{margin-left:0}.composer{padding:13px}.post{padding:14px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="left">
+    <div class="brand"><div class="orb">O</div> ORBIS</div>
+    <nav class="nav">
+      <button class="active" data-page="Лента"><span>⌂</span> Лента</button>
+      <button data-page="Поиск"><span>⌕</span> Поиск</button>
+      <button data-page="Популярное"><span>↗</span> Популярное</button>
+      <button data-page="Закладки"><span>▤</span> Закладки</button>
+      <button data-page="Профиль"><span>◉</span> Профиль</button>
+      <button class="create" id="openComposer"><span>＋</span> Создать пост</button>
+    </nav>
+  </aside>
+  <main>
+    <header class="top"><h1 id="pageTitle">Твоя лента</h1><span class="pill">BETA · 0.1</span></header>
+    <section class="composer">
+      <div class="compose-row"><div class="avatar" id="userAvatar">O</div><button class="fake-input" id="openComposer2">О чём думаешь?</button></div>
+      <div class="compose-actions"><button class="chip" id="textPost">✎ Текст</button><button class="chip" id="photoHint">▧ Фото — скоро</button></div>
+    </section>
+    <div class="filters" id="filters">
+      <button class="filter active">Для тебя</button><button class="filter">Новости</button><button class="filter">Технологии</button><button class="filter">Бизнес</button><button class="filter">Общество</button><button class="filter">#ORBiS</button>
+    </div>
+    <section id="feed">
+      <article class="post">
+        <div class="post-head"><div class="avatar">O</div><div><div class="post-name">Команда ORBIS <span class="handle">@orbis · официальный</span></div><div class="time">Только что · Пример публикации</div></div></div>
+        <div class="post-text">Добро пожаловать в ORBIS! 🌐
+
+Здесь начинается пространство идей, новостей и общения. Это демонстрационная публикация интерфейса — скоро здесь появятся реальные посты пользователей.</div>
+        <div class="post-foot"><button>◇ В закладки</button><button>↗ Поделиться</button></div>
+      </article>
+      <article class="post">
+        <div class="post-head"><div class="avatar" style="background:linear-gradient(135deg,#ffcf8b,#ed8b9d)">N</div><div><div class="post-name">Новости и идеи <span class="handle">@daily_digest</span></div><div class="time">Пример публикации</div></div></div>
+        <div class="post-text">Небольшие идеи могут стать большими проектами. Главное — начать, проверить гипотезу и постепенно улучшать результат. <span class="tag">#идеи</span> <span class="tag">#развитие</span></div>
+        <div class="post-foot"><button>◇ В закладки</button><button>↗ Поделиться</button></div>
+      </article>
+    </section>
+    <p class="note">Демонстрационный интерфейс. Публикации пока не сохраняются на сервере.</p>
+  </main>
+  <aside>
+    <section class="side-card"><h3>Популярные темы</h3><div class="trend"><div><b>#Технологии</b><br><span>Технологии</span></div><span>тема</span></div><div class="trend"><div><b>#Бизнес</b><br><span>Идеи и проекты</span></div><span>тема</span></div><div class="trend"><div><b>#Новости</b><br><span>Главное сегодня</span></div><span>тема</span></div></section>
+    <section class="side-card"><h3>О проекте</h3><p class="note">ORBIS — социальная платформа, которая начинается внутри Telegram. Сейчас собираем первый интерфейс.</p></section>
+  </aside>
+</div>
+<nav class="mobile-nav"><button data-page="Лента">⌂</button><button data-page="Поиск">⌕</button><button id="mobileCreate">＋</button><button data-page="Популярное">↗</button><button data-page="Профиль">◉</button></nav>
+<div class="modal" id="composerModal"><div class="dialog"><h2>Новая публикация</h2><textarea id="postText" maxlength="2000" placeholder="Поделись своей мыслью..."></textarea><div class="dialog-actions"><button class="secondary" id="cancelPost">Отмена</button><button class="primary" id="publishPost">Предпросмотр</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+  const $ = id => document.getElementById(id);
+  const modal = $("composerModal"), toast = $("toast");
+  function notify(message){toast.textContent=message;toast.style.display="block";setTimeout(()=>toast.style.display="none",2600)}
+  function openComposer(){modal.classList.add("open");$("postText").focus()}
+  $("openComposer").addEventListener("click",openComposer);
+  $("openComposer2").addEventListener("click",openComposer);
+  $("textPost").addEventListener("click",openComposer);
+  $("mobileCreate").addEventListener("click",openComposer);
+  $("photoHint").addEventListener("click",()=>notify("Загрузка фотографий появится на следующем этапе."));
+  $("cancelPost").addEventListener("click",()=>modal.classList.remove("open"));
+  $("publishPost").addEventListener("click",()=>{const value=$("postText").value.trim();if(!value){notify("Сначала напиши текст публикации.");return;}notify("Это пока предпросмотр. Сохранение постов подключим следующим этапом.");});
+  document.querySelectorAll("[data-page]").forEach(button=>button.addEventListener("click",()=>{document.querySelectorAll("[data-page]").forEach(x=>x.classList.remove("active"));button.classList.add("active");$("pageTitle").textContent=button.dataset.page==="Лента"?"Твоя лента":button.dataset.page; if(button.dataset.page!=="Лента")notify("Раздел «"+button.dataset.page+"» подключим следующим этапом.");}));
+  document.querySelectorAll(".filter").forEach(button=>button.addEventListener("click",()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));button.classList.add("active");notify("Фильтр выбран: "+button.textContent);}));
+  if(tg?.initDataUnsafe?.user){const user=tg.initDataUnsafe.user;$("userAvatar").textContent=(user.first_name||"O").slice(0,1).toUpperCase();}
+</script>
+</body>
+</html>
