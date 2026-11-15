@@ -1282,6 +1282,84 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 @media(max-width:760px){body{background-attachment:scroll}.hero{border-radius:21px!important}.post:hover,.side-card:hover,.navigator-topic:hover{transform:none}.hero:before{animation-duration:14s}}
 @media(prefers-reduced-motion:reduce){body:before,.brandmark,.hero:before{animation:none!important}.nav button,.post,.side-card,.navigator-topic,.mobile-nav button{transition:none!important}}
 
+
+/* ORBIS immersive access experience */
+[hidden]{display:none!important}
+.auth-gateway{--a-violet:#9a82ff;--a-cyan:#68eadc;position:fixed;inset:0;z-index:10000;min-height:100svh;overflow:auto;display:grid;place-items:center;padding:38px 5vw 56px;background:radial-gradient(ellipse at 17% 22%,#42318a55,transparent 35%),radial-gradient(ellipse at 88% 76%,#087d8050,transparent 38%),linear-gradient(125deg,#080d1c,#11152c 48%,#091b29);color:#f7f7ff}
+.auth-gateway:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.25;background-image:radial-gradient(1px 1px at 15% 24%,#fff 99%,transparent),radial-gradient(2px 2px at 70% 15%,#b6d7ff 99%,transparent),radial-gradient(1px 1px at 85% 70%,#fff 99%,transparent),radial-gradient(1px 1px at 42% 88%,#8ce9e4 99%,transparent);background-size:190px 190px,270px 270px,230px 230px,310px 310px;animation:authStars 65s linear infinite}
+@keyframes authStars{to{background-position:190px 380px,-270px 270px,230px -230px,-310px 310px}}
+.auth-backdrop{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.auth-nebula{position:absolute;width:48vw;height:48vw;max-width:700px;max-height:700px;border-radius:50%;filter:blur(80px);opacity:.17;animation:authNebula 13s ease-in-out infinite alternate}
+.auth-nebula.n-one{background:#8865ff;left:-15%;top:-24%}.auth-nebula.n-two{background:#14c9bc;right:-18%;bottom:-28%;animation-delay:-6s}
+@keyframes authNebula{to{transform:translate(7%,8%) scale(1.16);opacity:.27}}
+.auth-orbit{position:absolute;left:18%;top:48%;width:360px;height:150px;border:1px solid #a99bff42;border-radius:50%;transform:rotate(-27deg);box-shadow:0 0 35px #8672ff16,inset 0 0 35px #8672ff0d}
+.auth-orbit i{position:absolute;top:50%;left:-5px;width:10px;height:10px;border-radius:50%;background:#b9aaff;box-shadow:0 0 18px 5px #9c83ff}
+.auth-orbit.o-two{width:490px;height:205px;left:13%;top:43%;transform:rotate(28deg);border-color:#62d9d43b;animation:authOrbit 18s linear infinite}
+.auth-orbit.o-two i{left:auto;right:12%;background:#72eee0;box-shadow:0 0 18px 5px #54d8d0}
+.auth-orbit.o-three{width:570px;height:255px;left:10%;top:39%;transform:rotate(-6deg);border-style:dashed;border-color:#ffffff15;animation:authOrbit 36s linear infinite reverse}
+@keyframes authOrbit{to{rotate:360deg}}
+.auth-planet{position:absolute;width:125px;height:125px;left:34%;top:40%;border-radius:50%;background:radial-gradient(circle at 30% 25%,#e0d7ff,#8874e7 28%,#403e9c 62%,#161b4b 100%);box-shadow:0 0 55px #8976ff7a,0 0 120px #7460ef38,inset -18px -20px 32px #101538;animation:authPlanetFloat 7s ease-in-out infinite}
+.auth-planet:after{content:"";position:absolute;inset:-22px -40px;border:1px solid #a99bff63;border-radius:50%;transform:rotate(-25deg) scaleY(.32);box-shadow:0 0 22px #8f7aff28}
+@keyframes authPlanetFloat{50%{transform:translateY(-13px)}}
+.auth-star{position:absolute;color:#d9d2ff;text-shadow:0 0 15px #a995ff;animation:authTwinkle 3s ease-in-out infinite}.auth-star.s-one{left:11%;top:22%;font-size:24px}.auth-star.s-two{left:43%;top:18%;font-size:30px;animation-delay:-1s}.auth-star.s-three{left:48%;bottom:20%;font-size:18px;animation-delay:-2s}.auth-star.s-four{right:12%;top:38%;font-size:40px;color:#7beadd}
+@keyframes authTwinkle{50%{opacity:.25;transform:scale(.7)}}
+.auth-layout{position:relative;z-index:1;width:min(1160px,100%);min-height:690px;display:grid;grid-template-columns:minmax(0,1fr) minmax(410px,.88fr);align-items:center;gap:clamp(36px,7vw,110px);margin:auto}
+.auth-showcase{min-height:590px;display:flex;flex-direction:column;justify-content:space-between;padding:14px 0 24px}
+.auth-brand{display:flex;align-items:center;gap:13px;font-size:24px;font-weight:900;letter-spacing:5px}
+.auth-brand-symbol{position:relative;display:grid;place-items:center;width:43px;height:43px;border:1px solid #b3a4ff8c;border-radius:15px;color:#d8d0ff;font-size:25px;background:linear-gradient(145deg,#9a82ff45,#5de3d322);box-shadow:0 0 30px #8976ff44,inset 0 1px #fff5}
+.auth-brand-symbol i{position:absolute;inset:-6px;border:1px solid #8fdbd75c;border-radius:18px;transform:rotate(35deg)}
+.auth-brand small{align-self:flex-end;margin:0 0 3px -4px;font-size:8px;letter-spacing:2px;color:#91a0bd;font-weight:600}
+.auth-showcase-copy{max-width:540px;margin-top:35px}
+.auth-overline{display:flex;align-items:center;gap:10px;color:#9ce9df;font-size:10px;font-weight:800;letter-spacing:2.2px}
+.auth-overline i,.caption-dot{width:7px;height:7px;border-radius:50%;background:#6be6d8;box-shadow:0 0 14px #6be6d8}
+.auth-showcase-copy h1{margin:22px 0 17px;font-size:clamp(54px,6vw,82px);line-height:.99;letter-spacing:-4px;font-weight:850}
+.auth-showcase-copy h1 em{font-style:normal;background:linear-gradient(100deg,#c8baff 4%,#8b82ff 47%,#6ce9dc 96%);color:transparent;background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 8px 24px #8978ff35)}
+.auth-showcase-copy p{max-width:420px;color:#aab5ce;font-size:16px;line-height:1.8}
+.auth-orbit-caption{display:flex;align-items:center;gap:12px;margin-top:48px;color:#aab5ca;font-size:9px;letter-spacing:2.4px}
+.auth-showcase-foot{display:flex;justify-content:space-between;max-width:480px;padding-top:18px;border-top:1px solid #ffffff19;color:#71809f;font-size:9px;letter-spacing:1.5px}
+.auth-card-wrap{width:100%;max-width:470px;justify-self:end}
+.auth-card{position:relative;padding:34px 36px 28px;border:1px solid #ffffff24;border-radius:27px;background:linear-gradient(145deg,#202944eF,#111a2df2 72%);box-shadow:0 35px 100px #0008,0 0 60px #8875ff16,inset 0 1px #ffffff25;backdrop-filter:blur(26px);animation:authCardIn .8s cubic-bezier(.2,.8,.2,1) both}
+@keyframes authCardIn{from{opacity:0;transform:translateY(22px) scale(.975)}to{opacity:1;transform:none}}
+.auth-card:before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,#c1b4ff72,transparent 30%,#63e6d43d 72%,transparent);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.auth-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:29px}
+.auth-mini-logo{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:linear-gradient(145deg,#a48dff,#5dcfc9);color:#11182c;font-size:20px;box-shadow:0 5px 20px #8272e855}
+.auth-secure{font-size:9px;font-weight:800;letter-spacing:1.5px;color:#86e6dc}
+.auth-heading .auth-eyebrow{font-size:9px;letter-spacing:2.3px;color:#9e91e8;font-weight:800}
+.auth-heading h2{margin:9px 0 7px;font-size:31px;letter-spacing:-1.2px;color:#fff}
+.auth-heading p{margin:0;color:#9ba9c3;font-size:12px;line-height:1.65}
+.auth-tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;margin:26px 0 23px;padding:4px;border:1px solid #ffffff12;border-radius:13px;background:#080f20a6}
+.auth-tabs button{position:relative;z-index:1;padding:11px;border:0;border-radius:10px;background:transparent;color:#8794ad;font:inherit;font-size:12px;font-weight:750;cursor:pointer;transition:color .25s}
+.auth-tabs button.active{color:#fff}
+.auth-tab-glider{position:absolute;left:4px;top:4px;bottom:4px;width:calc(50% - 4px);border-radius:10px;background:linear-gradient(110deg,#8771e9,#536fc5);box-shadow:0 5px 16px #6659c255;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.auth-tabs.signup .auth-tab-glider{transform:translateX(100%)}
+.auth-field{display:block;margin:0 0 17px}
+.auth-field>span:first-child{display:block;margin:0 0 8px 2px;color:#9aa7c0;font-size:9px;font-weight:800;letter-spacing:1.5px}
+.auth-input-wrap{display:flex;align-items:center;gap:11px;height:53px;padding:0 14px;border:1px solid #ffffff19;border-radius:13px;background:#080f20a8;transition:border-color .2s,box-shadow .2s,background .2s}
+.auth-input-wrap:focus-within{border-color:#9b89ffb8;background:#11182be8;box-shadow:0 0 0 3px #9883ff19,0 0 24px #8271e51a}
+.auth-input-wrap>i{font-style:normal;color:#9c8cf0;font-size:16px}
+.auth-input-wrap input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#fff;font:inherit;font-size:13px}
+.auth-input-wrap input::placeholder{color:#63708a}
+.auth-eye{border:0;background:transparent;color:#8e9ab2;cursor:pointer;font-size:17px}
+.auth-form-note{min-height:28px;margin:0 0 12px;color:#7888a7;font-size:10px;line-height:1.5}
+.auth-form-note.error{color:#ff9dba}.auth-form-note.success{color:#83e8d9}
+.auth-submit{display:flex;align-items:center;justify-content:space-between;width:100%;height:54px;padding:0 18px;border:0;border-radius:13px;background:linear-gradient(105deg,#9879ff,#687ce8 56%,#39b9b2);color:#fff;font:inherit;font-size:13px;font-weight:850;cursor:pointer;box-shadow:0 12px 28px #7767e344,inset 0 1px #ffffff55;transition:transform .22s,filter .22s,box-shadow .22s}
+.auth-submit b{display:grid;place-items:center;width:29px;height:29px;border-radius:9px;background:#ffffff22;font-size:17px}
+.auth-submit:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 16px 34px #7767e366}
+.auth-submit:active{transform:scale(.985)}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0 13px;color:#64728d;font-size:8px;letter-spacing:1.8px}
+.auth-divider span{height:1px;flex:1;background:#ffffff17}
+.auth-demo{display:flex;justify-content:center;align-items:center;gap:10px;width:100%;padding:10px;border:1px solid #ffffff18;border-radius:12px;background:#ffffff08;color:#d5d9eb;font:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.auth-demo:hover{border-color:#7fe4d866;background:#63dfd511;color:#9df2e8}
+.auth-demo span{color:#7fe4d8;font-size:16px}
+.auth-legal{margin-top:19px;color:#66738d;text-align:center;font-size:9px;line-height:1.7}
+.auth-legal a{color:#a99bff;text-decoration:none}.auth-legal a:hover{text-decoration:underline}
+.auth-bottom-note{margin-top:18px;text-align:center;color:#7887a4;font-size:8px;letter-spacing:2px}.auth-bottom-note span{color:#8e81ff}
+.auth-copyright{position:absolute;z-index:1;bottom:18px;left:5vw;color:#65728c;font-size:8px;letter-spacing:1.8px}.auth-copyright span{padding:0 8px;color:#76dcd4}
+@media(max-width:900px){.auth-layout{grid-template-columns:minmax(0,.8fr) minmax(370px,1fr);gap:35px}.auth-showcase-copy h1{font-size:58px}.auth-planet{left:24%}.auth-orbit{left:4%}}
+@media(max-width:700px){.auth-gateway{padding:28px 17px 58px;align-items:start}.auth-layout{display:flex;flex-direction:column;gap:25px;min-height:0;width:min(470px,100%)}.auth-showcase{min-height:0;width:100%;padding:0}.auth-brand{font-size:20px}.auth-brand-symbol{width:37px;height:37px}.auth-brand small{font-size:7px}.auth-showcase-copy{margin-top:36px}.auth-showcase-copy h1{font-size:49px;letter-spacing:-2.8px;margin:13px 0}.auth-showcase-copy p{max-width:350px;font-size:13px;line-height:1.65}.auth-overline{font-size:8px}.auth-orbit-caption,.auth-showcase-foot{display:none}.auth-card-wrap{max-width:none}.auth-card{padding:25px 22px 22px;border-radius:22px}.auth-card-top{margin-bottom:20px}.auth-heading h2{font-size:27px}.auth-tabs{margin:20px 0}.auth-bottom-note{font-size:7px}.auth-planet{width:90px;height:90px;left:auto;right:2%;top:10%;opacity:.6}.auth-orbit{left:30%;top:12%;width:250px;height:100px}.auth-orbit.o-two{left:24%;top:10%;width:310px;height:130px}.auth-orbit.o-three{display:none}.auth-copyright{bottom:15px;left:0;right:0;text-align:center;font-size:7px}}
+@media(max-width:380px){.auth-card{padding:22px 17px}.auth-showcase-copy h1{font-size:43px}.auth-gateway{padding-inline:13px}}
+@media(prefers-reduced-motion:reduce){.auth-gateway:before,.auth-nebula,.auth-planet,.auth-orbit,.auth-star,.auth-card{animation:none!important}.auth-tabs button,.auth-tab-glider,.auth-input-wrap,.auth-submit{transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -1310,7 +1388,39 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   </div>
   <button class="intro-skip" id="introSkip" type="button">Войти в ORBIS →</button>
 </div>
-<div class="shell">
+
+<section class="auth-gateway" id="authGateway" hidden aria-label="Вход в ORBIS">
+ <div class="auth-backdrop" aria-hidden="true"><div class="auth-nebula n-one"></div><div class="auth-nebula n-two"></div><div class="auth-orbit o-one"><i></i></div><div class="auth-orbit o-two"><i></i></div><div class="auth-orbit o-three"><i></i></div><span class="auth-star s-one">✦</span><span class="auth-star s-two">✧</span><span class="auth-star s-three">✦</span><span class="auth-star s-four">·</span><div class="auth-planet"></div></div>
+ <div class="auth-layout">
+  <div class="auth-showcase">
+   <div class="auth-brand"><span class="auth-brand-symbol">✳<i></i></span><span>ORBIS</span><small>YOUR WORLD OF IDEAS</small></div>
+   <div class="auth-showcase-copy"><span class="auth-overline"><i></i> ТВОЁ ПРОСТРАНСТВО УЖЕ ЖДЁТ</span><h1>Мир идей.<br><em>Без границ.</em></h1><p>Открывай новые взгляды, находи вдохновение и делись тем, что действительно важно.</p></div>
+   <div class="auth-orbit-caption"><span class="caption-dot"></span> ONE UNIVERSE · INFINITE IDEAS</div>
+   <div class="auth-showcase-foot"><span>01 / 03</span><span>ИССЛЕДУЙ · СОЗДАВАЙ · ОТКРЫВАЙ</span></div>
+  </div>
+  <div class="auth-card-wrap">
+   <div class="auth-card">
+    <div class="auth-card-top"><span class="auth-mini-logo">✳</span><span class="auth-secure">● ORBIS ACCESS</span></div>
+    <div class="auth-heading"><div class="auth-eyebrow">РАДЫ ТЕБЯ ВИДЕТЬ</div><h2 id="authTitle">С возвращением</h2><p id="authSubtitle">Войди в свой аккаунт и продолжай открывать новое.</p></div>
+    <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
+    <form id="orbisAuthForm" novalidate>
+     <label class="auth-field"><span>ЭЛЕКТРОННАЯ ПОЧТА</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com" required></span></label>
+     <label class="auth-field"><span>ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authPassword" type="password" autocomplete="current-password" placeholder="Не менее 8 символов" minlength="8" required><button class="auth-eye" id="authEye" type="button" aria-label="Показать пароль">◉</button></span></label>
+     <label class="auth-field auth-confirm-field" id="authConfirmField" hidden><span>ПОВТОРИ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Введи пароль ещё раз"></span></label>
+     <div class="auth-form-note" id="authFormNote" aria-live="polite">Твои данные будут защищены после подключения системы авторизации.</div>
+     <button class="auth-submit" type="submit"><span id="authSubmitText">Войти в ORBIS</span><b>↗</b></button>
+    </form>
+    <div class="auth-divider"><span></span> ИЛИ <span></span></div>
+    <button class="auth-demo" id="authDemo" type="button">Посмотреть демоверсию <span>→</span></button>
+    <div class="auth-legal">Продолжая, ты принимаешь <a href="#" id="authTerms">условия использования</a> и <a href="#" id="authPrivacy">политику конфиденциальности</a>.</div>
+   </div>
+   <div class="auth-bottom-note"><span>✦</span> ТВОЯ СЛЕДУЮЩАЯ ИДЕЯ НАЧИНАЕТСЯ ЗДЕСЬ</div>
+  </div>
+ </div>
+ <div class="auth-copyright">© 2026 ORBIS <span>•</span> BUILT FOR CURIOUS MINDS</div>
+</section>
+
+<div class="shell" id="orbisAppShell" hidden>
 <aside class="sidebar">
  <div class="brand"><div class="brandmark" aria-label="ORBIS"><span class="orbit-core">✳</span><i class="orbit-ring"></i><i class="orbit-dot"></i></div><span class="brand-word">ORBIS</span></div>
  <nav class="nav">
@@ -1595,6 +1705,39 @@ document.addEventListener("click",event=>{
   let queued=false;
   function update(){const max=document.documentElement.scrollHeight-innerHeight;bar.style.width=(max>0?Math.min(100,scrollY/max*100):0)+"%";queued=false}
   window.addEventListener("scroll",()=>{if(!queued){queued=true;requestAnimationFrame(update)}},{passive:true});window.addEventListener("resize",update,{passive:true});update();
+})();
+
+
+/* ORBIS access screen interactions — visual prototype; no account service connected yet. */
+(function(){
+ const intro=document.getElementById("orbisIntro"),gateway=document.getElementById("authGateway"),shell=document.getElementById("orbisAppShell");
+ const skip=document.getElementById("introSkip"),form=document.getElementById("orbisAuthForm"),demo=document.getElementById("authDemo");
+ const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs");
+ let mode="login";
+ function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}if(gateway)gateway.hidden=false}
+ function enterDemo(){if(gateway)gateway.hidden=true;if(shell)shell.hidden=false;document.body.classList.add("orbis-demo-open")}
+ if(skip)skip.addEventListener("click",showAccess);
+ if(intro){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)showAccess();else window.setTimeout(showAccess,6200)}
+ tabs.forEach(tab=>tab.addEventListener("click",()=>{
+  mode=tab.dataset.authMode;tabs.forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active))});
+  tabWrap.classList.toggle("signup",mode==="signup");
+  title.textContent=mode==="login"?"С возвращением":"Создай свой аккаунт";
+  subtitle.textContent=mode==="login"?"Войди в свой аккаунт и продолжай открывать новое.":"Всего пара шагов — и твоё пространство ORBIS готово.";
+  confirmField.hidden=mode!=="signup";confirmInput.required=mode==="signup";
+  password.autocomplete=mode==="login"?"current-password":"new-password";
+  submitText.textContent=mode==="login"?"Войти в ORBIS":"Создать аккаунт";
+  note.className="auth-form-note";note.textContent="Авторизация пока не подключена. Это пока визуальный прототип.";
+ }));
+ const eye=document.getElementById("authEye");if(eye)eye.addEventListener("click",()=>{const reveal=password.type==="password";password.type=reveal?"text":"password";eye.textContent=reveal?"◎":"◉";eye.setAttribute("aria-label",reveal?"Скрыть пароль":"Показать пароль")});
+ if(form)form.addEventListener("submit",e=>{
+  e.preventDefault();note.className="auth-form-note error";
+  if(!document.getElementById("authEmail").validity.valid){note.textContent="Проверь адрес электронной почты.";return}
+  if(password.value.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";return}
+  if(mode==="signup"&&password.value!==confirmInput.value){note.textContent="Пароли не совпадают. Проверь оба поля.";return}
+  note.textContent="Экран готов, но вход и создание аккаунта заработают после подключения безопасного сервера авторизации.";
+ });
+ if(demo)demo.addEventListener("click",enterDemo);
+ ["authTerms","authPrivacy"].forEach(id=>{const a=document.getElementById(id);if(a)a.addEventListener("click",e=>{e.preventDefault();note.className="auth-form-note";note.textContent="Документы будут добавлены перед запуском регистрации."})});
 })();
 
 </script>
