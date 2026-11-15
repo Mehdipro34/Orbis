@@ -63,20 +63,19 @@ After deployment and configuration:
 
 - Open `/health` on the Worker URL; expect `ok: true`.
 - Open `/api/news/sources`; expect four configured news sources.
-- Open ORBIS through Telegram and complete the first sign-in.
-- Confirm one profile appears in Supabase `profiles` and its private mapping appears in `account_lookup`.
+- Register through the email form, confirm the email address, then sign in.
+- Confirm one profile appears in Supabase `profiles` with the selected username.
 - Publish one test post; confirm it appears in the Supabase feed.
 - Add a comment and a like; confirm counts update and comments load 20 at a time.
 - Upload a photo to a post and a Story; confirm media appears in the `orbis-media` bucket.
-- If archive channels are configured, confirm Telegram receives the post, media and Story.
 - Test like, comment, reply-as-post, follow, bookmark, profile edit, report, logout and a fresh sign-in.
 - Install the PWA from the browser menu on a supported device. The service worker caches the static shell only; social actions still need internet.
 
 ## 5. Limits and safety
 
-- The database was empty at the last project inspection. The first real Telegram sign-in has not yet been completed or verified.
+- The database was empty at the last project inspection. The first real email registration has not yet been completed or verified.
 - Do not announce a public launch until the full smoke test is complete.
 - Free tiers have quotas and can pause/throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users.
-- Keep the service-role key and bot token private.
+- Keep the Supabase service-role key private.
 - The project has report submission, lightweight rule-based anti-spam checks and per-user rate limits. It does not yet have a complete human moderation console or proven automated AI moderation.
 - Direct messages, a notification center, clans, Stars/Premium and ad management are not yet implemented.
