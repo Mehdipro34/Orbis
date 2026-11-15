@@ -59,7 +59,7 @@ async function telegram(method, env, payload) {
   if (!response.ok || !result.ok) throw new Error(result.description || "Telegram API error");
   return result;
 }
-async function allPosts(env, limit = 100) {
+async function allPosts(env, limit = 100, offset = 0) {
   // KV list is paginated. Walk pages so older posts do not hide newer ones
   // after the first 1,000 keys. Cap one request at 10 pages for predictable cost.
   const names = [];
@@ -73,7 +73,7 @@ async function allPosts(env, limit = 100) {
     cursor = listed.list_complete ? undefined : listed.cursor;
     pages += 1;
   } while (cursor && pages < 10);
-  const keys = names.sort().reverse().slice(0, limit);
+  const keys = names.sort().reverse().slice(Math.max(0, offset), Math.max(0, offset) + limit);
   const values = await Promise.all(keys.map(key => env.ORBIS_KV.get(key, "json")));
   return values.filter(Boolean);
 }
@@ -103,6 +103,37 @@ async function postView(env, post, user) {
   return { ...post, likes: Number(stats.likes || 0), liked };
 }
 
+const NEWS_SOURCES = {
+  "bbc-ru": { name: "BBC News · Русский", url: "https://feeds.bbci.co.uk/russian/rss.xml", language: "Русский", credit: "BBC News" },
+  "oxu-az": { name: "Oxu.az", url: "https://oxu.az/feed", language: "Азербайджанский", credit: "Oxu.az" },
+  "trend-en": { name: "Trend News Agency", url: "https://en.trend.az/feeds/index.rss", language: "English", credit: "© Trend News Agency 2026", noCache: true, teaserLimit: 140 },
+  "aljazeera-en": { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", language: "English", credit: "Al Jazeera" }
+};
+function decodeXml(value) {
+  return String(value || "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (_, code) => {
+    const n = code[0].toLowerCase() === "x" ? parseInt(code.slice(1), 16) : parseInt(code, 10);
+    try { return Number.isFinite(n) ? String.fromCodePoint(n) : ""; } catch { return ""; }
+  }).replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"' ).replace(/&apos;|&#39;/g, "'").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+function xmlTag(block, names) {
+  for (const name of names) { const match = block.match(new RegExp("<" + name + "(?:\\s[^>]*)?>([\\s\\S]*?)</" + name + "\\s*>", "i")); if (match) return decodeXml(match[1]); }
+  return "";
+}
+function parseNewsXml(xml, source, limit = 30) {
+  const blocks = [...xml.matchAll(/<(item|entry)(?:\s[^>]*)?>([\s\S]*?)<\/\1\s*>/gi)].map(m => m[2]);
+  const entries = [];
+  for (const block of blocks.slice(0, limit)) {
+    const title = xmlTag(block, ["title"]);
+    let link = xmlTag(block, ["link"]);
+    if (!link) { const lm = block.match(/<link\b[^>]*href=["\']([^"\']+)["\'][^>]*\/?\s*>/i); if (lm) link = decodeXml(lm[1]); }
+    const description = xmlTag(block, ["description", "summary", "content:encoded", "content"]);
+    const dateText = xmlTag(block, ["pubDate", "published", "updated", "dc:date"]);
+    let safeUrl = ""; try { const parsed = new URL(link); if (parsed.protocol === "https:" && parsed.hostname.includes(".")) safeUrl = parsed.href; } catch {}
+    if (!title || !safeUrl) continue;
+    entries.push({ title: title.slice(0,220), summary: description.slice(0,source.teaserLimit || 260), url: safeUrl, publishedAt: dateText && !Number.isNaN(Date.parse(dateText)) ? new Date(dateText).toISOString() : null, source: source.name, credit: source.credit });
+  }
+  return entries;
+}
 async function api(request, env, url) {
   await requireKV(env);
   const path = url.pathname;
@@ -173,11 +204,15 @@ async function api(request, env, url) {
     const user = await currentUser(request, env);
     const topic = String(url.searchParams.get("topic") || "").trim().toLocaleLowerCase("ru");
     const query = String(url.searchParams.get("q") || "").trim().toLocaleLowerCase("ru");
-    let posts = await allPosts(env, 100);
+    const pageSize = Math.min(30, Math.max(1, Number.parseInt(url.searchParams.get("limit") || "20", 10) || 20));
+    const offset = Math.max(0, Number.parseInt(url.searchParams.get("offset") || "0", 10) || 0);
+    let posts = await allPosts(env, topic || query ? 1000 : pageSize + 1, topic || query ? 0 : offset);
     if (topic) posts = posts.filter(post => String(post.topic || "").toLocaleLowerCase("ru") === topic);
     if (query) posts = posts.filter(post => [post.title, post.body, post.topic, post.author, post.username].join(" ").toLocaleLowerCase("ru").includes(query));
+    const hasMore = !topic && !query && posts.length > pageSize;
+    posts = posts.slice(0, pageSize);
     const views = await Promise.all(posts.map(post => postView(env, post, user)));
-    return json({ posts: views });
+    return json({ posts: views, hasMore, nextOffset: offset + views.length });
   }
   const likeMatch = path.match(/^\/api\/posts\/([a-f0-9-]+)\/like$/i);
   if (request.method === "POST" && likeMatch) {
@@ -278,6 +313,17 @@ async function api(request, env, url) {
       const archived = await telegram("sendMessage", env, { chat_id: env.POSTS_CHANNEL_ID, text: archiveText, disable_web_page_preview: true });
       post.telegramMessageId = archived.result.message_id;
       post.archived = true;
+      const mediaChannel = env.MEDIA_CHANNEL_ID || env.POSTS_CHANNEL_ID;
+      post.telegramMediaMessageIds = [];
+      for (const item of media) {
+        const mediaUrl = url.origin + item.url;
+        const caption = ("ORBIS · @" + user.username + "\n" + title + "\n" + post.id).slice(0, 900);
+        const method = item.type === "image/gif" ? "sendAnimation" : item.type.startsWith("video/") ? "sendVideo" : "sendPhoto";
+        const field = item.type === "image/gif" ? "animation" : item.type.startsWith("video/") ? "video" : "photo";
+        try { const mediaResult = await telegram(method, env, { chat_id: mediaChannel, [field]: mediaUrl, caption }); post.telegramMediaMessageIds.push(mediaResult.result.message_id); }
+        catch (mediaError) { post.mediaArchiveWarning = "Файл доступен по ссылке, но Telegram не смог скопировать его в медиаканал: " + mediaError.message; }
+      }
+      post.mediaArchived = post.telegramMediaMessageIds.length === media.length;
     } catch (error) {
       return json({ error: "Не удалось сохранить публикацию в Telegram: " + error.message }, 502);
     }
@@ -285,7 +331,14 @@ async function api(request, env, url) {
     await env.ORBIS_KV.put(storageKey, JSON.stringify(post));
     await env.ORBIS_KV.put("postid:" + post.id, storageKey);
     await env.ORBIS_KV.put("poststats:" + post.id, JSON.stringify({ likes: 0 }));
-    return json({ ok: true, post: await postView(env, post, user) }, 201);
+    if (env.INDEX_CHANNEL_ID) {
+      try {
+        await telegram("sendMessage", env, { chat_id: env.INDEX_CHANNEL_ID, text: "ORBIS_INDEX\n" + post.createdAt + "\n@" + post.username + "\n" + post.topic + "\n" + post.id, disable_web_page_preview: true });
+        post.indexed = true;
+        await env.ORBIS_KV.put(storageKey, JSON.stringify(post));
+      } catch { post.indexed = false; }
+    }
+    return json({ ok: true, post: await postView(env, post, user), mediaArchived: post.mediaArchived !== false, archiveWarning: post.mediaArchiveWarning || null }, 201);
   }
   if (request.method === "PUT" && path === "/api/profile") {
     const user = await currentUser(request, env);
@@ -307,6 +360,34 @@ async function api(request, env, url) {
     const [followers, following] = await Promise.all([listPrefix(env, "follow:" + username + ":", 10000), listPrefix(env, "follow:", 10000)]);
     const viewer = await currentUser(request, env);
     return json({ user: { username, name: user.name, bio: user.bio, createdAt: user.createdAt }, posts: await Promise.all(posts.map(post => postView(env, post, viewer))), followers: followers.length, following: following.filter(key => key.endsWith(":" + username)).length, isFollowing: viewer ? Boolean(await env.ORBIS_KV.get("follow:" + username + ":" + viewer.username)) : false });
+  }
+  if (request.method === "GET" && path === "/api/news/sources") {
+    return json({ sources: Object.entries(NEWS_SOURCES).map(([id, source]) => ({ id, name: source.name, language: source.language, credit: source.credit })) });
+  }
+  if (request.method === "GET" && path === "/api/news") {
+    const id = String(url.searchParams.get("source") || "bbc-ru");
+    const source = NEWS_SOURCES[id];
+    if (!source) return json({ error: "Неизвестный новостной источник." }, 404);
+    const cacheKey = "news-cache:" + id;
+    if (!source.noCache) {
+      const cached = await env.ORBIS_KV.get(cacheKey, "json");
+      if (cached && Date.now() - cached.fetchedAt < 300000) return json({ source: source.name, language: source.language, items: cached.items, cached: true, fetchedAt: cached.fetchedAt });
+    }
+    try {
+      const response = await fetch(source.url, { headers: { "accept": "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5", "user-agent": "ORBIS News Reader/1.0" } });
+      if (!response.ok) throw new Error("Источник ответил HTTP " + response.status);
+      const xml = await response.text();
+      if (!xml || !/<(?:rss|feed|rdf:RDF)\\b/i.test(xml)) throw new Error("Источник вернул неизвестный формат ленты.");
+      const items = parseNewsXml(xml, source, 30);
+      if (!items.length) throw new Error("В ленте пока нет доступных публикаций.");
+      const fetchedAt = Date.now();
+      if (!source.noCache) await env.ORBIS_KV.put(cacheKey, JSON.stringify({ fetchedAt, items }), { expirationTtl: 300 });
+      return json({ source: source.name, language: source.language, items, cached: false, fetchedAt });
+    } catch (error) {
+      const cached = !source.noCache ? await env.ORBIS_KV.get(cacheKey, "json") : null;
+      if (cached && cached.items && cached.items.length) return json({ source: source.name, language: source.language, items: cached.items, cached: true, stale: true, warning: "Не удалось обновить источник. Показаны последние сохранённые заголовки.", fetchedAt: cached.fetchedAt });
+      return json({ error: "Не удалось загрузить " + source.name + ": " + error.message }, 502);
+    }
   }
   if (request.method === "GET" && path === "/api/navigator") {
     const posts = await allPosts(env, 10000);
