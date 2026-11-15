@@ -1925,7 +1925,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
  </div>
 </section><section class="land-about" id="about"><div><small class="land-kicker">БОЛЬШЕ, ЧЕМ ПРОСТО ЛЕНТА</small><h2>Открой пространство<br><em>для своих идей.</em></h2></div><p>ORBIS объединяет публикации, темы и личные страницы в понятном и красивом интерфейсе. Без перегруженных меню — только самое главное.</p></section>
-<section class="land-features" id="features"><small class="land-kicker">ВОЗМОЖНОСТИ ORBIS</small><h2>Всё важное — <em>под рукой.</em></h2><div class="land-grid"><article><div class="feature-symbol">◉</div><small>01 / FEED</small><h3>Лента и обсуждения</h3><p>Публикации, фотографии и видео. Реакции, комментарии, ответы отдельными постами и закладки.</p></article><article><div class="feature-symbol">⌁</div><small>02 / EXPLORE</small><h3>Навигатор</h3><p>Поиск людей и публикаций, тематические разделы и новостные RSS-источники с переходом к оригиналу.</p></article><article><div class="feature-symbol">◎</div><small>03 / IDENTITY</small><h3>Профили и подписки</h3><p>Регистрация через Telegram, личная страница, редактирование описания и подписки на авторов.</p></article><article><div class="feature-symbol">✦</div><small>04 / STORIES</small><h3>Истории на 24 часа</h3><p>Короткие текстовые истории, фото и видео, которые автоматически исчезают через сутки.</p></article></div></section>
+<section class="land-features" id="features"><small class="land-kicker">ВОЗМОЖНОСТИ ORBIS</small><h2>Всё важное — <em>под рукой.</em></h2><div class="land-grid"><article><div class="feature-symbol">◉</div><small>01 / FEED</small><h3>Лента и обсуждения</h3><p>Публикации, фотографии и видео. Реакции, комментарии, ответы отдельными постами и закладки.</p></article><article><div class="feature-symbol">⌁</div><small>02 / EXPLORE</small><h3>Навигатор</h3><p>Поиск людей и публикаций, тематические разделы и новостные RSS-источники с переходом к оригиналу.</p></article><article><div class="feature-symbol">◎</div><small>03 / IDENTITY</small><h3>Профили и подписки</h3><p>Регистрация по почте, личная страница, редактирование описания и подписки на авторов.</p></article><article><div class="feature-symbol">✦</div><small>04 / STORIES</small><h3>Истории на 24 часа</h3><p>Короткие текстовые истории, фото и видео, которые автоматически исчезают через сутки.</p></article></div></section>
 <section class="land-creator" id="creator"><div class="land-monogram">ММ<span>✳</span></div><div><small class="land-kicker">ЗА ИДЕЕЙ СТОИТ ЧЕЛОВЕК</small><h2>Создаётся с идеей.<br><em>Растёт вместе с людьми.</em></h2><p>Меня зовут Мехти Мурадлы. ORBIS — проект о новых возможностях, интересных мыслях и цифровом пространстве, которое развивается шаг за шагом.</p><div class="land-social"><a href="https://www.youtube.com/@mehdimuradli" target="_blank" rel="noopener">▶ <span><small>YOUTUBE</small><b>Жизнь Мехти</b></span> ↗</a><a href="https://www.instagram.com/lifemehti/" target="_blank" rel="noopener">◎ <span><small>INSTAGRAM</small><b>@lifemehti</b></span> ↗</a></div></div></section>
 <section class="land-roadmap" id="land-roadmap">
  <div class="roadmap-heading"><small class="land-kicker">ВОЗМОЖНОСТИ</small><h2>Всё важное.<br><em>В одном пространстве.</em></h2><p>Открывай новые идеи, находи людей и создавай собственную историю.</p></div>
@@ -1939,12 +1939,12 @@ document.addEventListener("DOMContentLoaded",()=>{
  <div class="faq-heading"><small class="land-kicker">ВОПРОСЫ И ОТВЕТЫ</small><h2>Знакомство с <em>ORBIS.</em></h2><p>Коротко о том, что представляет собой проект сегодня.</p></div>
  <div class="faq-list">
   <details><summary>Что такое ORBIS?<span>＋</span></summary><p>Это цифровое пространство для публикаций, тематического поиска и личных профилей. Главная идея — оставить три понятных направления: Лента, Навигатор и Профиль.</p></details>
-  <details><summary>Как войти в ORBIS?<span>＋</span></summary><p>Вход и создание аккаунта доступны только через официальный Telegram Mini App. Telegram передаёт подписанные данные, сервер проверяет их и связывает профиль с защищённой сессией Supabase.</p></details>
-  <details><summary>Где хранятся данные?<span>＋</span></summary><p>Профили, публикации, реакции, подписки, закладки и истории хранятся в Supabase PostgreSQL. Фото и видео загружаются в Supabase Storage. Telegram-каналы используются как дополнительный архив, когда он настроен.</p></details>
+  <details><summary>Как войти в ORBIS?<span>＋</span></summary><p>Вход и создание аккаунта работают по электронной почте и паролю. Supabase защищает учётные данные и сохраняет сессию между посещениями.</p></details>
+  <details><summary>Где хранятся данные?<span>＋</span></summary><p>Профили, публикации, реакции, подписки, закладки и истории хранятся в Supabase PostgreSQL. Фото и видео загружаются во внутреннее хранилище ORBIS и отображаются в ленте вместе с публикацией.</p></details>
   <details><summary>Можно ли открыть ORBIS на телефоне?<span>＋</span></summary><p>Да, текущую веб-страницу можно открыть в мобильном браузере. Отдельное приложение пока не выпущено.</p></details>
  </div>
 </section>
-<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере или Telegram Mini App. Установка на главный экран доступна через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS через Telegram <b>↗</b></button><small id="downloadNote">Вход и создание аккаунта — только через Telegram.</small></div></section></main>
+<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере или Telegram Mini App. Установка на главный экран доступна через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS <b>↗</b></button><small id="downloadNote">Регистрация и вход — по электронной почте и паролю.</small></div></section></main>
 <footer class="land-footer"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><span>ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</span><span>© 2026 ORBIS · Мехти Мурадлы</span></footer></section>
 <section class="auth-gateway auth-minimal" id="authGateway" hidden aria-label="Вход в ORBIS">
  <button class="auth-back-landing" id="authBackLanding" type="button" aria-label="Назад">←</button>
@@ -2292,7 +2292,7 @@ document.addEventListener("click",event=>{
 </script>
 
 <script>
-/* ORBIS single-worker connection: API, Telegram archive and shared profiles. */
+/* ORBIS API connection and shared profiles. */
 (function(){
  const $=id=>document.getElementById(id);
  const api=async(path,options={})=>{
@@ -2729,7 +2729,7 @@ document.addEventListener("click",event=>{
     ["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
     if($("postMedia"))$("postMedia").value="";
     replyToPostId=null;$("dialogTitle").textContent="Новая публикация";
-    $("modal").classList.remove("open");await loadFeed(true,feedTopic);window.notify?.(data.archiveWarning?"Публикация сохранена в ORBIS.":"Публикация сохранена и отправлена в Telegram.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
+    $("modal").classList.remove("open");await loadFeed(true,feedTopic);window.notify?.(data.archiveWarning?"Публикация сохранена в ORBIS и добавлена в ленту.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
    }catch(error){window.notify?.(error.message)}
    finally{target.disabled=false;target.textContent="Опубликовать"}
   }
@@ -3005,7 +3005,7 @@ document.addEventListener("click",event=>{
       media=uploaded.media||[];
      }
      const published=await request("/api/stories",{method:"POST",body:JSON.stringify({body,media})});
-     layer.classList.remove("open");window.notify?.(published.archiveWarning?"История сохранена в ORBIS.":"История опубликована и отправлена в Telegram.");if(published.archiveWarning)window.notify?.(published.archiveWarning);await refresh();
+     layer.classList.remove("open");window.notify?.(published.archiveWarning?"История сохранена в ORBIS.");if(published.archiveWarning)window.notify?.(published.archiveWarning);await refresh();
     }catch(err){error.textContent=err.message}
     finally{submit.disabled=false;submit.innerHTML='Опубликовать историю <span>↗</span>'}
    });
@@ -3026,12 +3026,12 @@ document.addEventListener("click",event=>{
     item.append(ring,label);item.addEventListener("click",()=>openStory(story));target.append(item);
    });
   }catch(error){
-   const note=document.createElement("span");note.className="stories-empty";note.textContent=error.message.includes("Войди")?"Войди через Telegram, чтобы смотреть истории.":"Истории временно недоступны.";target.append(note);
+   const note=document.createElement("span");note.className="stories-empty";note.textContent=error.message.includes("Войди")?"Войди в ORBIS, чтобы смотреть истории.":"Истории временно недоступны.";target.append(note);
   }
  }
  document.addEventListener("click",e=>{
   const button=e.target.closest("#orbisAddStory");if(!button)return;
-  if(!window.orbisUser){window.notify?.("Сначала войди через Telegram.");return}
+  if(!window.orbisUser){window.notify?.("Сначала войди в ORBIS.");return}
   openComposer();
  });
  document.addEventListener("DOMContentLoaded",()=>setTimeout(refresh,250));
