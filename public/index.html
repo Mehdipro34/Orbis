@@ -1901,7 +1901,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   </div>
   <button class="intro-skip" id="introSkip" type="button">Продолжить в ORBIS →</button>
 </div>
-<section class="orbis-landing" id="orbisLanding">
+<section class="orbis-landing" id="orbisLanding" hidden>
 <header class="landing-nav"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><nav><a href="#about">О проекте</a><a href="#features">Возможности</a><a href="#creator">Создатель</a></nav><div><button class="land-login" data-open-auth="login">Открыть ORBIS</button></div></header>
 <main class="land-main" id="home"><section class="land-hero land-hero-centered">
  <div class="center-stage">
@@ -1954,7 +1954,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="auth-card-wrap"><div class="auth-card auth-card-compact">
    <div class="auth-card-top"><span class="auth-mini-logo">✳</span><span class="auth-secure">● ORBIS ACCESS</span></div>
    <div class="auth-heading"><div class="auth-eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h2 id="authTitle">С возвращением</h2><p id="authSubtitle">Войди и продолжай.</p></div>
-   <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
+   <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true" hidden>Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false" hidden>Регистрация</button><span class="auth-tab-glider"></span></div>
    <form id="orbisAuthForm" novalidate>
     <label class="auth-field auth-username-field" id="authUsernameField" hidden><span>ИМЯ ПОЛЬЗОВАТЕЛЯ</span><span class="auth-input-wrap"><i>@</i><input id="authUsername" type="text" autocomplete="username" placeholder="Твой username" minlength="3" maxlength="24"></span></label>
     <label class="auth-field auth-email-field" id="authEmailField"><span>ЭЛЕКТРОННАЯ ПОЧТА</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com" required></span></label>
@@ -2927,6 +2927,8 @@ document.addEventListener("click",event=>{
 </script>
 
 <style id="orbis-auth-and-layout-fix">
+#orbisLanding[hidden],#authGateway[hidden]{display:none!important}
+
 /* Keep the signed-in experience balanced and centered on wide displays. */
 #orbisAppShell.shell{width:min(100%,1760px);margin-inline:auto;grid-template-columns:minmax(215px,250px) minmax(0,1fr) minmax(250px,300px);justify-content:center;gap:clamp(18px,2vw,32px);padding-inline:clamp(16px,2vw,30px)}
 #orbisAppShell>main{width:100%;max-width:1040px;justify-self:center}
