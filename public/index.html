@@ -1855,7 +1855,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <button class="intro-skip" id="introSkip" type="button">Продолжить в ORBIS →</button>
 </div>
 <section class="orbis-landing" id="orbisLanding">
-<header class="landing-nav"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><nav><a href="#about">О проекте</a><a href="#features">Возможности</a><a href="#creator">Создатель</a></nav><div><button class="land-login" data-open-auth="login">Войти</button><button class="land-signup" data-open-auth="login">Войти через Telegram ↗</button></div></header>
+<header class="landing-nav"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><nav><a href="#about">О проекте</a><a href="#features">Возможности</a><a href="#creator">Создатель</a></nav><div><button class="land-login" data-open-auth="login">Войти через Telegram</button></div></header>
 <main class="land-main" id="home"><section class="land-hero land-hero-centered">
  <div class="center-stage">
   <div class="center-status"><i></i> НОВОЕ ПРОСТРАНСТВО УЖЕ ОТКРЫТО</div>
@@ -1872,7 +1872,7 @@ document.addEventListener("DOMContentLoaded",()=>{
    <div class="center-eyebrow">ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</div>
    <h1>Твой мир.<br><em>Твой ORBIS.</em></h1>
    <p>Социальная сеть для мыслей, открытий и публикаций. Вход и регистрация — только через Telegram.</p>
-   <div class="center-actions"><button class="center-primary" data-open-auth="signup">Продолжить через Telegram <span>↗</span></button><button class="center-secondary" data-open-auth="login">О проекте</button></div>
+   <div class="center-actions"><button class="center-primary" data-open-auth="login">Продолжить через Telegram <span>↗</span></button><button class="center-secondary" data-open-auth="login">О проекте</button></div>
    <div class="center-proof"><span><i>✳</i> Лента</span><b></b><span><i>⌁</i> Navigator</span><b></b><span><i>◎</i> Профиль</span></div>
   </div>
   <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
@@ -1892,8 +1892,8 @@ document.addEventListener("DOMContentLoaded",()=>{
  <div class="faq-heading"><small class="land-kicker">ВОПРОСЫ И ОТВЕТЫ</small><h2>Знакомство с <em>ORBIS.</em></h2><p>Коротко о том, что представляет собой проект сегодня.</p></div>
  <div class="faq-list">
   <details><summary>Что такое ORBIS?<span>＋</span></summary><p>Это цифровое пространство для публикаций, тематического поиска и личных профилей. Главная идея — оставить три понятных направления: Лента, Навигатор и Профиль.</p></details>
-  <details><summary>Можно ли создать настоящий аккаунт?<span>＋</span></summary><p>Да, когда Worker развёрнут и подключён к KV. Регистрация и вход используют серверный API; пароль хранится в виде PBKDF2-хеша, а сессия — в защищённой HttpOnly-cookie.</p></details>
-  <details><summary>Сохраняются ли публикации между устройствами?<span>＋</span></summary><p>Публикации и профили сохраняются в Cloudflare KV, а публикации дополнительно отправляются в Telegram-архив. Фото и видео хранятся в R2. Это заработает после подключения всех ресурсов и успешного Deploy.</p></details>
+  <details><summary>Как войти в ORBIS?<span>＋</span></summary><p>Вход и создание аккаунта доступны только через официальный Telegram Mini App. Telegram передаёт подписанные данные, сервер проверяет их и связывает профиль с защищённой сессией Supabase.</p></details>
+  <details><summary>Где хранятся данные?<span>＋</span></summary><p>Профили, публикации, реакции, подписки, закладки и истории хранятся в Supabase PostgreSQL. Фото и видео загружаются в Supabase Storage. Telegram-каналы используются как дополнительный архив, когда он настроен.</p></details>
   <details><summary>Можно ли открыть ORBIS на телефоне?<span>＋</span></summary><p>Да, текущую веб-страницу можно открыть в мобильном браузере. Отдельное приложение пока не выпущено.</p></details>
  </div>
 </section>
