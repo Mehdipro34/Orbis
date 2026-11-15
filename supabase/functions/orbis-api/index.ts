@@ -42,7 +42,7 @@ async function enrichPostCounts(admin:any, uid:string, rows:any[]){
 const encoder=new TextEncoder();
 function bytesToBase64Url(bytes:Uint8Array){
   let binary="";for(const byte of bytes)binary+=String.fromCharCode(byte);
-  return btoa(binary).replace(/=/g,"").replace(/\\+/g,"-").replace(/\\//g,"_");
+  return btoa(binary).replace(/=/g,"").replaceAll("+","-").replaceAll("/","_");
 }
 function base64UrlToBytes(value:string){
   const normalized=value.replace(/-/g,"+").replace(/_/g,"/");
@@ -88,7 +88,8 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get("SUPABASE_URL"), service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !service) return out({ error: "Supabase server secrets are not configured." }, 503);
   const admin = createClient(url, service, { auth: { persistSession:false, autoRefreshToken:false } });
-  const token = (req.headers.get("Authorization")||"").replace(/^Bearer\\s+/i,"");
+  const authHeader=req.headers.get("Authorization")||"";
+  const token=authHeader.toLowerCase().startsWith("bearer ")?authHeader.slice(7).trim():authHeader.trim();
   let uid: string|null = token ? await verifyGuestToken(token,service) : null;
   const u = new URL(req.url);
   const pathname = u.pathname;
