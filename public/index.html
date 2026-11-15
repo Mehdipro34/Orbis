@@ -538,6 +538,67 @@ body{isolation:isolate}
 @keyframes satelliteCruise{0%,100%{translate:0 0}50%{translate:-32px 20px}}
 @media(max-width:650px){.orbital-satellite{transform:translateX(92px) scale(.75)}}
 @media(prefers-reduced-motion:reduce){.orbital-satellite{animation:none!important}}
+
+/* ORBIS motion polish — expressive, coordinated, and intentionally restrained */
+:root{--orb-ease:cubic-bezier(.2,.75,.25,1);--orb-spring:cubic-bezier(.18,.9,.25,1.25)}
+html{scroll-behavior:smooth}
+::selection{background:#cfc5ff;color:#35266f}
+button,.story,.topic-item,.nav button,.mobile-nav button{ -webkit-tap-highlight-color:transparent}
+button{position:relative;isolation:isolate;overflow:hidden}
+button:focus-visible,.compose-open:focus-visible{outline:3px solid #9b8cff;outline-offset:3px}
+.brandmark{transition:filter .35s var(--orb-ease),box-shadow .35s var(--orb-ease)}
+.brandmark:hover{filter:saturate(1.25);box-shadow:0 13px 34px #7964ef70,0 0 0 7px #eeeaff}
+.hero{transition:box-shadow .45s var(--orb-ease),filter .45s var(--orb-ease)}
+.hero:hover{filter:saturate(1.07);box-shadow:0 26px 58px #7965ef55}
+.hero-visual{will-change:transform}
+.story{cursor:pointer;transition:transform .3s var(--orb-spring),filter .3s}
+.story:hover{transform:translateY(-5px) scale(1.035);filter:saturate(1.12)}
+.story-ring{transition:box-shadow .35s,transform .35s}
+.story:hover .story-ring{box-shadow:0 8px 24px #8c73ed40;transform:rotate(-5deg)}
+.story-ring>div{transition:transform .35s var(--orb-spring)}
+.story:hover .story-ring>div{transform:scale(.92)}
+.post{transform-origin:50% 80%;transition:transform .32s var(--orb-ease),box-shadow .32s,border-color .32s}
+.post:hover{border-color:#dcd5ff}
+.post-actions button[aria-pressed=true]{color:#e36c91;background:#fff0f4}
+.topic-filter button{transition:transform .22s var(--orb-spring),background .25s,border-color .25s,box-shadow .25s}
+.topic-filter button:active{transform:scale(.94)}
+.nav button,.mobile-nav button{transition:transform .22s var(--orb-spring),background .25s,color .25s,box-shadow .25s}
+.nav button:active,.mobile-nav button:active{transform:scale(.96)}
+.primary,.secondary,.tiny,.bell,.compose-open{transition:transform .22s var(--orb-spring),box-shadow .25s,border-color .25s,background .25s}
+.primary:hover{transform:translateY(-2px);box-shadow:0 13px 27px #8068ef55}
+.secondary:hover,.tiny:hover,.bell:hover{transform:translateY(-1px)}
+.modal.open .dialog{animation:dialogBloom .42s var(--orb-spring) both}
+@keyframes dialogBloom{0%{opacity:0;transform:translateY(18px) scale(.965);filter:blur(5px)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+.toast{animation:toastBloom .32s var(--orb-spring) both}
+@keyframes toastBloom{from{opacity:0;transform:translate(-50%,12px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.reveal-on-scroll{opacity:0;transform:translateY(18px) scale(.99);transition:opacity .65s var(--orb-ease),transform .65s var(--orb-ease)}
+.reveal-on-scroll.is-visible{opacity:1;transform:translateY(0) scale(1)}
+.orb-sheen{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;border-radius:inherit}
+.orb-sheen:after{content:"";position:absolute;top:-80%;left:-45%;width:28%;height:260%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,#ffffff45,transparent);opacity:0;transition:left .65s var(--orb-ease),opacity .25s}
+button:hover .orb-sheen:after{left:125%;opacity:1}
+.orb-ripple{position:absolute;z-index:1;pointer-events:none;border-radius:50%;background:#ffffff55;transform:scale(0);animation:orbRipple .65s ease-out forwards}
+@keyframes orbRipple{to{transform:scale(1);opacity:0}}
+button>*:not(.orb-sheen):not(.orb-ripple){position:relative;z-index:2}
+.is-pressed{animation:buttonPress .24s ease-out}
+@keyframes buttonPress{0%{transform:scale(1)}45%{transform:scale(.965)}100%{transform:scale(1)}}
+#orbisProgress{height:3px;box-shadow:0 0 12px #8b75ff99,0 0 24px #ff8eaa55}
+#orbisParticles{opacity:.82}
+@media(hover:hover) and (pointer:fine){
+ .side-card:hover,.composer:hover,.stories:hover{transform:translateY(-3px);box-shadow:0 18px 42px #5946a31a}
+ .side-card,.composer,.stories{transition:transform .32s var(--orb-ease),box-shadow .32s}
+}
+@media(max-width:650px){
+ .hero-visual{right:-58px;opacity:.62;transform:translateY(-50%) scale(.82)}
+ .hero>*:not(.hero-visual){max-width:78%;z-index:2}
+ .story:hover{transform:translateY(-2px)}
+ .reveal-on-scroll{transform:translateY(10px)}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ .reveal-on-scroll{opacity:1;transform:none}
+ .orb-sheen:after{display:none}
+}
+
 </style>
 </head>
 <body>
