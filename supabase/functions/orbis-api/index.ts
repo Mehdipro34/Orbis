@@ -19,6 +19,8 @@ function basicTextGuard(value:string){
     const unique=new Set(words).size;
     if(unique/words.length<0.24)return "Текст похож на повторяющийся спам.";
   }
+  const allAgesBlocked=/(?:\\bporn(?:ography)?\\b|\\brape\\b|\\bsexual assault\\b|\\bsex trafficking\\b|\\bchild abuse\\b|\\bmurder(?:ed)?\\b|\\bmassacre\\b|\\bsuicide\\b|\\bself[- ]harm\\b|\\bdrug trafficking\\b|\\boverdose\\b|\\bshooting\\b|\\bbombing\\b|\\bbeheading\\b|\\btorture\\b|\\bterror attack\\b|порно|изнасил|сексуальн.{0,12}насил|домогательств|убийств|убит[аоы]?|труп|самоубийств|суицид|самоповрежден|наркотик|наркобанд|расстрел|взрыв|бомб|обезглав|пытк|теракт|cinsi zorakılıq|zorlama|qətl|öldür|intihar|narkotik|partlayış|terror)/iu;
+  if(allAgesBlocked.test(text))return "Этот материал не подходит для общей ленты ORBIS. Публикуй безопасный для всех возрастов контент.";
   return null;
 }
 
