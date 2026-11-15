@@ -34,6 +34,20 @@
   });
 })();
 
+
+/* Add two extra explorer crew members to the intro scene. */
+(function(){
+ const scene=document.querySelector("#orbisIntro .intro-scene");
+ if(!scene||scene.querySelector(".extra-a"))return;
+ const source=scene.querySelector(".intro-astronaut.left");
+ if(!source)return;
+ const a=source.cloneNode(true);a.className="intro-astronaut extra-a";a.setAttribute("aria-hidden","true");
+ const b=source.cloneNode(true);b.className="intro-astronaut extra-b";b.setAttribute("aria-hidden","true");
+ scene.append(a,b);
+ const satellite=document.createElement("div");satellite.className="orbital-satellite";satellite.setAttribute("aria-hidden","true");
+ satellite.innerHTML="<span></span><i></i><b></b>";
+ scene.appendChild(satellite);
+})();
 </script>
 <style>
 :root{color-scheme:light;--bg:#f6f7fb;--paper:#fff;--ink:#20243a;--muted:#858ba2;--line:#e9ebf3;--violet:#6958e8;--violet2:#8b7cf6;--coral:#ff8c79;--mint:#5bc9b3;--shadow:0 14px 40px #34365c0c}
@@ -496,6 +510,34 @@ body{isolation:isolate}
 @media(max-width:650px){#orbNebula{opacity:.42}.post:hover:after{animation:none}}
 @media(prefers-reduced-motion:reduce){#orbNebula i,.hero-planet:after,.story:nth-child(n) .story-ring{animation:none!important}.post:after{display:none}}
 
+
+/* ORBIS deep-space redesign pass */
+.orbis-intro{background:radial-gradient(ellipse at 50% 48%,#55409b 0,#282052 39%,#0c1028 76%,#050816 100%)}
+.orbis-intro:before{opacity:.9;background:repeating-radial-gradient(ellipse at center,transparent 0 48px,#b7a4ff18 49px 50px,transparent 51px 102px);animation:spaceRotate 78s linear infinite}
+.orbis-intro:after{width:min(88vw,760px);border-color:#c9baff50;box-shadow:0 0 0 22px #ffffff09,0 0 0 58px #ffffff06,0 0 110px #9d7cff45}
+.intro-scene{width:min(100vw,1000px);height:min(55vh,500px);min-height:320px;transform:scale(1.08)}
+.intro-astronaut.extra-a{position:absolute;left:20%;top:6%;width:76px;height:112px;z-index:3;animation:astronautFloatA 7s ease-in-out infinite}
+.intro-astronaut.extra-b{position:absolute;right:19%;bottom:1%;width:82px;height:122px;z-index:3;animation:astronautFloatB 8s ease-in-out infinite}
+@keyframes astronautFloatA{0%,100%{transform:translateY(0) rotate(13deg)}50%{transform:translateY(-22px) rotate(3deg)}}
+@keyframes astronautFloatB{0%,100%{transform:translateY(0) rotate(-12deg)}50%{transform:translateY(18px) rotate(-2deg)}}
+.intro-loader{margin-top:58px;transform:translateY(18px);width:190px;height:4px;box-shadow:0 0 18px #c5aaff66}
+.intro-loader span{background:linear-gradient(90deg,#70e9e0,#fff,#ffb6d4);box-shadow:0 0 12px #ffffff}
+.intro-word{letter-spacing:.32em;text-shadow:0 0 18px #bba5ff,0 0 48px #8d75ff88}
+.intro-caption{letter-spacing:.24em;color:#e5dcff}
+.intro-chip{border-color:#d6caff55!important;background:linear-gradient(135deg,#ffffff20,#a58bff16)!important;box-shadow:0 10px 35px #08071e55, inset 0 1px #ffffff30!important;backdrop-filter:blur(15px)}
+.intro-portal{box-shadow:0 0 0 12px #ffffff09,0 0 0 32px #ffffff07,0 0 85px #9e7cff99,inset 0 0 40px #a78bfa55}
+.intro-planet{filter:drop-shadow(0 15px 20px #05071988)}
+.intro-comet{filter:drop-shadow(0 0 9px #b8eaff)}
+@media(max-width:650px){.intro-scene{height:49vh;min-height:280px;transform:scale(1.02)}.intro-astronaut.extra-a{left:16%;top:1%;width:58px;height:88px}.intro-astronaut.extra-b{right:15%;bottom:-2%;width:62px;height:94px}.intro-loader{margin-top:38px;transform:translateY(14px)}}
+@media(prefers-reduced-motion:reduce){.intro-astronaut.extra-a,.intro-astronaut.extra-b{animation:none!important}}
+
+.orbital-satellite{position:absolute;z-index:4;left:50%;top:13%;width:66px;height:24px;transform:translateX(155px) rotate(-18deg);animation:satelliteCruise 9s ease-in-out infinite;filter:drop-shadow(0 0 10px #9feaff88)}
+.orbital-satellite span{position:absolute;left:21px;top:2px;width:25px;height:19px;border-radius:7px;background:linear-gradient(145deg,#fff,#8e9df5);border:1px solid #e8eaff}
+.orbital-satellite i,.orbital-satellite b{position:absolute;top:5px;width:18px;height:13px;background:linear-gradient(90deg,#7be4e8,#5b6ac6);border:1px solid #c7ffff}
+.orbital-satellite i{left:0}.orbital-satellite b{right:0}
+@keyframes satelliteCruise{0%,100%{translate:0 0}50%{translate:-32px 20px}}
+@media(max-width:650px){.orbital-satellite{transform:translateX(92px) scale(.75)}}
+@media(prefers-reduced-motion:reduce){.orbital-satellite{animation:none!important}}
 </style>
 </head>
 <body>
