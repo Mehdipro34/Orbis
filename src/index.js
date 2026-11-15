@@ -198,11 +198,14 @@ async function api(request, env, url) {
     if (q.length < 2) return json({ users: [], posts: [] });
     const [posts, userKeys] = await Promise.all([allPosts(env, 1000), listPrefix(env, "user:", 1000)]);
     const viewer = await currentUser(request, env);
-    const users = (await Promise.all(userKeys.map(key => env.ORBIS_KV.get(key, "json"))))
+    const matchingUsers = (await Promise.all(userKeys.map(key => env.ORBIS_KV.get(key, "json"))))
       .filter(Boolean)
       .filter(user => [user.username, user.name, user.bio].join(" ").toLocaleLowerCase("ru").includes(q))
-      .slice(0, 20)
-      .map(user => ({ username: user.username, name: user.name, bio: user.bio, isFollowing: viewer ? Boolean(env.ORBIS_KV.get("follow:" + user.username + ":" + viewer.username)) : false }));
+      .slice(0, 20);
+    const users = await Promise.all(matchingUsers.map(async user => ({
+      username: user.username, name: user.name, bio: user.bio,
+      isFollowing: viewer ? Boolean(await env.ORBIS_KV.get("follow:" + user.username + ":" + viewer.username)) : false
+    })));
     const foundPosts = posts.filter(post => [post.title, post.body, post.topic, post.username, post.author].join(" ").toLocaleLowerCase("ru").includes(q)).slice(0, 30);
     return json({ users, posts: await Promise.all(foundPosts.map(post => postView(env, post, viewer))) });
   }
