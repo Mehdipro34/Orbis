@@ -23,7 +23,7 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity.
 - Edge Functions: `orbis-telegram-auth`, `orbis-api`
 - Tables: `profiles`, `account_lookup`, `posts`, `post_likes`, `follows`, `bookmarks`, `stories`, `post_reports`
 - Storage bucket: `orbis-media`
-- RLS is enabled on all public application tables. The private account lookup table denies direct client access.
+- RLS is enabled on all public application tables. The private account lookup table denies direct client access, and Telegram IDs in profiles are not readable by browser roles.
 - The browser only receives the Supabase publishable key. The service-role key and Telegram bot token must remain in Edge Function secrets.
 
 ## Required owner configuration before live use
