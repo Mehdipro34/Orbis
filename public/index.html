@@ -640,13 +640,82 @@ button>*:not(.orb-sheen):not(.orb-ripple){position:relative;z-index:2}
 @media(max-height:650px) and (min-width:651px){.orbis-intro{justify-content:flex-start}.intro-word{margin-top:8vh}.intro-loader{margin-top:8px}.intro-caption{margin-top:5px}.intro-rocket-wrap{scale:.78}}
 @media(prefers-reduced-motion:reduce){.discovery-panel:before,.discovery-orbit,.discovery-orbit i,.intro-rocket-wrap,.intro-rocket-wrap:before,.intro-rocket-wrap:after{animation:none!important}.intro-rocket-wrap{opacity:1;transform:translate(-50%,-50%)!important}}
 
+
+/* ORBIS cinematic intro — precision pass */
+.orbis-intro{
+ background:
+ radial-gradient(ellipse at 50% 48%,#4d3a9d 0%,#211b51 37%,#0b1028 72%,#050817 100%);
+}
+.orbis-intro:before{
+ background:
+ repeating-radial-gradient(ellipse at center,transparent 0 54px,#a99aff18 55px 56px,transparent 57px 108px),
+ linear-gradient(115deg,transparent 35%,#9d8cff0b 50%,transparent 65%);
+ animation:spaceRotate 68s linear infinite;
+}
+.orbis-intro:after{
+ width:min(70vw,720px);border:1px solid #c5b8ff55;
+ box-shadow:0 0 0 14px #ffffff08,0 0 0 42px #9f8cff0b,0 0 0 82px #ffffff06,0 0 110px #8b72ff35,inset 0 0 70px #8b72ff16;
+}
+.intro-scene{z-index:1}
+.intro-holo-ring{position:absolute;left:50%;top:45%;border:1px solid #b8a9ff55;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 22px #8e7aff22,inset 0 0 22px #8e7aff12}
+.ring-one{width:min(58vw,570px);height:min(58vw,570px);border-style:dashed;animation:haloSpin 34s linear infinite}
+.ring-two{width:min(45vw,440px);height:min(45vw,440px);border-color:#70e9e0a0;animation:haloSpin 23s linear infinite reverse}
+.ring-three{width:min(34vw,330px);height:min(34vw,330px);border:2px dotted #ffd38b77;animation:haloSpin 17s linear infinite}
+@keyframes haloSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.intro-scanline{position:absolute;left:0;right:0;top:-15%;height:22%;background:linear-gradient(transparent,#a9a0ff0c,#c9c1ff20,transparent);filter:blur(8px);animation:scanPass 6s ease-in-out infinite;pointer-events:none}
+@keyframes scanPass{0%,100%{transform:translateY(-20vh);opacity:0}20%,75%{opacity:1}80%{transform:translateY(120vh);opacity:0}}
+.intro-data{position:absolute;z-index:4;top:calc(50% - 210px);display:grid;gap:5px;min-width:170px;padding:11px 14px;border:1px solid #b9adff4a;border-radius:12px;background:linear-gradient(135deg,#ffffff18,#ffffff06);box-shadow:0 12px 35px #02051555,inset 0 1px #ffffff20;backdrop-filter:blur(10px);font:700 8px/1.4 ui-monospace,monospace;letter-spacing:1.4px;color:#f4efff;animation:dataFloat 5s ease-in-out infinite}
+.intro-data span{font-size:7px;color:#a9f5ec;letter-spacing:1px}
+.intro-data i{height:2px;width:100%;background:linear-gradient(90deg,#6ee9df,#a78cff,transparent);border-radius:3px;animation:dataScan 2.8s ease-in-out infinite}
+.data-left{left:calc(50% - 410px)}.data-right{right:calc(50% - 410px);top:calc(50% + 145px);animation-delay:-2.4s}
+@keyframes dataFloat{0%,100%{translate:0 0}50%{translate:0 -9px}}
+@keyframes dataScan{0%,100%{transform:scaleX(.35);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}}
+.intro-crosshair{position:absolute;left:50%;top:45%;width:16px;height:16px;border:1px solid #fff8;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 12px #ffffff0a,0 0 0 26px #ffffff08;pointer-events:none}
+.intro-crosshair:before,.intro-crosshair:after{content:"";position:absolute;background:#d9d1ff88}
+.intro-crosshair:before{width:38px;height:1px;left:-12px;top:7px}.intro-crosshair:after{height:38px;width:1px;top:-12px;left:7px}
+.intro-planet.one{width:72px;height:72px;box-shadow:0 0 0 9px #ff9fb512,0 0 45px #ff91ba55}
+.intro-planet.two{width:38px;height:38px;box-shadow:0 0 0 7px #65dcca12,0 0 30px #65dcca55}
+.intro-planet.three{width:22px;height:22px;box-shadow:0 0 0 6px #ffd36d12,0 0 24px #ffd36d55}
+.intro-rocket-wrap{z-index:5;top:45%;width:170px;height:270px;animation-duration:5.2s;filter:drop-shadow(0 0 20px #c8baff88) drop-shadow(0 24px 32px #050416aa)}
+.intro-rocket{background:linear-gradient(90deg,#8e80dc 0%,#f7f5ff 20%,#fff 48%,#d7d0ff 72%,#7765d5 100%);box-shadow:inset -10px 0 16px #5944b855,0 0 0 5px #ffffff10,0 0 45px #b8a5ff88}
+.intro-rocket:before{border-bottom-color:#ff9dbb}
+.rocket-flame{width:38px;height:112px;filter:blur(1px);background:linear-gradient(#fff 0%,#fff2a8 18%,#ffb34f 48%,#ff6d9b 78%,transparent 100%);box-shadow:0 0 30px #ffad6e88}
+.rocket-flame:after{inset:8px 12px 18px}
+.intro-rocket-wrap:before{content:"";position:absolute;left:50%;top:185px;width:90px;height:190px;transform:translateX(-50%);background:radial-gradient(ellipse,#ffb66b66,transparent 68%);filter:blur(15px);animation:exhaustPulse .18s ease-in-out infinite alternate}
+.intro-rocket-wrap:after{content:"";position:absolute;left:50%;top:245px;width:170px;height:170px;transform:translateX(-50%);border-radius:50%;border:1px solid #ffcf9a55;box-shadow:0 0 30px #ff9d7755;opacity:0;animation:launchShock 5.2s ease-out forwards}
+@keyframes exhaustPulse{to{opacity:.55;scale:1.18 .86}}
+@keyframes launchShock{0%,22%{opacity:0;scale:.2}38%{opacity:.8;scale:1.2}52%,100%{opacity:0;scale:2.7}}
+.intro-chip{border-radius:13px;background:linear-gradient(135deg,#ffffff24,#ffffff08);border-color:#cfc4ff88;box-shadow:0 16px 42px #05041477,inset 0 1px #ffffff30;backdrop-filter:blur(16px)}
+.intro-chip.posts{left:-2%;top:25%}.intro-chip.stories{right:-2%;top:12%}.intro-chip.likes{left:0;bottom:12%}.intro-chip.community{right:-2%;bottom:10%}
+.intro-word{margin-top:190px;font-size:clamp(38px,6.4vw,56px);letter-spacing:15px;text-shadow:0 0 24px #bbaaff99,0 0 75px #8872ff88;animation:introWord 1.1s .45s both}
+.intro-hud{position:absolute;top:24px;left:28px;z-index:5;font:700 9px/1.5 ui-monospace,monospace;letter-spacing:2px;color:#bcb3f5}
+.intro-caption{font-size:9px;letter-spacing:3.2px;color:#e8e1ff}
+.intro-loader{width:190px;height:4px;margin-top:21px;background:#ffffff1c;box-shadow:0 0 18px #a996ff22}
+.intro-loader span{background:linear-gradient(90deg,#65dcca,#fff,#ffd36d,#ff8eaa);box-shadow:0 0 14px #fff;animation-duration:4.7s}
+.intro-skip{border-color:#ffffff66;background:linear-gradient(100deg,#ffffff1c,#ffffff0a);box-shadow:0 8px 28px #03061666;transition:background .2s,transform .2s}
+.intro-skip:hover{background:#ffffff2c;transform:translateY(-3px)}
+@media(max-width:900px){.intro-data{display:none}.ring-one{width:76vw;height:76vw}.ring-two{width:60vw;height:60vw}.ring-three{width:43vw;height:43vw}}
+@media(max-width:650px){
+ .intro-hud{top:16px;left:15px;font-size:7px}
+ .intro-word{margin-top:160px;font-size:34px;letter-spacing:9px}
+ .intro-caption{font-size:8px;letter-spacing:1.5px;text-align:center}
+ .intro-ui-float{width:96vw;height:290px;transform:translate(-50%,-50%) scale(.72)}
+ .intro-chip.posts{left:2%;top:16%}.intro-chip.stories{right:2%;top:5%}
+ .intro-chip.likes{left:1%;bottom:7%}.intro-chip.community{right:0;bottom:5%}
+ .intro-rocket-wrap{scale:.78}.intro-crosshair{top:43%}
+}
+@media(prefers-reduced-motion:reduce){
+ .intro-holo-ring,.intro-scanline,.intro-data,.intro-rocket-wrap:before,.intro-rocket-wrap:after{animation:none!important}
+ .intro-rocket-wrap:after{display:none}
+}
+
 </style>
 </head>
 <body>
 <div class="orbis-intro" id="orbisIntro" role="dialog" aria-label="Космическое приветствие ORBIS" aria-modal="true">
   <div class="intro-stars" aria-hidden="true"><i>✦</i><i>✧</i><i>·</i><i>✦</i><i>·</i><i>✧</i></div>
   <div class="intro-scene" aria-hidden="true">
-    <div class="intro-nebula"></div><div class="intro-grid"></div><div class="intro-orbit a"><span class="orbiting-world"></span></div><div class="intro-orbit b"><span class="orbiting-world"></span></div><div class="intro-orbit c"><span class="orbiting-world"></span></div><div class="intro-portal"></div><div class="intro-light-beam b1"></div><div class="intro-light-beam b2"></div>
+    <div class="intro-nebula"></div><div class="intro-grid"></div><div class="intro-holo-ring ring-one"></div><div class="intro-holo-ring ring-two"></div><div class="intro-holo-ring ring-three"></div><div class="intro-scanline"></div><div class="intro-data data-left"><b>ORBITAL NETWORK</b><span>СИГНАЛ СТАБИЛЕН</span><i></i></div><div class="intro-data data-right"><b>MISSION 001</b><span>ОТКРЫВАЙ НОВЫЕ МИРЫ</span><i></i></div><div class="intro-crosshair"></div><div class="intro-orbit a"><span class="orbiting-world"></span></div><div class="intro-orbit b"><span class="orbiting-world"></span></div><div class="intro-orbit c"><span class="orbiting-world"></span></div><div class="intro-portal"></div><div class="intro-light-beam b1"></div><div class="intro-light-beam b2"></div>
     <div class="intro-comet c1"></div><div class="intro-comet c2"></div>
     <div class="intro-planet one"></div><div class="intro-planet two"></div><div class="intro-planet three"></div>
     <div class="intro-smoke"></div>
@@ -655,14 +724,14 @@ button>*:not(.orb-sheen):not(.orb-ripple){position:relative;z-index:2}
     <div class="intro-astronaut right"><div class="astronaut-glow"></div><svg viewBox="0 0 130 190" role="img" aria-label="Космонавт ORBIS"><defs><linearGradient id="suitB" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".6" stop-color="#d8f7f4"/><stop offset="1" stop-color="#75bfc8"/></linearGradient><linearGradient id="visorB"><stop stop-color="#d4ffff"/><stop offset=".5" stop-color="#5e91bd"/><stop offset="1" stop-color="#243c70"/></linearGradient></defs><path d="M43 75Q18 77 15 105l10 13 24-25M87 75q25 3 28 31l-12 12-21-25" fill="url(#suitB)" stroke="#548b9a" stroke-width="3"/><rect x="42" y="68" width="47" height="68" rx="19" fill="url(#suitB)" stroke="#548b9a" stroke-width="3"/><rect x="48" y="84" width="35" height="25" rx="7" fill="#4b91a7"/><path d="M53 90h24M53 98h18" stroke="#dfffff" stroke-width="2"/><path d="M45 127 38 166 52 170 64 139 76 170 91 166 85 127" fill="url(#suitB)" stroke="#548b9a" stroke-width="3"/><circle cx="65" cy="43" r="34" fill="url(#suitB)" stroke="#fff" stroke-width="4"/><ellipse cx="65" cy="44" rx="25" ry="24" fill="url(#visorB)" stroke="#5c9ba7" stroke-width="3"/><path d="M50 35q12-13 27-4" stroke="#e8ffff" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="94" cy="117" r="8" fill="#ffcf70" stroke="#fff" stroke-width="2"/><path d="M31 162h22v12H29q-6-5 2-12M77 162h18l7 12H79q-7-4-2-12" fill="#498b9b"/></svg></div>
     <div class="intro-ui-float">
       <div class="intro-chip posts">✎ ПУБЛИКАЦИИ<small>Делись своими идеями</small></div>
-      <div class="intro-chip stories">◉ STORIES<small>Моменты на каждый день</small></div>
+      <div class="intro-chip stories">✳ НАВИГАТОР<small>Открывай новые направления</small></div>
       <div class="intro-chip likes">♡ РЕАКЦИИ<small>Находи то, что нравится</small></div>
       <div class="intro-chip community">✧ СООБЩЕСТВО<small>Люди. Интересы. Открытия.</small></div>
     </div>
   </div>
   <div class="intro-word">ORBIS</div>
   <div class="intro-hud">ORBITAL SYSTEM · ONLINE · 2026</div>
-  <div class="intro-caption">ТВОЙ МИР ИДЕЙ · ТВОЯ ВСЕЛЕННАЯ</div>
+  <div class="intro-caption">ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</div>
   <div class="intro-loader"><span></span></div>
   <button class="intro-skip" id="introSkip" type="button">Войти в ORBIS →</button>
 </div>
