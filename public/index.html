@@ -2483,7 +2483,7 @@ document.addEventListener("click",event=>{
   if(password.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";return}
   if(mode==="signup"&&!/^[a-zA-Z0-9_.]{3,24}$/.test(username)){note.textContent="Username: 3–24 символа, латиница, цифры, точка или _.";return}
   if(mode==="signup"&&password!==$("authConfirm").value){note.textContent="Пароли не совпадают.";return}
-  const submit=event.target.querySelector(".auth-submit");if(submit)submit.disabled=true;
+  const submit=event.target.querySelector('button[type="submit"]');if(submit)submit.disabled=true;
   note.className="auth-form-note";note.textContent=mode==="signup"?"Создаём аккаунт...":"Выполняем вход...";
   try{
    await window.orbisSupabaseReady;
@@ -2525,7 +2525,10 @@ document.addEventListener("click",event=>{
    const message=String(error?.message||"Не удалось выполнить вход.");
    note.className="auth-form-note error";
    if(/already registered|already exists/i.test(message))note.textContent="Этот адрес уже зарегистрирован. Переключись на «Вход».";
+   else if(/email not confirmed/i.test(message))note.textContent="Подтверди электронную почту по ссылке из письма, затем войди.";
+   else if(/invalid login credentials/i.test(message))note.textContent="Неверная электронная почта или пароль.";
    else if(/username/i.test(message)&&/duplicate|unique|taken/i.test(message))note.textContent="Этот username уже занят. Выбери другой.";
+   else if(/rate limit|too many requests/i.test(message))note.textContent="Слишком много попыток. Подожди немного и попробуй снова.";
    else note.textContent=message;
   }finally{if(submit)submit.disabled=false}
  },true);
