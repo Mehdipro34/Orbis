@@ -290,7 +290,6 @@ async function api(request, env, url) {
     if (!await rateLimit(request, env, "publish", 12, 60)) return json({ error: "Слишком много публикаций подряд. Подожди немного." }, 429);
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Сначала войди в ORBIS." }, 401);
-    if (!env.POSTS_CHANNEL_ID) return json({ error: "Не настроен POSTS_CHANNEL_ID в Cloudflare." }, 503);
     const body = await request.json();
     const title = String(body.title || "").trim().slice(0, 120);
     const topic = String(body.topic || "").trim().slice(0, 48);
@@ -320,6 +319,7 @@ async function api(request, env, url) {
     await env.ORBIS_KV.put("postid:" + post.id, storageKey);
     await env.ORBIS_KV.put("poststats:" + post.id, JSON.stringify({ likes: 0 }));
     try {
+      if (!env.BOT_TOKEN || !env.POSTS_CHANNEL_ID) throw new Error("Не настроены BOT_TOKEN и POSTS_CHANNEL_ID.");
       const archived = await telegram("sendMessage", env, { chat_id: env.POSTS_CHANNEL_ID, text: archiveText, disable_web_page_preview: true });
       post.telegramMessageId = archived.result.message_id;
       post.archived = true;
