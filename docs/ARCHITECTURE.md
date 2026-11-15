@@ -4,14 +4,14 @@ Status: implementation specification; deployment and scale claims remain unverif
 
 ## Product definition
 
-ORBIS is a deliberately focused social network. Its primary experience is a continuously refreshed post feed, a Stories stream containing only recent Stories, and a topic-based Navigator. Do not add a general Search section.
+ORBIS is a Telegram-first social network. Its primary experience is a continuously refreshed post feed, a Stories stream containing only recent Stories, and a topic-based Navigator. Telegram is the only sign-in method. Do not add a general Search section unless product scope is explicitly changed.
 
 Clients:
 - Responsive website.
 - Optional Telegram Mini App.
 - Later Android and iOS clients using the same APIs and account model.
 
-Telegram is an internal archive/storage layer only. People can use ORBIS without having Telegram installed.
+Telegram is the only identity provider and is also an optional internal archive destination. Users must open ORBIS from the official Telegram Mini App to register or sign in.
 
 ## Core experience
 
@@ -145,3 +145,15 @@ Telegram channels are not a database and cannot efficiently replace an index. Ke
 - Keep profile minimal.
 - Separate backend deployment boundary for every Navigator.
 - Maximum one post and one Story per account per day; target maximum 100,000 platform-wide per format per day.
+
+
+## Current implementation status (2026-11-15)
+
+The active implementation differs from the older proposal above in these ways:
+- `public/index.html` contains the current responsive client, Telegram-only sign-in, Supabase API bridge, feed, profile, topic Navigator, bookmark UI, and text Stories UI.
+- `orbis-telegram-auth` and `orbis-api` are deployed Supabase Edge Functions.
+- Supabase currently has eight application tables and an `orbis-media` Storage bucket. The profiles/posts/Stories tables were empty at the last inspection; no real user content should be implied.
+- The Cloudflare Worker is retained for static assets and RSS/news only. Its legacy KV-based auth and social API routes are disabled to avoid two competing account stores.
+- The orbital intro is a client-side animation (canvas starfield, ORBIS planet, orbital stations, shuttles, asteroid belt and meteor trails); reduced-motion preferences are respected.
+- Production use still requires the owner to configure the Telegram bot token secret, the official bot Mini App URL and the HTTPS deployment, then complete end-to-end testing.
+- No claim of production readiness, unlimited free capacity, or 10,000+ concurrent users is made without tests.
