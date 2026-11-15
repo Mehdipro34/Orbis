@@ -2057,14 +2057,14 @@ function setOrbisScreen(view){
    const topic=btn.dataset.topic;setOrbisScreen("Лента");
    const filter=[...document.querySelectorAll("#topicFilter button")].find(x=>x.textContent.trim()===topic);
    document.querySelectorAll("#topicFilter button").forEach(x=>x.classList.toggle("active",x===filter));
-   loadFeed(true,topic);
+   window.orbisLoadFeed?.(true,topic);
    window.scrollTo({top:0,behavior:"smooth"});
   }));
   const newsSelect=$("newsSourceSelect");
-  if(newsSelect)loadNews(newsSelect.value);
+  if(newsSelect)window.orbisLoadNews?.(newsSelect.value);
  }else if(view==="Закладки"){
   orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SAVED IDEAS</span><h2>Закладки</h2><p>Публикации, которые ты сохранил, всегда под рукой.</p></div><div id="orbisBookmarksList" aria-live="polite"><div class="post">Загружаем сохранённые публикации…</div></div>';
-  api("/api/bookmarks").then(data=>{const list=$("orbisBookmarksList");if(!list)return;list.replaceChildren();if(!data.posts.length){const empty=document.createElement("div");empty.className="post";empty.textContent="Здесь пока пусто. Сохраняй интересные публикации из ленты.";list.append(empty)}else data.posts.forEach(item=>list.append(card(item))) }).catch(error=>{const list=$("orbisBookmarksList");if(list){list.textContent=error.message}});
+  window.orbisApi("/api/bookmarks").then(data=>{const list=$("orbisBookmarksList");if(!list)return;list.replaceChildren();if(!data.posts.length){const empty=document.createElement("div");empty.className="post";empty.textContent="Здесь пока пусто. Сохраняй интересные публикации из ленты.";list.append(empty)}else data.posts.forEach(item=>list.append(card(item))) }).catch(error=>{const list=$("orbisBookmarksList");if(list){list.textContent=error.message}});
  }else if(view==="Профиль"){
   orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button">Выйти из аккаунта</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
  }else if(view==="Реклама"){
@@ -2310,6 +2310,7 @@ document.addEventListener("click",event=>{
   if(!response.ok)throw new Error(data.error||"Ошибка запроса.");
   return data;
  }; 
+ window.orbisApi=api;
  function syncUserUI(user){
   if(!user)return;
   const name=user.name||user.username||"ORBIS";
@@ -2390,6 +2391,8 @@ document.addEventListener("click",event=>{
    }
   }catch(error){window.notify?.("Не удалось загрузить профиль: "+error.message)}
  }
+ window.orbisLoadFeed=loadFeed;
+ window.orbisLoadCurrentProfile=loadCurrentProfile;
  async function loadAdsCenter(){
   const list=$("orbisAdsList"),form=$("orbisAdForm"),note=$("orbisAdFormNote");
   if(!list)return;
@@ -2569,6 +2572,7 @@ document.addEventListener("click",event=>{
   }catch(error){status.textContent=error.message;const retry=document.createElement("button");retry.type="button";retry.className="secondary";retry.textContent="Попробовать снова";retry.addEventListener("click",()=>loadNews(sourceId));feed.append(retry)}
   finally{if(refresh)refresh.disabled=false}
  }
+ window.orbisLoadNews=loadNews;
  async function runSearch(){
   const input=$("orbisSearchInput"),results=$("orbisSearchResults");if(!input||!results)return;
   const q=input.value.trim();lastSearchQuery=q;if(q.length<2){results.textContent="Введи хотя бы 2 символа.";return}
