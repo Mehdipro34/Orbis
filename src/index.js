@@ -252,7 +252,7 @@ async function api(request, env, url) {
     }
     const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString(), replyTo: replyTo || null, replyToTitle: parentPost?.title || null, media };
     const mediaLinks = media.map(item => url.origin + item.url).join("\n");
-    const archiveText = "ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + (mediaLinks ? "\n\nМедиа:\n" + mediaLinks : "") + "\n\nID: " + post.id;
+    const archiveText = "ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + (mediaLinks ? "\n\nМедиа:\n" + mediaLinks : "") + "\n\nID: " + post.id.slice(0, 4000);
     try {
       const archived = await telegram("sendMessage", env, { chat_id: env.POSTS_CHANNEL_ID, text: archiveText, disable_web_page_preview: true });
       post.telegramMessageId = archived.result.message_id;
