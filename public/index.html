@@ -1838,7 +1838,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
  <header class="topbar"><div><div class="kicker">ОДНА ЛЕНТА — МНОГО МИРОВ</div><h1 id="pageTitle">Твоя лента</h1></div><div class="top-actions"><span class="date-pill">✦ ORBIS COMMUNITY</span><button class="bell" id="refreshFeed" type="button" aria-label="Обновить ленту" title="Обновить ленту">↻</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">♫ Звук: выкл.</button></div></header>
  <section class="hero"><div class="hero-visual" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-spark">✦</div><div class="hero-planet">✳</div></div><div class="hero-label">WELCOME TO ORBIS</div><h2>Место, где идеи находят своё место.</h2><p>Открывай интересное, делись мыслями и следи за тем, что происходит в мире вокруг тебя.</p><span class="hero-tag">✦ Твой поток начинается здесь</span></section>
  <section class="discovery-panel"><div class="discovery-orbit" aria-hidden="true"><i></i><b></b><span>✦</span></div><div class="discovery-copy"><div class="discovery-kicker">ORBIS EXPLORER · 01</div><h2>Твоя следующая большая идея — ближе, чем кажется.</h2><p>Исследуй темы, открывай новые взгляды и находи своё направление.</p><div class="discovery-tags"><span>✦ Идеи</span><span>◈ Открытия</span><span>⌁ Сообщество</span></div></div></section>
- <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button></div><span class="hint">Твои идеи — в одном потоке</span></div></section>
+ <section class="stories" id="orbisStories" aria-label="Истории ORBIS">
+ <div class="section-head"><h2>Истории сообщества</h2><span>ИСТОРИИ · 24 ЧАСА</span></div>
+ <div class="story-row" id="orbisStoryRow" aria-live="polite">
+  <button class="story add" id="orbisAddStory" type="button" aria-label="Добавить историю"><span class="story-ring"><span>＋</span></span><small>Моя история</small></button>
+  <span class="stories-loading">Загружаем истории…</span>
+ </div>
+</section>
+<section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button></div><span class="hint">Твои идеи — в одном потоке</span></div></section>
  <div class="filter-row"><strong>Сейчас в ORBIS</strong><span>Новые мысли и знакомые темы</span></div>
  <div class="topic-filter" id="topicFilter"><button class="active">Все темы</button><button>Новости</button><button>Технологии</button><button>Бизнес</button><button>Общество</button><button>Наука</button><button>Идеи</button></div>
  <section id="feed">
@@ -2626,5 +2633,83 @@ document.addEventListener("click",event=>{
 }
 </style>
 
+<script id="orbis-stories-client">
+(function(){
+ const row=()=>document.getElementById("orbisStoryRow");
+ const addButton=()=>document.getElementById("orbisAddStory");
+ const request=async(path,options={})=>{
+  const res=await fetch(path,{...options,headers:{"content-type":"application/json",...(options.headers||{})}});
+  const data=await res.json().catch(()=>({error:"Не удалось прочитать ответ сервера."}));
+  if(!res.ok)throw new Error(data.error||"Ошибка запроса.");
+  return data;
+ };
+ function openStory(story){
+  let layer=document.getElementById("orbisStoryViewer");
+  if(!layer){
+   layer=document.createElement("div");layer.id="orbisStoryViewer";layer.className="orbis-story-viewer";
+   layer.innerHTML='<div class="orbis-story-viewer-card" role="dialog" aria-modal="true" aria-labelledby="orbisStoryAuthor"><button type="button" class="orbis-story-close" aria-label="Закрыть">×</button><div class="orbis-story-progress"><i></i></div><div class="orbis-story-author" id="orbisStoryAuthor"></div><div class="orbis-story-content" id="orbisStoryContent"></div><div class="orbis-story-time">История доступна в течение 24 часов</div></div>';
+   document.body.append(layer);
+   layer.addEventListener("click",e=>{if(e.target===layer||e.target.closest(".orbis-story-close"))layer.classList.remove("open")});
+   document.addEventListener("keydown",e=>{if(e.key==="Escape")layer.classList.remove("open")});
+  }
+  layer.querySelector("#orbisStoryAuthor").textContent=story.author||story.username||"Участник ORBIS";
+  layer.querySelector("#orbisStoryContent").textContent=story.body||"";
+  layer.classList.add("open");
+ }
+ async function refresh(){
+  const target=row();if(!target)return;
+  const add=addButton();target.replaceChildren();
+  if(add)target.append(add);
+  try{
+   const data=await request("/api/stories");
+   if(!data.stories?.length){const empty=document.createElement("span");empty.className="stories-empty";empty.textContent="Пока нет историй. Поделись первой.";target.append(empty);return}
+   data.stories.forEach(story=>{
+    const item=document.createElement("button");item.type="button";item.className="story";item.setAttribute("aria-label","Открыть историю "+(story.author||story.username||"участника"));
+    const ring=document.createElement("span");ring.className="story-ring";
+    const inner=document.createElement("span");inner.textContent=(story.author||story.username||"O").slice(0,1).toUpperCase();ring.append(inner);
+    const label=document.createElement("small");label.textContent=story.author||story.username||"Участник";
+    item.append(ring,label);item.addEventListener("click",()=>openStory(story));target.append(item);
+   });
+  }catch(error){
+   const note=document.createElement("span");note.className="stories-empty";note.textContent=error.message.includes("Войди")?"Войди через Telegram, чтобы смотреть истории.":"Истории временно недоступны.";target.append(note);
+  }
+ }
+ document.addEventListener("click",async e=>{
+  const button=e.target.closest("#orbisAddStory");if(!button)return;
+  if(!window.orbisUser){window.notify?.("Сначала войди через Telegram.");return}
+  const body=window.prompt("Текст истории (до 500 символов):");
+  if(body===null)return;
+  if(!body.trim()){window.notify?.("История не может быть пустой.");return}
+  button.disabled=true;
+  try{await request("/api/stories",{method:"POST",body:JSON.stringify({body:body.trim()})});window.notify?.("История опубликована на 24 часа.");await refresh()}
+  catch(error){window.notify?.(error.message)}
+  finally{button.disabled=false}
+ });
+ document.addEventListener("DOMContentLoaded",()=>setTimeout(refresh,250));
+ window.addEventListener("orbis:login",refresh);
+})();
+</script>
+<style id="orbis-stories-ui">
+#orbisStories .story-row{align-items:center;min-height:82px;gap:18px}
+#orbisStories .story{border:0;background:transparent;padding:0;cursor:pointer;min-width:62px}
+#orbisStories .story-ring{display:block;width:60px;height:60px;padding:3px;border-radius:50%;background:conic-gradient(#9d89ff,#72e2d1,#ff9fbd,#9d89ff);margin:0 auto 6px;transition:transform .25s,filter .25s}
+#orbisStories .story-ring>span{display:grid;place-items:center;width:100%;height:100%;border:3px solid #111a2d;border-radius:50%;background:linear-gradient(145deg,#28314b,#171f35);color:#e5deff;font-size:20px;font-weight:850}
+#orbisStories .story.add .story-ring{background:linear-gradient(135deg,#a795ff,#72e2d1)}
+#orbisStories .story.add .story-ring>span{font-size:25px;color:#d9d0ff}
+#orbisStories .story:hover .story-ring{transform:translateY(-4px) scale(1.06);filter:drop-shadow(0 8px 15px #927bff55)}
+#orbisStories .story small{display:block;max-width:74px;color:#aeb9d3;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orbisStories .stories-empty,#orbisStories .stories-loading{color:#96a4c2;font-size:11px;padding:8px}
+.orbis-story-viewer{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:#050816d9;backdrop-filter:blur(16px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.orbis-story-viewer.open{opacity:1;visibility:visible}
+.orbis-story-viewer-card{position:relative;width:min(420px,100%);min-height:min(620px,82svh);display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding:24px;border:1px solid #b29dff55;border-radius:28px;background:radial-gradient(circle at 80% 12%,#9c80ff44,transparent 34%),radial-gradient(circle at 15% 90%,#62d9cf26,transparent 32%),linear-gradient(145deg,#252044,#10182b);box-shadow:0 35px 100px #0009;transform:translateY(18px) scale(.97);transition:transform .3s}
+.orbis-story-viewer.open .orbis-story-viewer-card{transform:translateY(0) scale(1)}
+.orbis-story-close{align-self:flex-end;width:38px;height:38px;border:1px solid #ffffff2b;border-radius:50%;background:#ffffff12;color:white;font-size:25px}
+.orbis-story-progress{height:3px;background:#ffffff2c;border-radius:99px;overflow:hidden;margin:12px 0 22px}
+.orbis-story-progress i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#b6a4ff,#72e2d1)}
+.orbis-story-author{color:#d8d0ff;font-size:12px;font-weight:800}
+.orbis-story-content{margin:auto 0;color:#fff;font-size:clamp(22px,5vw,30px);font-weight:750;line-height:1.35;overflow-wrap:anywhere}
+.orbis-story-time{color:#a7b3ce;font-size:10px}
+@media(prefers-reduced-motion:reduce){.orbis-story-viewer,.orbis-story-viewer-card,#orbisStories .story-ring{transition:none!important}}
+</style>
 </body>
 </html>
