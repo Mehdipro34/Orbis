@@ -429,6 +429,9 @@ export default {
         return new Response(request.method === "HEAD" ? null : object.body, { headers });
       } catch (error) { return new Response("Media unavailable", { status: 500 }); }
     }
+    if (url.pathname.startsWith("/api/") && !["/api/news", "/api/news/sources"].includes(url.pathname)) {
+      return json({ error: "Основной ORBIS API работает через Supabase. Обнови приложение и повтори запрос." }, 410);
+    }
     if (url.pathname.startsWith("/api/")) {
       try {
         return await api(request, env, url);
