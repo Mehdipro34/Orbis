@@ -1853,6 +1853,22 @@ document.addEventListener("DOMContentLoaded",()=>{
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ORBIS">
+<style id="orbis-comments-ui">
+.orbis-comments-panel{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#fbfaff,#fff8fb)}
+.orbis-comments-heading{font-size:12px;font-weight:850;margin-bottom:10px;color:var(--ink)}
+.orbis-comments-list{display:grid;gap:8px;max-height:390px;overflow:auto;overscroll-behavior:contain}
+.orbis-comment{padding:10px 11px;border:1px solid #eeeafa;border-radius:12px;background:#fff}
+.orbis-comment-head{display:flex;flex-wrap:wrap;align-items:center;gap:7px;font-size:10px}
+.orbis-comment-head strong{color:#4d438c}.orbis-comment-head span,.orbis-comment-head time{color:#a09bb5}
+.orbis-comment-head time{margin-left:auto}.orbis-comment p{font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 0;color:#5c5873}
+.orbis-comment-delete{border:0;background:transparent;color:#c07891;font-size:10px;padding:4px 0;margin-top:5px}
+.orbis-comment-form{display:flex;align-items:flex-end;gap:8px;margin-top:10px}
+.orbis-comment-form textarea{flex:1;min-width:0;resize:vertical;min-height:42px;max-height:120px;border:1px solid #e8e4f5;border-radius:12px;padding:10px 12px;background:#fff;color:#332d53;font:inherit;font-size:12px}
+.orbis-comment-form .primary{white-space:nowrap;padding:10px 13px}
+.orbis-comments-empty{font-size:11px;color:#9994ac;padding:8px 2px;margin:0}
+.orbis-comments-more{display:block;margin:10px auto 0;border:1px solid #e6e1f7;background:#fff;color:#6958d9;padding:8px 12px;border-radius:10px;font-size:10px}
+@media(max-width:480px){.orbis-comment-form{align-items:stretch;flex-direction:column}.orbis-comment-form .primary{width:100%}}
+</style>
 </head>
 <body>
 <div class="orbis-intro" id="orbisIntro" role="dialog" aria-label="Космическое приветствие ORBIS" aria-modal="true">
@@ -1904,7 +1920,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
  </div>
 </section><section class="land-about" id="about"><div><small class="land-kicker">БОЛЬШЕ, ЧЕМ ПРОСТО ЛЕНТА</small><h2>Открой пространство<br><em>для своих идей.</em></h2></div><p>ORBIS объединяет публикации, темы и личные страницы в понятном и красивом интерфейсе. Без перегруженных меню — только самое главное.</p></section>
-<section class="land-features" id="features"><small class="land-kicker">ТРИ ПРОСТЫХ НАПРАВЛЕНИЯ</small><h2>Всё важное — <em>под рукой.</em></h2><div class="land-grid"><article><div class="feature-symbol">◉</div><small>01 / FEED</small><h3>Лента</h3><p>Публикации и идеи в одном потоке. Читай и делись тем, что тебе интересно.</p></article><article><div class="feature-symbol">⌁</div><small>02 / EXPLORE</small><h3>Navigator</h3><p>Открывай направления, переходи к темам и находи интересные публикации.</p></article><article><div class="feature-symbol">◎</div><small>03 / PROFILE</small><h3>Профиль</h3><p>Твоя личная страница в ORBIS — имя пользователя и собственное пространство.</p></article></div></section>
+<section class="land-features" id="features"><small class="land-kicker">ТРИ ПРОСТЫХ НАПРАВЛЕНИЯ</small><h2>Всё важное — <em>под рукой.</em></h2><div class="land-grid"><article><div class="feature-symbol">◉</div><small>01 / FEED</small><h3>Лента</h3><p>Создавай текстовые публикации, добавляй фото и видео, ставь реакции и обсуждай записи в комментариях.</p></article><article><div class="feature-symbol">⌁</div><small>02 / EXPLORE</small><h3>Navigator</h3><p>Ищи пользователей и публикации, фильтруй ленту по темам и открывай новостные RSS-источники.</p></article><article><div class="feature-symbol">◎</div><small>03 / PROFILE</small><h3>Профиль</h3><p>Редактируй имя и описание, управляй своими публикациями и сохраняй интересные записи.</p></article></div></section>
 <section class="land-creator" id="creator"><div class="land-monogram">ММ<span>✳</span></div><div><small class="land-kicker">ЗА ИДЕЕЙ СТОИТ ЧЕЛОВЕК</small><h2>Создаётся с идеей.<br><em>Растёт вместе с людьми.</em></h2><p>Меня зовут Мехти Мурадлы. ORBIS — проект о новых возможностях, интересных мыслях и цифровом пространстве, которое развивается шаг за шагом.</p><div class="land-social"><a href="https://www.youtube.com/@mehdimuradli" target="_blank" rel="noopener">▶ <span><small>YOUTUBE</small><b>Жизнь Мехти</b></span> ↗</a><a href="https://www.instagram.com/lifemehti/" target="_blank" rel="noopener">◎ <span><small>INSTAGRAM</small><b>@lifemehti</b></span> ↗</a></div></div></section>
 <section class="land-roadmap" id="land-roadmap">
  <div class="roadmap-heading"><small class="land-kicker">ВОЗМОЖНОСТИ</small><h2>Всё важное.<br><em>В одном пространстве.</em></h2><p>Открывай новые идеи, находи людей и создавай собственную историю.</p></div>
@@ -1923,7 +1939,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <details><summary>Можно ли открыть ORBIS на телефоне?<span>＋</span></summary><p>Да, текущую веб-страницу можно открыть в мобильном браузере. Отдельное приложение пока не выпущено.</p></details>
  </div>
 </section>
-<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS на компьютере или смартфоне. Отдельная мобильная сборка готовится.</p></div><div><button id="downloadCTA">↓ Установить ORBIS <b>↗</b></button><small id="downloadNote">Установка на главный экран · PWA</small><button class="download-login" data-open-auth="login">У меня уже есть аккаунт →</button></div></section></main>
+<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере или Telegram Mini App. Установка на главный экран доступна через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS через Telegram <b>↗</b></button><small id="downloadNote">Вход и создание аккаунта — только через Telegram.</small></div></section></main>
 <footer class="land-footer"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><span>ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</span><span>© 2026 ORBIS · Мехти Мурадлы</span></footer></section>
 <section class="auth-gateway auth-minimal" id="authGateway" hidden aria-label="Вход в ORBIS">
  <button class="auth-back-landing" id="authBackLanding" type="button" aria-label="Назад">←</button>
@@ -1976,10 +1992,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Чем хочешь поделиться сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Написать пост</button></div><span class="hint">Твои идеи — в одном потоке</span></div></section>
  <div class="filter-row"><strong>Сейчас в ORBIS</strong><span>Новые мысли и знакомые темы</span></div>
  <div class="topic-filter" id="topicFilter"><button class="active">Все темы</button><button>Новости</button><button>Технологии</button><button>Бизнес</button><button>Общество</button><button>Наука</button><button>Идеи</button></div>
- <section id="feed">
-  <article class="post"><div class="post-top"><div class="avatar">O</div><div><div class="author">ORBIS <span class="handle">@orbis · Admin</span></div><div class="post-meta">Пример оформления публикации</div></div><span class="sample">ПРИМЕР</span></div><div class="post-title">Большие идеи начинаются с простого шага</div><span class="topic">ИДЕИ · СООБЩЕСТВО</span><div class="post-body">Каждый день вокруг появляются новые мысли, открытия и возможности. ORBIS создан, чтобы собирать их в одном живом потоке — и помогать находить то, что действительно интересно.</div><div class="post-actions"><button>♡ Реакция</button><button>↗ Поделиться</button><button>⌑ Сохранить</button></div></article>
-  <article class="post"><div class="post-top"><div class="avatar" style="background:linear-gradient(140deg,#ffae91,#f17b9d)">И</div><div><div class="author">Идеи дня <span class="handle">@ideas_daily</span></div><div class="post-meta">Пример оформления публикации</div></div><span class="sample">ПРИМЕР</span></div><div class="post-title">А что, если привычные вещи можно сделать лучше?</div><span class="topic">РАЗВИТИЕ · ИДЕИ</span><div class="post-body">Иногда достаточно посмотреть на обычную задачу под другим углом. Какую вещь вокруг себя ты бы изменил в первую очередь?</div><div class="post-actions"><button>♡ Реакция</button><button>↗ Поделиться</button><button>⌑ Сохранить</button></div></article>
- </section>
+ <section id="feed"><div class="post feed-loading" aria-live="polite">Подключаем настоящую ленту ORBIS…</div></section>
  <section id="orbisScreen" class="orbis-screen" hidden></section>
 </main>
 <aside class="right">
@@ -2219,20 +2232,7 @@ document.addEventListener("click",event=>{
  function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>username&&username.focus({preventScroll:true}),220);window.scrollTo({top:0,behavior:"smooth"})}
  document.querySelectorAll("[data-open-auth]").forEach(button=>button.addEventListener("click",()=>openAuth(button.dataset.openAuth)));
  const back=document.getElementById("authBackLanding");if(back)back.addEventListener("click",()=>{if(gateway)gateway.hidden=true;if(landing)landing.hidden=false;document.body.classList.remove("orbis-auth-open");window.scrollTo({top:0,behavior:"smooth"})});
- let deferredInstallPrompt=null;
- window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferredInstallPrompt=event;});
- const download=document.getElementById("downloadCTA");
- if(download)download.addEventListener("click",async()=>{
-  const n=document.getElementById("downloadNote");
-  if(window.matchMedia("(display-mode: standalone)").matches){if(n)n.textContent="ORBIS уже установлен на этом устройстве.";return}
-  if(deferredInstallPrompt){
-   deferredInstallPrompt.prompt();
-   const choice=await deferredInstallPrompt.userChoice;
-   if(n)n.textContent=choice?.outcome==="accepted"?"ORBIS добавлен на главный экран.":"Установка пока отменена.";
-   deferredInstallPrompt=null;return;
-  }
-  if(n)n.textContent="Чтобы установить ORBIS, открой меню браузера и выбери «Установить приложение» или «Добавить на главный экран». В Telegram Mini App эта команда может быть недоступна.";
- });
+ // Installation remains available through the browser's native install menu.
  if(skip)skip.addEventListener("click",showAccess);
  if(intro){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)showAccess();else window.setTimeout(showAccess,6500)}
  tabs.forEach(tab=>tab.addEventListener("click",()=>{
@@ -2328,18 +2328,19 @@ document.addEventListener("click",event=>{
    article.append(mediaWrap);
   }
   const actions=document.createElement("div");actions.className="post-actions";
-  const like=document.createElement("button");like.type="button";like.dataset.action="like";like.textContent=(post.liked?"♥ ":"♡ ")+(post.likes||0)+" · Реакция";like.setAttribute("aria-pressed",String(Boolean(post.liked)));if(post.liked)like.style.color="#e36c91";
-  const reply=document.createElement("button");reply.type="button";reply.dataset.action="reply";reply.textContent="↩ Ответить";
-  const showReplies=document.createElement("button");showReplies.type="button";showReplies.dataset.action="show-replies";showReplies.textContent="◌ Ответы";
+  const like=document.createElement("button");like.type="button";like.dataset.action="like";like.textContent=(post.liked?"♥ ":"♡ ")+(post.likes||0)+" · Нравится";like.setAttribute("aria-pressed",String(Boolean(post.liked)));if(post.liked)like.style.color="#e36c91";
+  const comments=document.createElement("button");comments.type="button";comments.dataset.action="comments";comments.textContent="◌ Комментарии · "+(post.comments||0);comments.setAttribute("aria-label","Открыть комментарии");
+  const reply=document.createElement("button");reply.type="button";reply.dataset.action="reply";reply.textContent="↩ Ответить постом";
+  const showReplies=document.createElement("button");showReplies.type="button";showReplies.dataset.action="show-replies";showReplies.textContent="◌ Ответы-посты";
   const share=document.createElement("button");share.type="button";share.dataset.action="share";share.textContent="↗ Поделиться";
   const save=document.createElement("button");save.type="button";save.dataset.action="bookmark";save.textContent="⌑ Сохранить";
   const report=document.createElement("button");report.type="button";report.dataset.action="report";report.textContent="⚑ Пожаловаться";
-  actions.append(like,reply,showReplies,share,save,report);article.append(top,title,topic,body,actions);return article;
+  actions.append(like,comments,reply,showReplies,share,save,report);article.append(top,title,topic,body,actions);return article;
  }
  let feedOffset=0,feedHasMore=false,feedLoading=false,feedTopic="";
  async function loadFeed(reset=true,topic=feedTopic){
   const feed=$("feed");if(!feed||feedLoading)return;
-  if(reset){feedOffset=0;feedTopic=topic||"";feed.querySelectorAll(".api-post,.feed-load-more,#orbisEmptyFeed,#orbisApiEmptyFeed,.feed-error").forEach(x=>x.remove());feed.querySelectorAll(".sample").forEach(x=>x.closest(".post")?.remove())}
+  if(reset){feedOffset=0;feedTopic=topic||"";feed.querySelectorAll(".api-post,.feed-load-more,.feed-loading,#orbisEmptyFeed,#orbisApiEmptyFeed,.feed-error").forEach(x=>x.remove());feed.querySelectorAll(".sample").forEach(x=>x.closest(".post")?.remove())}
   feedLoading=true;
   try{
    const params=new URLSearchParams({limit:"20",offset:String(feedOffset)});
@@ -2455,6 +2456,41 @@ document.addEventListener("click",event=>{
    data.posts.forEach(post=>results.append(card(post)));
   }catch(error){results.textContent=error.message}
  }
+
+ async function appendCommentRows(article,list,items){
+  items.forEach(item=>{
+   const row=document.createElement("div");row.className="orbis-comment";row.dataset.commentId=item.id;
+   const head=document.createElement("div");head.className="orbis-comment-head";
+   const author=document.createElement("strong");author.textContent=item.author||item.username||"Участник";
+   const handle=document.createElement("span");handle.textContent="@"+(item.username||"user");
+   const time=document.createElement("time");time.textContent=new Date(item.createdAt).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+   head.append(author,handle,time);
+   const body=document.createElement("p");body.textContent=item.body;
+   row.append(head,body);
+   if(item.own){
+    const remove=document.createElement("button");remove.type="button";remove.className="orbis-comment-delete";remove.dataset.action="delete-comment";remove.dataset.commentId=item.id;remove.textContent="Удалить";
+    row.append(remove);
+   }
+   list.append(row);
+  });
+ }
+ async function fetchCommentPage(article,panel,offset=0,append=false){
+  const id=article.dataset.postId;
+  const list=panel.querySelector(".orbis-comments-list");
+  const more=panel.querySelector(".orbis-comments-more");
+  if(more)more.remove();
+  const data=await api("/api/posts/"+encodeURIComponent(id)+"/comments?limit=20&offset="+offset);
+  if(!append)list.replaceChildren();
+  if(!data.comments.length&&!append){
+   const empty=document.createElement("p");empty.className="orbis-comments-empty";empty.textContent="Пока нет комментариев. Начни обсуждение.";
+   list.append(empty);
+  }else appendCommentRows(article,list,data.comments);
+  if(data.hasMore){
+   const button=document.createElement("button");button.type="button";button.className="orbis-comments-more";button.textContent="Загрузить ещё комментарии";
+   button.dataset.nextOffset=String(data.nextOffset);panel.append(button);
+  }
+ }
+
  document.addEventListener("click",async event=>{
   const target=event.target.closest("button");if(!target)return;
   if(target.closest("#topicFilter")){event.preventDefault();event.stopImmediatePropagation();const buttons=target.closest("#topicFilter").querySelectorAll("button");buttons.forEach(x=>x.classList.toggle("active",x===target));loadFeed(true,target.textContent.trim()==="Все темы"?"":target.textContent.trim());return}
@@ -2478,6 +2514,60 @@ document.addEventListener("click",event=>{
    target.disabled=true;
    try{const data=await api("/api/posts/"+encodeURIComponent(article.dataset.postId)+"/like",{method:"POST",body:"{}"});target.setAttribute("aria-pressed",String(data.liked));target.textContent=(data.liked?"♥ ":"♡ ")+data.likes+" · Реакция";target.style.color=data.liked?"#e36c91":""}
    catch(error){window.notify?.(error.message)}finally{target.disabled=false}
+   return;
+  }
+  if(target.dataset.action==="comments"){
+   event.preventDefault();event.stopImmediatePropagation();
+   const article=target.closest("[data-post-id]");if(!article)return;
+   const existing=article.querySelector(".orbis-comments-panel");
+   if(existing){existing.hidden=!existing.hidden;target.setAttribute("aria-expanded",String(!existing.hidden));return}
+   const panel=document.createElement("section");panel.className="orbis-comments-panel";
+   const heading=document.createElement("div");heading.className="orbis-comments-heading";heading.textContent="Комментарии";
+   const list=document.createElement("div");list.className="orbis-comments-list";list.setAttribute("aria-live","polite");
+   const form=document.createElement("form");form.className="orbis-comment-form";
+   const input=document.createElement("textarea");input.maxLength=1000;input.rows=2;input.placeholder="Напиши комментарий…";input.required=true;input.setAttribute("aria-label","Текст комментария");
+   const submit=document.createElement("button");submit.type="submit";submit.className="primary";submit.textContent="Отправить";
+   form.append(input,submit);panel.append(heading,list,form);article.append(panel);
+   target.setAttribute("aria-expanded","true");
+   form.addEventListener("submit",async e=>{
+    e.preventDefault();const body=input.value.trim();if(!body)return;
+    submit.disabled=true;submit.textContent="Отправляем…";
+    try{
+     const data=await api("/api/posts/"+encodeURIComponent(article.dataset.postId)+"/comments",{method:"POST",body:JSON.stringify({body})});
+     list.querySelector(".orbis-comments-empty")?.remove();
+     appendCommentRows(article,list,[data.comment]);input.value="";
+     const count=Number(data.comments)||0;
+     target.textContent="◌ Комментарии · "+count;
+     target.dataset.commentCount=String(count);
+     window.notify?.("Комментарий опубликован.");
+    }catch(error){window.notify?.(error.message)}
+    finally{submit.disabled=false;submit.textContent="Отправить"}
+   });
+   list.textContent="Загружаем комментарии…";
+   try{await fetchCommentPage(article,panel,0,false)}catch(error){list.textContent=error.message}
+   return;
+  }
+  if(target.dataset.action==="comments-more"){
+   const article=target.closest("[data-post-id]"),panel=target.closest(".orbis-comments-panel");if(!article||!panel)return;
+   target.disabled=true;target.textContent="Загружаем…";
+   try{await fetchCommentPage(article,panel,Number(target.dataset.nextOffset)||0,true)}
+   catch(error){window.notify?.(error.message);target.disabled=false;target.textContent="Повторить"}
+   return;
+  }
+  if(target.dataset.action==="delete-comment"){
+   const article=target.closest("[data-post-id]"),row=target.closest(".orbis-comment");if(!article||!row)return;
+   if(!confirm("Удалить свой комментарий?"))return;
+   target.disabled=true;
+   try{
+    const response=await fetch("/api/comments/"+encodeURIComponent(target.dataset.commentId),{method:"DELETE"});
+    const data=await response.json().catch(()=>({error:"Не удалось прочитать ответ сервера."}));
+    if(!response.ok)throw new Error(data.error||"Не удалось удалить комментарий.");
+    row.remove();
+    const button=article.querySelector('[data-action="comments"]');
+    if(button)button.textContent="◌ Комментарии · "+(Number(data.comments)||0);
+    if(!article.querySelector(".orbis-comment")){const empty=document.createElement("p");empty.className="orbis-comments-empty";empty.textContent="Пока нет комментариев. Начни обсуждение.";article.querySelector(".orbis-comments-list")?.append(empty)}
+    window.notify?.("Комментарий удалён.");
+   }catch(error){window.notify?.(error.message)}finally{target.disabled=false}
    return;
   }
   if(target.dataset.action==="show-replies"){
