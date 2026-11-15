@@ -2429,8 +2429,9 @@ document.addEventListener("click",event=>{
    await window.orbisSupabaseReady;
    let result;
    if(mode==="signup"){
-    const availability=await api("/api/username-available?username="+encodeURIComponent(username));
-    if(!availability.available)throw new Error(availability.error||"Этот username уже занят. Выбери другой.");
+    // Create the Auth account directly. The server creates the matching profile
+    // after the user has a valid session; this avoids blocking registration on a
+    // separate username-check request to the API.
     result=await window.orbisSupabase.auth.signUp({
      email,password,
      options:{
