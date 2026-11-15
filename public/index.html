@@ -3241,5 +3241,33 @@ if("serviceWorker" in navigator){
 .adcenter-empty{color:#aab6d0}
 @media(max-width:600px){.adcenter-intro{padding:18px}.adcenter-mark{flex-basis:48px;height:48px}.adcenter-list-head{align-items:flex-start}}
 </style>
+
+<script id="orbis-entry-hotfix">
+(function(){
+  const css=document.createElement("style");
+  css.textContent="#orbisIntro #introSkip{pointer-events:auto!important;z-index:2147483647!important;position:absolute!important}";
+  document.head.appendChild(css);
+  function continueToOrbis(event){
+    const target=event && event.target && event.target.closest ? event.target.closest("#introSkip") : null;
+    if(!target)return;
+    if(event){event.preventDefault();event.stopPropagation();if(event.stopImmediatePropagation)event.stopImmediatePropagation();}
+    const intro=document.getElementById("orbisIntro");
+    const landing=document.getElementById("orbisLanding");
+    const gateway=document.getElementById("authGateway");
+    if(intro){intro.classList.add("hide");window.setTimeout(()=>intro.remove(),900);}
+    if(landing)landing.hidden=true;
+    if(gateway)gateway.hidden=false;
+    document.body.classList.add("orbis-auth-open");
+    document.body.classList.remove("orbis-app-open");
+    const login=document.querySelector('[data-auth-mode="login"]');
+    if(login && !login.classList.contains("active"))login.click();
+    const email=document.getElementById("authEmail");
+    if(email)window.setTimeout(()=>email.focus({preventScroll:true}),180);
+  }
+  document.addEventListener("click",continueToOrbis,true);
+  const button=document.getElementById("introSkip");
+  if(button){button.style.pointerEvents="auto";button.addEventListener("click",continueToOrbis,true);}
+})();
+</script>
 </body>
 </html>
