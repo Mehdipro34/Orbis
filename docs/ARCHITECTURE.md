@@ -86,12 +86,11 @@ Do not show these as available product features until they are actually implemen
 
 ## Launch blockers
 
-1. Owner must set `TELEGRAM_BOT_TOKEN` in Supabase Edge Function secrets for Mini App auth. For browser OIDC, also set `TELEGRAM_LOGIN_CLIENT_ID`, `TELEGRAM_LOGIN_CLIENT_SECRET` and the exact HTTPS `TELEGRAM_LOGIN_REDIRECT_URI` in Supabase Edge Function secrets; Cloudflare Worker secrets are separate.
-2. Owner must set the official Telegram bot's Mini App URL to the deployed HTTPS Worker URL.
-3. Owner must remove the stale Cloudflare `ORBIS_MEDIA` R2 binding from Worker Settings → Bindings.
-4. Deploy the Worker and confirm the new build lists only `ASSETS` and `ORBIS_KV`.
-5. Run real Telegram sign-in and the full post/comment/media/Story/logout smoke test.
+1. Set Supabase Authentication → URL Configuration → Site URL to the deployed ORBIS HTTPS origin and add the frontend URL to Redirect URLs.
+2. Confirm the Email provider is enabled and email confirmation is configured.
+3. Deploy the Cloudflare Worker and confirm the build lists `ASSETS` and `ORBIS_KV` only; remove any stale `ORBIS_MEDIA` R2 binding.
+4. Run a real email registration, email confirmation, sign-in, media upload, post publication, logout and fresh sign-in smoke test.
 
 ## Capacity claims
 
-The database was empty at the last inspection. No first live Telegram sign-in, full browser end-to-end test or load test has been completed. Free tiers have quotas and may pause or throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users. Publish measured latency, throughput, error rates and provider limits before increasing launch traffic.
+The database was empty at the last inspection. No first live email registration, full browser end-to-end test or load test has been completed. Free tiers have quotas and may pause or throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users. Publish measured latency, throughput, error rates and provider limits before increasing launch traffic.
