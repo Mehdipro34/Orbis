@@ -6,13 +6,13 @@ This repository contains the application source. A GitHub commit does not automa
 
 Open the ORBIS Supabase project → Authentication → Sign In / Providers.
 
-1. Enable the Email provider and keep email confirmation enabled.
-2. Open Authentication → URL Configuration.
-3. Set **Site URL** to the deployed ORBIS HTTPS origin.
-4. Add the exact ORBIS origin/path to **Redirect URLs**. The frontend requests a confirmation redirect to the current ORBIS page.
-5. Supabase's default email sender on the Free plan is best-effort and rate-limited; for a small test, avoid repeated signup attempts. A custom SMTP provider is optional and may have its own pricing/limits.
+1. Enable **Anonymous Sign-Ins**. ORBIS creates a guest session automatically; visitors do not enter an email, password or username.
+2. Do not require email confirmation for guest access. The email provider is not used by the current guest-first frontend.
+3. Anonymous users are real Supabase Auth users with their own guest profile, posts, likes and media. Their session is remembered in that browser.
+4. Important: a guest cannot recover the same identity after clearing browser data, signing out, or switching devices. Do not clear site data if you want to keep access to a guest profile.
+5. Supabase recommends anti-abuse protection such as CAPTCHA/Turnstile for public anonymous sign-in. Add it before promoting ORBIS broadly.
 
-The browser uses Supabase Auth `signUp()` and `signInWithPassword()`. Passwords are handled by Supabase Auth and are never written to `profiles` or the application database. The server verifies each access token before creating the matching ORBIS profile.
+The frontend calls Supabase Auth `signInAnonymously()`. The Edge Function creates a stable guest username from the anonymous user's UUID. Passwords and email addresses are not requested.
 
 Supabase Edge Functions use their project environment for `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Never place the service-role key in frontend code.
 
@@ -48,14 +48,13 @@ In Cloudflare Dashboard:
 
 This binding is stored in Cloudflare account settings, not in the GitHub repository. Changing source files alone will not remove it.
 
-## 3. Email registration and login
+## 3. Guest access and first post
 
-1. Open the ORBIS HTTPS site in a normal browser.
-2. Choose **Регистрация**, enter a unique username, email address and password, then confirm the password.
-3. Open the confirmation email and follow its link. The link should return to the ORBIS URL configured in Supabase Auth.
-4. Sign in with the same email and password. The API creates the user's public profile on the first authenticated request.
-5. Publish a text-only post or attach photos/videos. The upload endpoint stores files in the `orbis-media` bucket under the user's account ID; the post stores the media metadata and the feed renders the uploaded files.
-6. Sign out and sign in again to confirm the account, profile and posts persist.
+1. Open the ORBIS HTTPS site. It should create a guest session and enter the app without showing a registration screen.
+2. Confirm a profile appears in Supabase `profiles` with a username beginning `guest_`.
+3. Publish a text post, then test a like, comment, bookmark and follow.
+4. Upload a photo or video. The upload endpoint stores it in `orbis-media` under the guest user's UUID; the feed renders the media with the post.
+5. Refresh the page. The same guest profile and its posts should still be available in that browser.
 
 ## 4. First live smoke test
 
@@ -63,7 +62,7 @@ After deployment and configuration:
 
 - Open `/health` on the Worker URL; expect `ok: true`.
 - Open `/api/news/sources`; expect four configured news sources.
-- Register through the email form, confirm the email address, then sign in.
+- Open the site and verify it enters guest mode without asking for registration.
 - Confirm one profile appears in Supabase `profiles` with the selected username.
 - Publish one test post; confirm it appears in the Supabase feed.
 - Add a comment and a like; confirm counts update and comments load 20 at a time.
@@ -73,7 +72,7 @@ After deployment and configuration:
 
 ## 5. Limits and safety
 
-- The database was empty at the last project inspection. The first real email registration has not yet been completed or verified.
+- The database was empty at the last project inspection. Guest-mode end-to-end use still needs to be verified after Anonymous Sign-Ins are enabled.
 - Do not announce a public launch until the full smoke test is complete.
 - Free tiers have quotas and can pause/throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users.
 - Keep the Supabase service-role key private.
