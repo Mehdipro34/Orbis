@@ -1,15 +1,19 @@
 {
   "id": "/",
-  "name": "ORBIS — пространство идей",
+  "name": "ORBIS — News Universe",
   "short_name": "ORBIS",
-  "description": "Социальное пространство для публикаций, историй и открытий.",
+  "description": "Личная новостная лента: технологии, наука, кино, игры, бизнес и авто.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#090b18",
-  "theme_color": "#090b18",
-  "categories": ["social"],
+  "background_color": "#070a13",
+  "theme_color": "#080b16",
+  "categories": [
+    "news",
+    "education",
+    "entertainment"
+  ],
   "icons": [
     {
       "src": "/orbis-icon.svg",

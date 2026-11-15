@@ -1,78 +1,52 @@
-# ORBIS
+# ORBIS — News Universe
 
-ORBIS is a guest-first social network with a dark orbital visual identity and an installable PWA interface.
+ORBIS is a news-first social reading PWA. There are no user-authored posts, public profiles, stories, comments, or direct messages. Readers can like news and save it privately to their device for offline reading.
 
 ## Production
+- Website/PWA: https://orbis-mehdipro34.vercel.app
+- Frontend: `public/index.html`
+- RSS aggregator: `api/news.js`
+- RSS directory: `api/news/sources.js`
+- Anonymous reaction API: Supabase Edge Function `orbis-api`
+- Supabase project: `wdwvcvpgovvkoodozbxf`
 
-- URL: https://orbis-mehdipro34.vercel.app
-- Vercel production is connected to GitHub `main`.
-- Supabase project: `wdwvcvpgovvkoodozbxf`.
-- Edge Function: `orbis-api`.
-
-## No-account access
-
-- The site opens directly in guest mode.
-- No registration, email, password or Telegram login is required.
-- Each browser receives a persistent device UUID and a signed guest session.
-- Each guest profile receives a unique sequential ORBIS number.
-- Each post receives its own unique sequential post number.
-- Clearing browser data or changing devices creates a new guest identity. Guest profiles cannot be recovered without a separate account/recovery mechanism.
-
-## Social features
-
-- “For you”, “Following” and “Fresh” feed modes.
-- Cursor-based feed pagination and topic filters.
-- Text, photo and video posts, post replies and 2–6 option polls.
-- Likes, bookmarks, follows, sharing and reports.
-- 24-hour Stories.
-- Topic Navigator with 16 RSS news sources.
-- One-to-one messages, notifications and clans.
-- Ad Center campaigns with review status, feed placements, impression and click tracking.
+## Features
+- Seven topic streams: World, Technology, Science, Movies, Gaming, Business and Auto.
+- For You: readers choose interests; likes add category weight and reorder the personalized stream.
+- Latest: a cross-category chronological stream.
+- Navigator: topic catalog and publisher/source directory.
+- Article actions: like/unlike and open the original publisher. No user comments, replies or posting.
+- Offline reading: explicitly saved news is stored in IndexedDB with a local fallback.
+- Refresh: manual and automatic every 10 minutes while the app is in use. RSS CDN cache is 10 minutes.
+- Native-style ad placement after every five articles. Approved ORBIS Ad Center campaigns show in the web feed and record impression/click events.
 - Installable PWA shell.
 
-## Performance design
+## RSS directory
+The source directory has 41 entries across seven categories: BBC News, Oxu.az, Deutsche Welle, Euronews, Al Jazeera, The Guardian, NPR, TechCrunch, The Verge, WIRED, Ars Technica, ScienceDaily, NASA, Phys.org, Nature, Variety, IndieWire, Deadline, The Hollywood Reporter, IGN, PC Gamer, Eurogamer, GameSpot, Kotaku, Game Developer, CNBC, BBC Business, The Economist, MarketWatch, Financial Times, Motor1, Electrek, InsideEVs and Autoblog.
 
-- Keyset/cursor pagination avoids deep SQL offsets.
-- Indexed chronological, topic and engagement-ranked feed paths.
-- Engagement scores are maintained by database triggers.
-- RSS responses use CDN caching.
-- Server-side rate limits protect guest sessions and high-frequency actions.
-- This design improves query efficiency but does not establish a concurrent-user capacity. No load test has been completed.
+Each category aggregates up to five feeds per request, removes duplicate article URLs, validates publisher-host links, and filters some unsuitable headlines/snippets. This is a rule-based filter, not full editorial or AI moderation. Publishers may change/block RSS endpoints; the interface reports partial failures. ORBIS shows short RSS excerpts and links back to publishers; it does not republish entire articles.
 
-## Ads
+## Identity and privacy
+No signup form and no public user profile are shown. A device-scoped anonymous identifier and signed token are used only for server-side reaction accounting and rate limits. Saved articles, selected interests, and recommendation weights stay in the browser. Clearing browser storage removes local preferences and the local saved cache.
 
-- Owner-supplied AdMob Android App ID and ad-unit IDs are in `config/admob.json`.
-- Publisher record is in `public/app-ads.txt`.
-- AdMob mobile IDs cannot directly display ads on the current web client. The live web feed supports approved ORBIS Ad Center campaigns; campaigns must be approved before they appear.
-- Ad content is labelled in the feed and impression/click events are recorded.
+## Advertising / AdMob
+- Supplied Android App ID: `ca-app-pub-9946397950500083~3195122396`.
+- Selected news-feed Native Ad Unit ID: `ca-app-pub-9946397950500083/7255776003`.
+- The AdMob unit is recorded in `config/admob.json` for a future native Android client. AdMob mobile SDK IDs do not render ads in a standard website/PWA. Actual AdMob delivery requires an Android native client using Google's Mobile Ads SDK and the required privacy/consent setup.
+- The current website uses approved ORBIS Ad Center campaigns. If none is approved, the feed shows a clearly labelled ad placement, not a fabricated third-party ad.
 
-## All-ages safeguards
+## Performance and limitations
+- RSS requests are bounded per category, concurrent and time-limited. Responses use CDN caching and stale serving.
+- Saved articles are stored per browser/device, not synchronized across devices. Live news, ad retrieval and reaction synchronization need connectivity.
+- No load test or multi-device end-to-end test has been completed. There is no verified 10,000/100,000 concurrent-user capacity. Free-tier Vercel/Supabase limits, RSS publisher limits, function execution and bandwidth quotas still apply.
+- A native Android AdMob integration and testing remain separate release work.
 
-- Basic rule-based checks apply to text posts and ad copy.
-- RSS headlines use a conservative all-ages keyword filter.
-- Reports are available.
-- Image/video uploads are type/size checked but do not yet have automated visual content moderation. The product is not yet a fully moderated all-ages platform.
-
-## Media
-
-- Supabase Storage bucket: `orbis-media`.
-- Photos: JPEG, PNG, WebP or GIF, up to 12 MB each.
-- Videos: MP4 or WebM, up to 50 MB each.
-- Up to four media files per post.
-
-## Repository structure
-
-- `public/index.html` — responsive web app client.
-- `public/orbis-social.js` — messages, notifications and clans UI.
-- `public/sw.js`, `public/manifest.webmanifest`, `public/orbis-icon.svg` — PWA.
-- `api/news.js` — RSS/news endpoint.
-- `api/news/sources.js` — RSS source directory.
-- `supabase/functions/orbis-api/index.ts` — guest sessions and social API.
-- `config/admob.json` — owner-supplied future Android AdMob configuration.
-- `docs/ARCHITECTURE.md` — architecture and known limitations.
-
-## Verification
-
-Latest checks confirmed a READY Vercel production deployment, HTTP 200 API health, active Supabase Edge Function, 16 RSS sources, and database indexes for unique public numbers and feed pagination/ranking. The new RSS feeds returned HTTP 200 in live checks.
-
-A full browser end-to-end test across multiple devices and a load test have not been completed. Free-tier provider limits still apply; do not assume unlimited traffic or a specific concurrent-user count.
+## Main files
+- `public/index.html` — news PWA, layout, feed and interactions.
+- `public/sw.js` — static app-shell offline cache.
+- `public/manifest.webmanifest` — install metadata.
+- `api/news.js` — RSS aggregation and headline safety filter.
+- `api/news/sources.js` — feed/category directory.
+- `supabase/functions/orbis-api/index.ts` — guest session and news reactions.
+- `config/admob.json` — supplied Android AdMob configuration.
+- `docs/ARCHITECTURE.md` — technical architecture and known limits.

@@ -182,6 +182,49 @@ Deno.serve(async (req: Request) => {
   const {data:me}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
   if (!me) return out({error:"Профиль ORBIS не найден. Обнови страницу, чтобы восстановить гостевую сессию."},401);
 
+  if (req.method === "GET" && path === "/api/news/reactions") {
+    const keys = [...new Set((u.searchParams.get("keys") || "").split(",").filter((x:string) => /^[0-9a-f]{64}$/.test(x)))].slice(0, 40);
+    if (!keys.length) return out({ reactions: [] });
+    const [{ data: counts, error: countError }, { data: mine, error: mineError }] = await Promise.all([
+      admin.from("news_reaction_counts").select("article_key,like_count").in("article_key", keys),
+      admin.from("news_reactions").select("article_key").eq("user_id", uid).in("article_key", keys)
+    ]);
+    if (countError || mineError) return out({ error: "Не удалось загрузить реакции новостей." }, 500);
+    const liked = new Set((mine || []).map((x:any) => x.article_key));
+    const countMap = new Map((counts || []).map((x:any) => [x.article_key, Number(x.like_count) || 0]));
+    return out({ reactions: keys.map((key:string) => ({ key, likes: countMap.get(key) || 0, liked: liked.has(key) })) });
+  }
+  if (req.method === "POST" && path === "/api/news/reactions") {
+    if (await isRateLimited(admin, uid, "news_reaction", 120, 60)) return out({ error: "Слишком много реакций. Попробуй чуть позже." }, 429);
+    const key = String(body.key || "");
+    if (!/^[0-9a-f]{64}$/.test(key) || typeof body.liked !== "boolean") return out({ error: "Некорректная реакция на новость." }, 400);
+    const { data: existing } = await admin.from("news_reactions").select("article_key").eq("article_key", key).eq("user_id", uid).maybeSingle();
+    let writeError = null;
+    if (body.liked && !existing) {
+      const result = await admin.from("news_reactions").insert({ article_key: key, user_id: uid });
+      writeError = result.error;
+    } else if (!body.liked && existing) {
+      const result = await admin.from("news_reactions").delete().eq("article_key", key).eq("user_id", uid);
+      writeError = result.error;
+    }
+    if (writeError) return out({ error: "Не удалось сохранить реакцию." }, 500);
+    const { count, error } = await admin.from("news_reactions").select("article_key", { count: "exact", head: true }).eq("article_key", key);
+    if (error) return out({ error: "Реакция сохранена, но счётчик пока недоступен." }, 200);
+    return out({ ok: true, key, liked: Boolean(body.liked), likes: count || 0 });
+  }
+
+  if (
+    path === "/api/posts" || /^\/api\/posts\//.test(path) ||
+    path === "/api/stories" || path === "/api/media" ||
+    path === "/api/conversations" || /^\/api\/conversations\//.test(path) ||
+    path === "/api/clans" || /^\/api\/clans\//.test(path) ||
+    path === "/api/profile" || /^\/api\/profile\//.test(path) ||
+    path === "/api/bookmarks" || path === "/api/notifications" || path === "/api/notifications/read" ||
+    /^\/api\/users\//.test(path) || path === "/api/username-available"
+  ) {
+    return out({ error: "ORBIS теперь работает как новостная платформа: профили, публикации, комментарии и сообщения пользователей отключены." }, 410);
+  }
+
   if (req.method==="GET" && path==="/api/posts") {
     if(await isRateLimited(admin,uid,"feed_read",120,60))return out({error:"Слишком много запросов к ленте. Подожди немного."},429);
     const rawLimit=Number(u.searchParams.get("limit")||20),limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
