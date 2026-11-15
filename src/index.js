@@ -35,6 +35,19 @@ async function currentUser(request, env) {
 async function requireKV(env) {
   if (!env.ORBIS_KV) throw new Error("KV_BINDING_MISSING");
 }
+async function rateLimit(request, env, action, limit, windowSeconds) {
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (!ip) return true;
+  const key = "ratelimit:" + action + ":" + await sha256(ip);
+  const now = Date.now();
+  let state = await env.ORBIS_KV.get(key, "json");
+  if (!state || now - Number(state.startedAt || 0) >= windowSeconds * 1000) {
+    state = { startedAt: now, count: 0 };
+  }
+  state.count = Number(state.count || 0) + 1;
+  await env.ORBIS_KV.put(key, JSON.stringify(state), { expirationTtl: windowSeconds });
+  return state.count <= limit;
+}
 async function telegram(method, env, payload) {
   if (!env.BOT_TOKEN) throw new Error("BOT_TOKEN_MISSING");
   const response = await fetch("https://api.telegram.org/bot" + env.BOT_TOKEN + "/" + method, {
@@ -97,6 +110,7 @@ async function api(request, env, url) {
     return json({ ok: true, service: "orbissocial", storage: "kv-index", telegramArchive: Boolean(env.BOT_TOKEN && env.POSTS_CHANNEL_ID) });
   }
   if (request.method === "POST" && path === "/api/auth/register") {
+    if (!await rateLimit(request, env, "register", 6, 900)) return json({ error: "Слишком много попыток регистрации. Попробуй позже." }, 429);
     const body = await request.json();
     const username = String(body.username || "").trim().toLowerCase();
     const password = String(body.password || "");
@@ -114,6 +128,7 @@ async function api(request, env, url) {
     return json({ ok: true, user: safeUser }, 201, { "set-cookie": "orbis_session=" + encodeURIComponent(token) + "; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=" + SESSION_TTL });
   }
   if (request.method === "POST" && path === "/api/auth/login") {
+    if (!await rateLimit(request, env, "login", 10, 900)) return json({ error: "Слишком много попыток входа. Подожди 15 минут." }, 429);
     const body = await request.json();
     const username = String(body.username || "").trim().toLowerCase();
     const password = String(body.password || "");
@@ -134,6 +149,7 @@ async function api(request, env, url) {
     return json({ authenticated: true, user: { username: user.username, name: user.name, bio: user.bio, createdAt: user.createdAt } });
   }
   if (request.method === "POST" && path === "/api/media") {
+    if (!await rateLimit(request, env, "media", 20, 60)) return json({ error: "Слишком много загрузок. Попробуй через минуту." }, 429);
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Войди, чтобы загружать медиа." }, 401);
     if (!env.ORBIS_MEDIA) return json({ error: "Хранилище медиа ещё не подключено. Нужен R2 bucket ORBIS_MEDIA." }, 503);
@@ -222,6 +238,7 @@ async function api(request, env, url) {
     return json({ ok: true, following: !exists });
   }
   if (request.method === "POST" && path === "/api/reports") {
+    if (!await rateLimit(request, env, "reports", 8, 3600)) return json({ error: "Лимит жалоб на сегодня временно исчерпан." }, 429);
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Войди, чтобы отправить жалобу." }, 401);
     const body = await request.json();
@@ -234,6 +251,7 @@ async function api(request, env, url) {
     return json({ ok: true }, 201);
   }
   if (request.method === "POST" && path === "/api/posts") {
+    if (!await rateLimit(request, env, "publish", 12, 60)) return json({ error: "Слишком много публикаций подряд. Подожди немного." }, 429);
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Сначала войди в ORBIS." }, 401);
     if (!env.POSTS_CHANNEL_ID) return json({ error: "Не настроен POSTS_CHANNEL_ID в Cloudflare." }, 503);
@@ -255,7 +273,7 @@ async function api(request, env, url) {
     }
     const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString(), replyTo: replyTo || null, replyToTitle: parentPost?.title || null, media };
     const mediaLinks = media.map(item => url.origin + item.url).join("\n");
-    const archiveText = "ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + (mediaLinks ? "\n\nМедиа:\n" + mediaLinks : "") + "\n\nID: " + post.id.slice(0, 4000);
+    const archiveText = ("ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + (mediaLinks ? "\n\nМедиа:\n" + mediaLinks : "") + "\n\nID: " + post.id).slice(0, 4000);
     try {
       const archived = await telegram("sendMessage", env, { chat_id: env.POSTS_CHANNEL_ID, text: archiveText, disable_web_page_preview: true });
       post.telegramMessageId = archived.result.message_id;
