@@ -2443,7 +2443,7 @@ document.addEventListener("click",event=>{
     finally{submit.disabled=false;submit.textContent="Создать кампанию"}
    });
   }
-  $("orbisAdsRefresh")?.addEventListener("click",load,{once:true});
+  const refresh=$("orbisAdsRefresh");if(refresh&&!refresh.dataset.bound){refresh.dataset.bound="1";refresh.addEventListener("click",load);}
   await load();
  }
  window.orbisLoadAdsCenter=loadAdsCenter;
