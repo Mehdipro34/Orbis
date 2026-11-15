@@ -241,6 +241,31 @@ button.is-pressed{animation:buttonPop .38s cubic-bezier(.2,.9,.3,1.3)}
 @media(prefers-reduced-motion:reduce){.orbis-intro:before,.orbis-intro:after,.intro-orb,.intro-orb span,.intro-orb i,.intro-orb b,.intro-word,.intro-loader span,.intro-stars i{animation:none!important}.orbis-intro{transition:none}}
 
 
+
+/* ORBIS astronaut parade + cinematic galaxy layers */
+.intro-nebula{position:absolute;inset:-15%;pointer-events:none;background:radial-gradient(ellipse at 20% 55%,#ff7fb52a 0,transparent 25%),radial-gradient(ellipse at 78% 35%,#7a8dff32 0,transparent 28%),radial-gradient(ellipse at 55% 85%,#52d9d02a 0,transparent 24%);filter:blur(18px);animation:nebulaFlow 12s ease-in-out infinite alternate}
+.intro-grid{position:absolute;left:-20%;right:-20%;bottom:-36%;height:58%;background:linear-gradient(#8b78ff20 1px,transparent 1px),linear-gradient(90deg,#8b78ff20 1px,transparent 1px);background-size:48px 48px;transform:perspective(240px) rotateX(62deg);transform-origin:top;mask-image:linear-gradient(transparent,#000 35%,transparent);opacity:.5;animation:gridMove 8s linear infinite}
+.intro-astronaut{position:absolute;z-index:2;width:130px;height:190px;filter:drop-shadow(0 16px 22px #07051c88);animation:astronautFloat 5s ease-in-out infinite}
+.intro-astronaut svg{width:100%;height:100%;overflow:visible}
+.intro-astronaut.left{left:calc(50% - 340px);top:calc(50% - 135px);transform:rotate(-15deg);animation:astroLeft 6s ease-in-out infinite}
+.intro-astronaut.right{right:calc(50% - 340px);top:calc(50% - 105px);width:112px;height:166px;animation:astroRight 7s ease-in-out infinite}
+.astronaut-glow{position:absolute;inset:15%;border-radius:50%;background:#a89aff30;filter:blur(22px);z-index:-1}
+.intro-comet{position:absolute;width:100px;height:2px;border-radius:50%;background:linear-gradient(90deg,transparent,#fff,#9bdfff,transparent);box-shadow:0 0 12px #a9cfff;transform:rotate(-28deg);animation:cometFly 3.6s ease-in infinite}
+.intro-comet.c1{top:22%;left:8%}.intro-comet.c2{top:66%;right:8%;animation-delay:1.7s;transform:rotate(155deg) scale(.7)}
+.intro-word{ text-shadow:0 0 24px #bbaaff77,0 0 65px #8872ff55}
+.intro-caption{ text-shadow:0 0 18px #b9a9ff88}
+.intro-chip{border-color:#cfc4ff66;box-shadow:0 16px 42px #05041466,inset 0 1px #ffffff24}
+.intro-chip:before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(120deg,#ffffff12,transparent 50%);pointer-events:none}
+@keyframes nebulaFlow{0%{transform:translate(-2%,1%) scale(.96)}100%{transform:translate(2%,-2%) scale(1.08)}}
+@keyframes gridMove{to{background-position:0 48px,48px 0}}
+@keyframes astronautFloat{0%,100%{translate:0 0;rotate:-4deg}50%{translate:0 -18px;rotate:5deg}}
+@keyframes astroLeft{0%,100%{transform:translate(0,0) rotate(-14deg)}50%{transform:translate(22px,-22px) rotate(8deg)}}
+@keyframes astroRight{0%,100%{transform:translate(0,0) rotate(12deg)}50%{transform:translate(-20px,18px) rotate(-12deg)}}
+@keyframes cometFly{0%{opacity:0;translate:-70px 35px}15%{opacity:1}75%{opacity:.8}100%{opacity:0;translate:240px -120px}}
+@media(max-width:900px){.intro-astronaut.left{left:3%;top:17%;width:95px;height:140px}.intro-astronaut.right{right:3%;top:58%;width:86px;height:128px}}
+@media(max-width:520px){.intro-astronaut.left{left:-12px;top:17%;width:75px;height:112px}.intro-astronaut.right{right:-8px;top:57%;width:72px;height:108px}.intro-chip.posts{left:4%;top:18%}.intro-chip.stories{right:4%;top:8%}.intro-chip.likes{left:4%;bottom:12%}.intro-chip.community{right:2%;bottom:8%}.intro-ui-float{height:310px}}
+@media(prefers-reduced-motion:reduce){.intro-nebula,.intro-grid,.intro-astronaut,.intro-comet{animation:none!important}.intro-astronaut.left{transform:rotate(-14deg)}.intro-astronaut.right{transform:rotate(12deg)}}
+
 /* ORBIS cinematic atmosphere: lightweight canvas particles + scroll progress */
 #orbisParticles{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.72}
 #orbisProgress{position:fixed;z-index:30;left:0;top:0;height:3px;width:0;background:linear-gradient(90deg,#7561f2,#ff8eaa,#65dcca);box-shadow:0 0 12px #9b83ff99;transform-origin:left;pointer-events:none}
@@ -269,9 +294,13 @@ button.is-pressed{animation:buttonPop .38s cubic-bezier(.2,.9,.3,1.3)}
 <div class="orbis-intro" id="orbisIntro" role="dialog" aria-label="Космическое приветствие ORBIS" aria-modal="true">
   <div class="intro-stars" aria-hidden="true"><i>✦</i><i>✧</i><i>·</i><i>✦</i><i>·</i><i>✧</i></div>
   <div class="intro-scene" aria-hidden="true">
+    <div class="intro-nebula"></div><div class="intro-grid"></div>
+    <div class="intro-comet c1"></div><div class="intro-comet c2"></div>
     <div class="intro-planet one"></div><div class="intro-planet two"></div><div class="intro-planet three"></div>
     <div class="intro-smoke"></div>
     <div class="intro-rocket-wrap"><div class="rocket-fin left"></div><div class="rocket-fin right"></div><div class="intro-rocket"></div><div class="rocket-flame"></div></div>
+    <div class="intro-astronaut left"><div class="astronaut-glow"></div><svg viewBox="0 0 130 190" role="img" aria-label="Космонавт ORBIS"><defs><linearGradient id="suitA" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".55" stop-color="#d9d5ff"/><stop offset="1" stop-color="#8e83d9"/></linearGradient><linearGradient id="visorA"><stop stop-color="#bff8ff"/><stop offset=".5" stop-color="#627fd1"/><stop offset="1" stop-color="#282c68"/></linearGradient></defs><path d="M43 75 Q17 79 15 111 L26 120 48 95" fill="url(#suitA)" stroke="#7770bb" stroke-width="3"/><path d="M87 75 Q112 78 115 105 L104 115 83 94" fill="url(#suitA)" stroke="#7770bb" stroke-width="3"/><rect x="42" y="68" width="47" height="68" rx="19" fill="url(#suitA)" stroke="#7770bb" stroke-width="3"/><rect x="47" y="84" width="37" height="25" rx="7" fill="#7770c9"/><path d="M51 89h29M51 96h22" stroke="#d9faff" stroke-width="2" opacity=".8"/><path d="M45 127 38 166 52 170 64 139 76 170 91 166 85 127" fill="url(#suitA)" stroke="#7770bb" stroke-width="3"/><path d="M35 162h19v12H31q-7-5 4-12M77 162h18l7 12H79q-7-4-2-12" fill="#6d64b8"/><rect x="51" y="9" width="31" height="21" rx="8" fill="#ff9fb9" stroke="#fff" stroke-width="2"/><circle cx="65" cy="43" r="34" fill="url(#suitA)" stroke="#fff" stroke-width="4"/><ellipse cx="65" cy="44" rx="25" ry="24" fill="url(#visorA)" stroke="#766bd0" stroke-width="3"/><path d="M50 35q12-13 27-4" stroke="#dfffff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".75"/><circle cx="94" cy="117" r="8" fill="#ffcf70" stroke="#fff" stroke-width="2"/><path d="M17 111l-5 9 15 5 4-10M105 106l11 5-4 13-13-5" fill="#fff" stroke="#7770bb" stroke-width="2"/></svg></div>
+    <div class="intro-astronaut right"><div class="astronaut-glow"></div><svg viewBox="0 0 130 190" role="img" aria-label="Космонавт ORBIS"><defs><linearGradient id="suitB" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".6" stop-color="#d8f7f4"/><stop offset="1" stop-color="#75bfc8"/></linearGradient><linearGradient id="visorB"><stop stop-color="#d4ffff"/><stop offset=".5" stop-color="#5e91bd"/><stop offset="1" stop-color="#243c70"/></linearGradient></defs><path d="M43 75Q18 77 15 105l10 13 24-25M87 75q25 3 28 31l-12 12-21-25" fill="url(#suitB)" stroke="#548b9a" stroke-width="3"/><rect x="42" y="68" width="47" height="68" rx="19" fill="url(#suitB)" stroke="#548b9a" stroke-width="3"/><rect x="48" y="84" width="35" height="25" rx="7" fill="#4b91a7"/><path d="M53 90h24M53 98h18" stroke="#dfffff" stroke-width="2"/><path d="M45 127 38 166 52 170 64 139 76 170 91 166 85 127" fill="url(#suitB)" stroke="#548b9a" stroke-width="3"/><circle cx="65" cy="43" r="34" fill="url(#suitB)" stroke="#fff" stroke-width="4"/><ellipse cx="65" cy="44" rx="25" ry="24" fill="url(#visorB)" stroke="#5c9ba7" stroke-width="3"/><path d="M50 35q12-13 27-4" stroke="#e8ffff" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="94" cy="117" r="8" fill="#ffcf70" stroke="#fff" stroke-width="2"/><path d="M31 162h22v12H29q-6-5 2-12M77 162h18l7 12H79q-7-4-2-12" fill="#498b9b"/></svg></div>
     <div class="intro-ui-float">
       <div class="intro-chip posts">✎ ПУБЛИКАЦИИ<small>Делись своими идеями</small></div>
       <div class="intro-chip stories">◉ STORIES<small>Моменты на каждый день</small></div>
