@@ -19,6 +19,38 @@ main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-b
 .modal{position:fixed;inset:0;background:#27234455;display:none;place-items:center;padding:18px;z-index:10;backdrop-filter:blur(9px)}.modal.open{display:grid}.dialog{width:min(560px,100%);background:#fff;border:1px solid #e8e6f5;border-radius:24px;padding:22px;box-shadow:0 30px 100px #24204435}.dialog h2{margin:0 0 5px;font-size:20px}.dialog .sub{font-size:11px;color:#9297aa;margin:0 0 15px}.dialog input,.dialog textarea{width:100%;background:#f8f8fc;border:1px solid #e9e9f1;border-radius:13px;color:var(--ink);padding:12px;margin-bottom:10px;outline:none}.dialog input:focus,.dialog textarea:focus{border-color:#a99fff;box-shadow:0 0 0 3px #8171f21a}.dialog textarea{min-height:135px;resize:vertical}.dialog-actions{display:flex;justify-content:flex-end;gap:9px}.primary{border:0;border-radius:12px;background:linear-gradient(110deg,#7969f2,#5e50dc);color:#fff;padding:11px 17px;font-weight:800;box-shadow:0 7px 16px #7565e833}.secondary{border:1px solid #e8e8f1;border-radius:12px;background:#fff;color:#777e96;padding:10px 16px}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#29264a;color:#fff;border-radius:13px;padding:11px 16px;z-index:20;display:none;font-size:11px;box-shadow:0 12px 30px #29264a35;max-width:calc(100% - 30px);text-align:center}.mobile-nav{display:none}
 @media(max-width:1080px){.shell{grid-template-columns:205px minmax(0,1fr);gap:20px}.right{display:none}}
 @media(max-width:650px){.shell{display:block;padding:13px 12px 85px}.sidebar{display:none}.topbar h1{font-size:25px}.topbar{padding-bottom:14px}.date-pill{display:none}.hero{padding:20px;border-radius:20px}.hero h2{font-size:21px}.stories{padding:13px}.composer{padding:13px}.compose-bottom{margin-left:0}.post{padding:15px}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:5;justify-content:space-around;background:#ffffffed;border-top:1px solid var(--line);padding:8px 5px calc(8px + env(safe-area-inset-bottom));backdrop-filter:blur(16px)}.mobile-nav button{border:0;background:transparent;color:#969bad;font-size:20px;padding:7px 13px;border-radius:12px}.mobile-nav button.active{color:var(--violet);background:#f0eeff}}
+
+/* ORBIS Vivid refresh */
+:root{--bg:#f7f6ff;--paper:#fff;--ink:#24213f;--muted:#8582a2;--line:#ece9fa;--violet:#6855ed;--violet2:#a18cff;--coral:#ff806f;--mint:#43cbb0;--sun:#ffc45f;--shadow:0 18px 48px #5746a612}
+body{background:radial-gradient(ellipse at 12% 4%,#ffe7ee 0,transparent 27%),radial-gradient(ellipse at 91% 8%,#e5e1ff 0,transparent 30%),radial-gradient(ellipse at 55% 95%,#e2faf4 0,transparent 25%),#f8f8ff}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:radial-gradient(#a69bf52b 1px,transparent 1px);background-size:23px 23px;mask-image:linear-gradient(to bottom,#0008,transparent 75%)}
+.brand{letter-spacing:3.8px}.brandmark{border-radius:16px;background:linear-gradient(145deg,#a18cff 0%,#6956ec 52%,#ff927f 100%);box-shadow:0 10px 28px #7864f05c;position:relative}.brandmark:after{content:"";position:absolute;inset:-4px;border-radius:19px;border:1px solid #a18cff55}
+.nav button{border-radius:16px}.nav button.active{background:linear-gradient(100deg,#f0edff,#faf5ff);box-shadow:inset 3px 0 #705df0,0 7px 20px #7966ef0b}.nav .create{background:linear-gradient(105deg,#725df2,#9a70ed 58%,#fa927f);box-shadow:0 13px 26px #8468ed48}
+.topbar h1{font-size:32px;letter-spacing:-1.5px;background:linear-gradient(100deg,#282342,#6552d8 65%,#e27e9a);background-clip:text;-webkit-background-clip:text;color:transparent}
+.hero{isolation:isolate;background:linear-gradient(112deg,#5748d8 0%,#7965ef 45%,#b47bf0 76%,#f18f9d 120%);box-shadow:0 22px 48px #7965ef45}
+.hero:before{width:290px;height:290px;right:-30px;top:-155px;border:36px solid #ffffff13;box-shadow:0 0 0 25px #ffffff09,0 0 0 60px #ffffff07}
+.hero:after{width:180px;height:180px;right:105px;bottom:-145px;border:24px solid #ffffff13}
+.hero-label{color:#f4eaff}.hero h2{font-size:26px;max-width:430px}.hero-tag{background:#ffffff20;backdrop-filter:blur(8px);box-shadow:0 5px 18px #34217d18}
+.stories,.composer,.post,.side-card{border-color:#eeebfa;box-shadow:0 13px 35px #5946a30b,0 2px 8px #5946a307}
+.stories{background:linear-gradient(145deg,#fff 70%,#fff8fb)}.story-ring{box-shadow:0 5px 15px #8c73ed1b}.story-ring>div{background:linear-gradient(145deg,#fff,#f1efff)}
+.story.add .story-ring{background:linear-gradient(135deg,#b4a7ff,#ff9b9b)}.story.add .story-ring>div{background:#fff}
+.avatar{background:linear-gradient(140deg,#8e7cff,#6854e8 65%,#ef8ba5);box-shadow:0 7px 17px #7866ec30}
+.compose-open{background:linear-gradient(100deg,#faf9ff,#fff8fa);border-color:#efebff}
+.tiny{border-color:#eeeafd}.tiny:hover{background:#f3efff;border-color:#d8d0ff}
+.topic-filter button{box-shadow:0 3px 10px #4c3b9908}.topic-filter button.active{background:linear-gradient(100deg,#eeeaff,#fceeff);border-color:#d8ccff;color:#6550db}
+.post{position:relative;overflow:hidden}.post:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#9b83ff,#ff9b91,#6bd5bf);opacity:0;transition:.2s}.post:hover:before{opacity:1}.post-title{letter-spacing:-.7px}.topic{background:linear-gradient(100deg,#f0edff,#fff0f2);color:#6955db}
+.post-actions button{transition:.18s}.post-actions button:hover{background:#f3efff;transform:translateY(-1px)}
+.side-card{background:linear-gradient(145deg,#fff 70%,#fbf9ff)}.topic-dot{box-shadow:0 0 0 5px #f0eeff,0 0 16px #8776ed45}
+.bell{box-shadow:0 4px 12px #5b4ca10c}.bell:hover{background:#f4f0ff;color:#6652dc}
+.primary{background:linear-gradient(105deg,#705cf0,#a06fe9 65%,#f08d92);box-shadow:0 9px 20px #8068e844}
+.dialog{box-shadow:0 35px 110px #29204445}
+.toast{background:linear-gradient(100deg,#32285f,#5e4ac2);box-shadow:0 12px 35px #3b2b8050}
+.post,.stories,.composer,.side-card{animation:riseIn .55s both}.stories{animation-delay:.06s}.composer{animation-delay:.1s}.post:nth-child(2){animation-delay:.08s}
+@keyframes riseIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:1081px){.shell{gap:32px}.right{padding-top:78px}}
+@media(max-width:650px){.topbar h1{font-size:27px}.hero h2{font-size:23px}.mobile-nav{box-shadow:0 -8px 28px #4c3b990d}.mobile-nav button.active{background:linear-gradient(135deg,#f0edff,#fff0f4)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
 </style>
 </head>
 <body>
