@@ -1176,6 +1176,56 @@ button:focus-visible{outline:2px solid #a998ff;outline-offset:3px}
  .reveal-on-scroll{opacity:1;transform:none}
 }
 
+
+/* ORBIS three-screen experience: Feed, Navigator, Profile */
+.orbis-screen{min-height:620px;animation:orbisScreenIn .48s cubic-bezier(.2,.75,.2,1) both}
+.orbis-screen[hidden]{display:none}
+@keyframes orbisScreenIn{from{opacity:0;transform:translateY(14px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+.screen-heading{padding:7px 2px 23px}
+.screen-eyebrow{font-size:9px;letter-spacing:2.6px;font-weight:900;color:#82e6dc}
+.screen-heading h2{font-size:31px;letter-spacing:-1.2px;margin:9px 0 7px;color:#f6f4ff}
+.screen-heading p{font-size:12px;line-height:1.8;color:#9eaccb;margin:0;max-width:560px}
+.navigator-feature{position:relative;overflow:hidden;min-height:190px;border:1px solid #6259a0;border-radius:23px;padding:26px 27px;background:radial-gradient(circle at 84% 50%,#a18aff30,transparent 24%),linear-gradient(112deg,#211c4c,#26305b 60%,#155365);box-shadow:0 22px 50px #0005,inset 0 1px #ffffff20}
+.navigator-feature>div:first-child{position:relative;z-index:2;max-width:67%}
+.navigator-feature h3{font-size:23px;line-height:1.25;color:#fff;margin:12px 0 8px;max-width:360px}
+.navigator-feature p{font-size:12px;line-height:1.7;color:#c1c9e5;margin:0;max-width:360px}
+.navigator-galaxy{position:absolute;width:145px;height:145px;right:32px;top:23px;border:1px solid #a89aff8a;border-radius:50%;box-shadow:0 0 45px #9279ff30,inset 0 0 28px #9279ff25;animation:navGalaxySpin 22s linear infinite}
+.navigator-galaxy:before,.navigator-galaxy:after{content:"";position:absolute;inset:22px -13px;border:1px solid #7ce7dc88;border-radius:50%;transform:rotate(58deg)}
+.navigator-galaxy:after{inset:42px -24px;border-color:#c1a1ff80;transform:rotate(-45deg)}
+.navigator-galaxy i{position:absolute;width:45px;height:45px;left:49px;top:49px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3eaff,#9985ff 34%,#4d3b9b 70%);box-shadow:0 0 35px #a58cff}
+.navigator-galaxy b{position:absolute;width:8px;height:8px;border-radius:50%;background:#9fffee;top:12px;left:85px;box-shadow:0 0 15px #8effec}
+.navigator-galaxy span{position:absolute;right:7px;bottom:27px;color:#fff;font-size:20px;text-shadow:0 0 16px #fff}
+@keyframes navGalaxySpin{to{transform:rotate(360deg)}}
+.navigator-section-title{display:flex;justify-content:space-between;align-items:center;margin:25px 2px 14px}
+.navigator-section-title b{display:block;color:#f2f3ff;font-size:14px}
+.navigator-section-title small{display:block;color:#8998ba;font-size:10px;margin-top:5px}
+.navigator-section-title>span{font-size:9px;letter-spacing:1.7px;color:#7889ad}
+.navigator-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.navigator-topic{position:relative;isolation:isolate;overflow:hidden;min-height:132px;text-align:left;padding:17px;border:1px solid #344362;border-radius:18px;background:linear-gradient(145deg,#151f37,#10182b);color:#eef0ff;animation:orbisTileIn .55s both;animation-delay:var(--topic-delay);transition:transform .25s,border-color .25s,box-shadow .25s}
+@keyframes orbisTileIn{from{opacity:0;transform:translateY(13px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.navigator-topic:before{content:"";position:absolute;z-index:-1;width:125px;height:125px;border:1px solid currentColor;border-radius:50%;right:-58px;bottom:-67px;opacity:.15;transition:transform .5s}
+.navigator-topic:hover{transform:translateY(-4px);border-color:#8978e7;box-shadow:0 17px 35px #0005,0 0 25px #8270ef19}
+.navigator-topic:hover:before{transform:scale(1.55) rotate(30deg)}
+.navigator-topic-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#ffffff12;font-size:19px;margin-bottom:12px}
+.navigator-topic-name{display:block;font-size:13px;font-weight:800;color:#f4f3ff}
+.navigator-topic-sub{display:block;font-size:10px;line-height:1.55;color:#91a0c0;margin-top:5px;max-width:90%}
+.navigator-topic-arrow{position:absolute;right:15px;top:17px;color:#9b8cff;font-size:16px;transition:transform .2s}
+.navigator-topic:hover .navigator-topic-arrow{transform:translate(3px,-3px)}
+.navigator-topic.violet{color:#aa98ff}.navigator-topic.cyan{color:#70e8dc}.navigator-topic.gold{color:#f1ca86}.navigator-topic.pink{color:#f59ac4}.navigator-topic.blue{color:#82baff}.navigator-topic.mint{color:#8ce7bd}
+.profile-screen-card{overflow:hidden;border:1px solid #3a486a;border-radius:23px;background:linear-gradient(145deg,#141f37,#0d1629);box-shadow:0 22px 50px #0005}
+.profile-cover{height:175px;position:relative;overflow:hidden;display:flex;align-items:flex-start;justify-content:flex-end;padding:18px;background:radial-gradient(circle at 76% 50%,#a28cff42,transparent 24%),linear-gradient(110deg,#211b4b,#29335e 58%,#145265)}
+.profile-cover:before,.profile-cover:after{content:"";position:absolute;width:210px;height:210px;border:1px solid #b4a5ff66;border-radius:50%;right:40px;top:-116px;animation:navGalaxySpin 24s linear infinite}
+.profile-cover:after{width:150px;height:150px;right:70px;top:-86px;border-color:#7be6dc66;animation-direction:reverse;animation-duration:17s}
+.profile-cover>span{position:relative;z-index:1;font-size:8px;letter-spacing:2px;color:#c8d4f1}
+.profile-identity{display:flex;align-items:flex-end;gap:15px;padding:0 23px;margin-top:-35px;position:relative;z-index:2}
+.profile-avatar-large{display:grid;place-items:center;width:76px;height:76px;border:4px solid #111a2e;border-radius:24px;background:linear-gradient(140deg,#9c85ff,#43b8c3);font-size:32px;font-weight:900;color:white;box-shadow:0 9px 28px #0006}
+.profile-name-block{padding-bottom:7px}
+.profile-name-block h3{font-size:18px;color:#f7f5ff;margin:0 0 4px}
+.profile-name-block span{font-size:11px;color:#91a0c0}
+.profile-only-note{margin:21px 23px 24px;padding:15px 16px;border-top:1px solid #2e3b59;color:#9eaccb;font-size:11px;line-height:1.7}
+@media(max-width:650px){.screen-heading h2{font-size:27px}.navigator-feature{min-height:175px;padding:22px 19px}.navigator-feature h3{font-size:19px}.navigator-feature>div:first-child{max-width:72%}.navigator-galaxy{width:105px;height:105px;right:10px;top:35px}.navigator-galaxy i{left:34px;top:34px;width:35px;height:35px}.navigator-galaxy b{left:65px;top:9px}.navigator-grid{gap:9px}.navigator-topic{min-height:126px;padding:13px}.profile-cover{height:145px}}
+@media(prefers-reduced-motion:reduce){.orbis-screen,.navigator-topic{animation:none!important}.navigator-galaxy,.profile-cover:before,.profile-cover:after{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -1227,6 +1277,7 @@ button:focus-visible{outline:2px solid #a998ff;outline-offset:3px}
   <article class="post"><div class="post-top"><div class="avatar">O</div><div><div class="author">ORBIS <span class="handle">@orbis · Admin</span></div><div class="post-meta">Пример оформления публикации</div></div><span class="sample">ПРИМЕР</span></div><div class="post-title">Большие идеи начинаются с простого шага</div><span class="topic">ИДЕИ · СООБЩЕСТВО</span><div class="post-body">Каждый день вокруг появляются новые мысли, открытия и возможности. ORBIS создан, чтобы собирать их в одном живом потоке — и помогать находить то, что действительно интересно.</div><div class="post-actions"><button>♡ Реакция</button><button>↗ Поделиться</button><button>⌑ Сохранить</button></div></article>
   <article class="post"><div class="post-top"><div class="avatar" style="background:linear-gradient(140deg,#ffae91,#f17b9d)">И</div><div><div class="author">Идеи дня <span class="handle">@ideas_daily</span></div><div class="post-meta">Пример оформления публикации</div></div><span class="sample">ПРИМЕР</span></div><div class="post-title">А что, если привычные вещи можно сделать лучше?</div><span class="topic">РАЗВИТИЕ · ИДЕИ</span><div class="post-body">Иногда достаточно посмотреть на обычную задачу под другим углом. Какую вещь вокруг себя ты бы изменил в первую очередь?</div><div class="post-actions"><button>♡ Реакция</button><button>↗ Поделиться</button><button>⌑ Сохранить</button></div></article>
  </section>
+ <section id="orbisScreen" class="orbis-screen" hidden></section>
 </main>
 <aside class="right">
  <section class="side-card"><h3>✳ Навигатор по темам</h3>
@@ -1249,7 +1300,36 @@ function openComposer(){$("dialogTitle").textContent="Новая публика�
 $("cancel").addEventListener("click",()=>modal.classList.remove("open"));
 modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
 $("publish").addEventListener("click",()=>{if(!$("postTitle").value.trim()||!$("postTopic").value.trim()||!$("postBody").value.trim()){notify("Добавь название, тему и текст публикации.");return}notify("Форма заполнена. Сохранение появится после подключения Posts API.")});
-document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-view]").forEach(x=>x.classList.remove("active"));document.querySelectorAll('[data-view="'+b.dataset.view+'"]').forEach(x=>x.classList.add("active"));$("pageTitle").textContent=b.dataset.view==="Лента"?"Твоя лента":b.dataset.view;notify("Раздел «"+b.dataset.view+"»: следующий этап — подключение реальных данных.")}));
+const orbisScreen=$("orbisScreen");
+const homeScreenNodes=[...document.querySelector("main").children].filter(el=>el.id!=="topbar"&&el!==orbisScreen);
+const orbisTopics=[
+ {name:"Новости",sub:"Главные события и новые взгляды",icon:"◉",tone:"violet"},
+ {name:"Технологии",sub:"Наука, цифровой мир и разработки",icon:"⌁",tone:"cyan"},
+ {name:"Бизнес",sub:"Предпринимательство и идеи проектов",icon:"◇",tone:"gold"},
+ {name:"Общество",sub:"Люди, культура и жизнь",icon:"◎",tone:"pink"},
+ {name:"Наука",sub:"Открытия и исследования",icon:"✧",tone:"blue"},
+ {name:"Идеи",sub:"Мысли, вдохновение и творчество",icon:"✳",tone:"mint"}
+];
+function setOrbisScreen(view){
+ document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x.dataset.view===view));
+ $("pageTitle").textContent=view==="Лента"?"Твоя лента":view;
+ const isHome=view==="Лента";
+ homeScreenNodes.forEach(el=>el.hidden=!isHome);
+ orbisScreen.hidden=isHome;
+ if(isHome)return;
+ if(view==="Навигатор"){
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">ORBIS · EXPLORE</span><h2>Навигатор</h2><p>Выбирай направление и открывай публикации по интересующим тебя темам.</p></div><div class="navigator-feature"><div><span class="screen-eyebrow">ТВОЙ ПУТЬ В ORBIS</span><h3>Найди тему, которая тебя зажигает.</h3><p>Один выбор — и ты уже в потоке интересных мыслей.</p></div><div class="navigator-galaxy"><i></i><b></b><span>✦</span></div></div><div class="navigator-section-title"><div><b>Исследуй направления</b><small>Выбери тему, чтобы открыть публикации</small></div><span>06 THEMES</span></div><div class="navigator-grid">'+orbisTopics.map((t,i)=>'<button class="navigator-topic '+t.tone+'" data-topic="'+t.name+'" style="--topic-delay:'+i*65+'ms"><span class="navigator-topic-icon">'+t.icon+'</span><span class="navigator-topic-name">'+t.name+'</span><span class="navigator-topic-sub">'+t.sub+'</span><span class="navigator-topic-arrow">↗</span><span class="navigator-topic-orbit"></span></button>').join("")+'</div>';
+  orbisScreen.querySelectorAll("[data-topic]").forEach(btn=>btn.addEventListener("click",()=>{
+   const topic=btn.dataset.topic;setOrbisScreen("Лента");
+   const filter=[...document.querySelectorAll("#topicFilter button")].find(x=>x.textContent.trim()===topic);
+   if(filter)filter.click();else notify("Публикации по теме «"+topic+"» появятся в ленте.");
+   window.scrollTo({top:0,behavior:"smooth"});
+  }));
+ }else if(view==="Профиль"){
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница в ORBIS.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large">O</div><div class="profile-name-block"><h3>Твоё имя</h3><span>@username</span></div></div><div class="profile-only-note">Здесь будет отображаться твоё имя пользователя.</div></div>';
+ }
+}
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setOrbisScreen(b.dataset.view)));
 document.querySelectorAll("#topicFilter button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll("#topicFilter button").forEach(x=>x.classList.remove("active"));
   b.classList.add("active");
