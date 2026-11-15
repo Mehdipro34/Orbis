@@ -16,7 +16,7 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity.
 - `public/index.html` — responsive web and Telegram Mini App UI, orbital intro, auth client and social screens.\n- `public/manifest.webmanifest`, `public/sw.js`, `public/orbis-icon.svg` — installable PWA shell and app icon.
 - `src/index.js` — Cloudflare Worker serving static assets and RSS/news endpoints. Legacy KV-based social/auth endpoints are disabled.
 - `wrangler.toml` — Cloudflare Worker and static asset configuration.
-- `docs/ARCHITECTURE.md` — product and technical architecture.
+- `docs/ARCHITECTURE.md` — product and technical architecture.\n- `docs/DEPLOYMENT.md` — Cloudflare, Supabase and Telegram launch checklist.
 
 ## Supabase project
 - Project ref: `wdwvcvpgovvkoodozbxf`
