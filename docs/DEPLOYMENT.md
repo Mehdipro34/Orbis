@@ -48,7 +48,7 @@ In Cloudflare Dashboard:
 4. Remove that binding and save the settings. Do not create an R2 bucket for this project; Supabase Storage is the single media store.
 5. Retry the existing Worker deployment. The build log should list `ASSETS` and `ORBIS_KV`, and should no longer list `ORBIS_MEDIA`.
 
-The Cloudflare account-management connector is not available in this session, so this dashboard-only binding cannot be removed remotely from here.
+This binding is stored in Cloudflare account settings, not in the GitHub repository. Changing source files alone will not remove it.
 
 ## 3. Telegram Mini App
 
