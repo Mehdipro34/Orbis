@@ -1851,7 +1851,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
  <section class="side-card"><h3>✳ Навигатор по темам</h3>
   <div class="topic-item"><i class="topic-dot"></i><div><b>Новости</b><small>События и важное</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#8b7cf6;box-shadow:0 0 0 4px #f0eeff"></i><div><b>Технологии</b><small>Наука и разработки</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#ff987f;box-shadow:0 0 0 4px #fff0ed"></i><div><b>Бизнес</b><small>Компании и идеи</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#5bc9b3;box-shadow:0 0 0 4px #e9faf6"></i><div><b>Общество</b><small>Люди и культура</small></div><em>→</em></div><div class="topic-item"><i class="topic-dot" style="background:#e6b95f;box-shadow:0 0 0 4px #fff8e8"></i><div><b>Наука</b><small>Открытия и знания</small></div><em>→</em></div>
  </section>
- <section class="side-card"><h3>Твой профиль</h3><div class="profile-preview"><div class="avatar">O</div><div><p>Гость ORBIS</p><small>Имя · @username</small></div></div><p class="side-copy">Минималистично и по делу: имя, никнейм и короткое описание.</p></section>
+ <section class="side-card"><h3>Твой профиль</h3><div class="profile-preview"><div class="avatar" id="sidebarAvatar">O</div><div><p id="sidebarProfileName">Твой профиль</p><small id="sidebarProfileHandle">@username</small></div></div><p class="side-copy">Минималистично и по делу: имя, никнейм и короткое описание.</p></section>
  <section class="side-card"><h3>Принципы ORBIS</h3><div class="stat-line"><span>Главная лента</span><b>Живая</b></div><div class="stat-line"><span>Навигатор</span><b>По темам</b></div><div class="stat-line"><span>Навигатор</span><b>По темам</b></div><p class="side-copy">Никакого перегруженного профиля и лишних разделов. Только то, ради чего люди приходят.</p></section>
 </aside>
 </div>
@@ -2076,7 +2076,7 @@ document.addEventListener("click",event=>{
  const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs"),username=document.getElementById("authUsername"),emailField=document.getElementById("authEmailField"),email=document.getElementById("authEmail");
  let mode="login";
  function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}}
- function enterApp(){if(gateway)gateway.hidden=true;const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(shell)shell.hidden=false;document.body.classList.remove("orbis-auth-open","orbis-demo-open");document.body.classList.add("orbis-app-open");window.scrollTo({top:0,behavior:"instant"});window.dispatchEvent(new Event("orbis:login"))} window.orbisEnterApp=enterApp;
+ function enterApp(){if(gateway)gateway.hidden=true;const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(shell)shell.hidden=false;document.body.classList.remove("orbis-auth-open","orbis-demo-open");document.body.classList.add("orbis-app-open");window.scrollTo({top:0,behavior:"auto"});window.dispatchEvent(new Event("orbis:login"))} window.orbisEnterApp=enterApp;
  const landing=document.getElementById("orbisLanding");
  function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>username&&username.focus({preventScroll:true}),220);window.scrollTo({top:0,behavior:"smooth"})}
  document.querySelectorAll("[data-open-auth]").forEach(button=>button.addEventListener("click",()=>openAuth(button.dataset.openAuth)));
@@ -2143,7 +2143,17 @@ document.addEventListener("click",event=>{
   const data=await response.json().catch(()=>({error:"Ответ сервера не распознан."}));
   if(!response.ok)throw new Error(data.error||"Ошибка запроса.");
   return data;
- };
+ }; 
+ function syncUserUI(user){
+  if(!user)return;
+  const name=user.name||user.username||"ORBIS";
+  const username=user.username||"";
+  const nameNode=$("sidebarProfileName"),handleNode=$("sidebarProfileHandle"),avatarNode=$("sidebarAvatar");
+  if(nameNode)nameNode.textContent=name;
+  if(handleNode)handleNode.textContent="@"+username;
+  if(avatarNode)avatarNode.textContent=name.slice(0,1).toUpperCase();
+ }
+
  function card(post){
   const article=document.createElement("article");article.className="post";article.id="post-"+post.id;
   const top=document.createElement("div");top.className="post-top";
@@ -2400,7 +2410,7 @@ document.addEventListener("click",event=>{
     ["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
     if($("postMedia"))$("postMedia").value="";
     replyToPostId=null;$("dialogTitle").textContent="Новая публикация";
-    $("modal").classList.remove("open");await loadFeed(true,feedTopic);window.notify?.("Публикация сохранена в ORBIS и архивирована в Telegram.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
+    $("modal").classList.remove("open");await loadFeed(true,feedTopic);window.notify?.(data.archiveWarning?"Публикация сохранена в ORBIS.":"Публикация сохранена и отправлена в Telegram.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
    }catch(error){window.notify?.(error.message)}
    finally{target.disabled=false;target.textContent="Продолжить"}
   }
@@ -2409,7 +2419,7 @@ document.addEventListener("click",event=>{
    const name=$("profileNameInput").value.trim(),bio=$("profileBioInput").value.trim();
    try{
     const data=await api("/api/profile",{method:"PUT",body:JSON.stringify({name,bio})});
-    window.orbisUser=data.user;$("profileNamePreview").textContent=data.user.name;$("profileHandlePreview").textContent="@"+data.user.username;$("profileAvatarPreview").textContent=data.user.name.slice(0,1).toUpperCase();
+    window.orbisUser=data.user;syncUserUI(data.user);$("profileNamePreview").textContent=data.user.name;$("profileHandlePreview").textContent="@"+data.user.username;$("profileAvatarPreview").textContent=data.user.name.slice(0,1).toUpperCase();
     $("profileSaveNote").textContent="Профиль сохранён на сервере ORBIS.";
     window.notify?.("Профиль обновлён.");
    }catch(error){window.notify?.(error.message)}
@@ -2435,7 +2445,7 @@ document.addEventListener("click",event=>{
  const searchInput=$("orbisSearchInput");
  document.addEventListener("keydown",event=>{if(event.key==="Enter"&&event.target===$("orbisSearchInput")){event.preventDefault();runSearch()}});
  window.addEventListener("orbis:login",()=>{loadFeed()});
- api("/api/auth/me").then(data=>{window.orbisUser=data.user;window.orbisEnterApp?.();loadFeed()}).catch(()=>{});
+ api("/api/auth/me").then(data=>{window.orbisUser=data.user;syncUserUI(data.user);window.orbisEnterApp?.();loadFeed()}).catch(()=>{});
 })();
 </script>
 </body></html>
