@@ -1498,6 +1498,60 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 /* Working profile editor */
 .profile-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px}.profile-edit-grid label{display:grid;gap:7px;color:#777391;font-size:11px;font-weight:750}.profile-edit-grid input,.profile-edit-grid textarea{width:100%;border:1px solid #e9e5f8;background:#faf9ff;border-radius:13px;padding:12px 13px;color:#282342;outline:none}.profile-edit-grid input:focus,.profile-edit-grid textarea:focus{border-color:#a18cff;box-shadow:0 0 0 3px #8c79f21b}.profile-edit-grid textarea{min-height:82px;resize:vertical}.profile-edit-grid .profile-bio-label{grid-column:1/-1}.profile-edit-grid .primary{justify-self:start}.profile-edit-grid .profile-only-note{grid-column:1/-1;margin:0;color:#9995ad;font-size:10px}@media(max-width:650px){.profile-edit-grid{grid-template-columns:1fr;padding:15px}.profile-edit-grid .profile-bio-label,.profile-edit-grid .profile-only-note{grid-column:auto}}
+
+/* ORBIS — centered cinematic landing */
+.orbis-landing{background:radial-gradient(ellipse at 50% 43%,#29204c 0%,#111126 42%,#090a17 78%);overflow:hidden}
+.landing-nav{max-width:100%;height:76px;padding:0 clamp(18px,5vw,76px);border-bottom-color:#ffffff12}
+.landing-nav nav{position:absolute;left:50%;transform:translateX(-50%);gap:34px}
+.landing-nav>div{margin-left:auto}
+.land-main{max-width:100%;padding:0}
+.land-hero-centered{min-height:calc(100svh - 76px);padding:0 20px;display:grid;place-items:center;overflow:hidden;isolation:isolate}
+.land-hero-centered:before,.land-hero-centered:after{content:"";position:absolute;z-index:-1;pointer-events:none;border-radius:50%;filter:blur(1px)}
+.land-hero-centered:before{width:min(80vw,900px);height:min(80vw,900px);border:1px solid #a999ff0b;box-shadow:0 0 140px #846dff0b,inset 0 0 120px #9d8aff08}
+.land-hero-centered:after{width:min(54vw,620px);height:min(54vw,620px);border:1px dashed #b5a6ff12;animation:orbit 80s linear infinite}
+.center-stage{width:min(100%,1040px);min-height:760px;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;padding:26px 0 54px}
+.center-status{display:flex;align-items:center;gap:9px;border:1px solid #b7aaff28;background:#ffffff08;padding:9px 15px;border-radius:99px;color:#c5baff;font-size:9px;letter-spacing:2px;font-weight:800;box-shadow:0 8px 34px #0002}
+.center-status i{width:6px;height:6px;background:#83e9cf;border-radius:50%;box-shadow:0 0 12px #83e9cf;animation:statusPulse 2s infinite}
+.center-orbit-scene{width:min(76vw,470px);height:min(76vw,470px);min-height:300px;position:relative;display:grid;place-items:center;margin:-5px auto -22px;perspective:900px}
+.center-glow{position:absolute;width:68%;height:68%;border-radius:50%;background:radial-gradient(circle,#9b7aff55 0%,#7053dc22 38%,transparent 72%);filter:blur(22px);animation:centerGlow 5s ease-in-out infinite}
+.center-ring{position:absolute;border:1px solid #c6baff38;border-radius:50%;box-shadow:0 0 28px #a28cff0c,inset 0 0 24px #a28cff08}
+.center-ring:before{content:"";position:absolute;inset:9%;border:1px dashed #9beadd2b;border-radius:50%}
+.center-ring span{position:absolute;top:50%;left:-5px;color:#d7ceff;text-shadow:0 0 15px #a48cff;font-size:17px}
+.ring-one{width:94%;height:42%;transform:rotate(-28deg);animation:centerOrbitA 22s linear infinite}
+.ring-two{width:78%;height:58%;transform:rotate(56deg);border-color:#ffafd14a;animation:centerOrbitB 18s linear infinite reverse}
+.ring-three{width:65%;height:82%;transform:rotate(72deg);border-color:#8de9dc3d;animation:centerOrbitC 26s linear infinite}
+.ring-two span{left:auto;right:-5px;color:#ffb6d0}.ring-three span{top:5%;left:50%;color:#9aeee0}
+.center-planet{width:174px;height:174px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(circle at 32% 22%,#8f80d9 0%,#393064 31%,#17152e 68%,#0c0c1c 100%);border:1px solid #d7ccff8a;box-shadow:0 0 45px #9277ff66,0 0 120px #826cff35,inset -15px -18px 35px #050510,inset 8px 8px 20px #ffffff30;animation:planetFloat 5s ease-in-out infinite}
+.planet-shine{position:absolute;width:95px;height:95px;left:13px;top:8px;border-radius:50%;background:radial-gradient(circle,#ffffff42,transparent 70%);filter:blur(8px)}
+.center-planet b{font-size:31px;color:#fff;text-shadow:0 0 25px #fff;margin-bottom:3px}.center-planet strong{font-size:21px;letter-spacing:5px;color:white;text-shadow:0 0 20px #c2b6ff}.center-planet small{font-size:7px;letter-spacing:3px;color:#c6bdf4;margin-top:7px}
+.scene-star{position:absolute;color:#fff;text-shadow:0 0 20px #bcaaff;font-size:20px;animation:starBlink 3s infinite}.star-one{top:15%;right:13%}.star-two{bottom:15%;left:12%;animation-delay:1s}.star-three{top:43%;left:4%;font-size:35px;color:#8ce8df}
+.scene-label{position:absolute;color:#a8a0d4;font-size:8px;letter-spacing:2px;opacity:.7}.scene-label-left{left:-4%;top:38%}.scene-label-right{right:-5%;bottom:34%}
+.center-copy{text-align:center;position:relative;z-index:2;margin-top:0}
+.center-eyebrow{font-size:9px;letter-spacing:4px;color:#b7a9ff;font-weight:850}
+.center-copy h1{font-size:clamp(48px,7vw,88px);line-height:.98;letter-spacing:-5px;margin:18px 0 13px;color:#fff}
+.center-copy h1 em{font-style:normal;background:linear-gradient(100deg,#c9bdff 5%,#ffb2cf 52%,#8ce9dd 100%);background-clip:text;color:transparent;filter:drop-shadow(0 0 24px #9c83ff24)}
+.center-copy>p{font-size:14px;color:#aaa8c8;letter-spacing:.2px;margin:0}
+.center-actions{display:flex;justify-content:center;gap:12px;margin-top:28px}
+.center-actions button{height:50px;padding:0 23px;border-radius:14px;font-size:12px;font-weight:850;cursor:pointer;transition:transform .25s,box-shadow .25s}
+.center-actions button:hover{transform:translateY(-3px)}
+.center-primary{border:0;color:#17132d;background:linear-gradient(110deg,#c7bbff,#9280ff 58%,#ffb4ce);box-shadow:0 12px 42px #a38cff42}
+.center-primary span{font-size:17px;margin-left:17px}
+.center-secondary{color:#e7e2ff;border:1px solid #b9adff45;background:#ffffff08}
+.center-secondary:hover{box-shadow:0 10px 35px #a18aff20}
+.center-proof{display:flex;align-items:center;justify-content:center;gap:17px;margin-top:30px;color:#aaa6c9;font-size:9px;letter-spacing:1px}
+.center-proof span{display:flex;align-items:center;gap:6px}.center-proof i{font-style:normal;color:#c4b6ff;font-size:14px}.center-proof b{height:3px;width:3px;border-radius:50%;background:#77709f}
+.center-bottom-note{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:2px;color:#797594;white-space:nowrap}.center-bottom-note span{margin-left:10px;color:#c5b8ff;font-size:13px}
+.land-about,.land-features,.land-creator,.land-download{max-width:1120px;margin-left:auto;margin-right:auto;padding-left:30px;padding-right:30px}
+.land-scroll,.land-author{display:none!important}
+@keyframes statusPulse{50%{opacity:.45;box-shadow:0 0 3px #83e9cf}}
+@keyframes centerGlow{50%{transform:scale(1.16);opacity:.65}}
+@keyframes centerOrbitA{to{transform:rotate(332deg)}}
+@keyframes centerOrbitB{to{transform:rotate(-304deg)}}
+@keyframes centerOrbitC{to{transform:rotate(432deg)}}
+@keyframes planetFloat{50%{transform:translateY(-7px)}}
+@keyframes starBlink{50%{opacity:.35;transform:scale(.8)}}
+@media(max-width:700px){.landing-nav{height:66px}.landing-nav nav{display:none}.landing-nav button{padding:9px 11px;font-size:10px}.landing-nav .land-signup{display:none}.land-hero-centered{min-height:calc(100svh - 66px);padding:0 16px}.center-stage{min-height:680px;padding-bottom:45px}.center-orbit-scene{width:min(90vw,390px);height:min(90vw,390px);min-height:280px;margin:-2px auto -10px}.center-planet{width:145px;height:145px}.center-planet strong{font-size:17px}.center-copy h1{font-size:clamp(48px,13vw,70px);letter-spacing:-3px}.center-copy>p{font-size:12px;max-width:300px;line-height:1.7;margin:auto}.center-eyebrow{font-size:8px;letter-spacing:2.2px}.center-actions{gap:9px;margin-top:23px}.center-actions button{height:47px;padding:0 15px;font-size:10px}.center-proof{margin-top:24px;gap:10px;font-size:8px}.scene-label{display:none}.center-bottom-note{bottom:16px}}
+@media(prefers-reduced-motion:reduce){.center-status i,.center-glow,.center-ring,.center-planet,.scene-star,.land-hero-centered:after{animation:none!important}}
 </style>
 </head>
 <body>
@@ -1528,9 +1582,28 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 </div>
 <section class="orbis-landing" id="orbisLanding">
 <header class="landing-nav"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><nav><a href="#about">О проекте</a><a href="#features">Возможности</a><a href="#creator">Создатель</a></nav><div><button class="land-login" data-open-auth="login">Войти</button><button class="land-signup" data-open-auth="signup">Регистрация ↗</button></div></header>
-<main class="land-main" id="home"><section class="land-hero"><div class="land-copy"><small class="land-kicker">✦ НОВОЕ ЦИФРОВОЕ ПРОСТРАНСТВО</small><h1>Твой мир.<br><em>Твои идеи.</em><br>Твой ORBIS.</h1><p>Место, где мысли превращаются в публикации, интересы открывают новые направления, а каждый находит свой собственный поток.</p><div class="land-actions"><button data-open-auth="signup">Начать пользоваться <b>↗</b></button><a href="#features">Исследовать ORBIS ↓</a></div><div class="land-author"><span>М</span><div><small>СОЗДАТЕЛЬ ПРОЕКТА</small><b>Мехти Мурадлы</b></div><i>·</i><label>Идея становится реальностью</label></div></div>
-<div class="land-art"><div class="land-aura"></div><div class="land-orbit outer"></div><div class="land-orbit middle"></div><div class="land-orbit inner"></div><div class="land-core"><b>✳</b><strong>ORBIS</strong><small>YOUR WORLD</small></div><div class="land-chip chip-a">◉ <span><b>Твоя лента</b><small>Идеи в одном потоке</small></span></div><div class="land-chip chip-b">⌁ <span><b>Navigator</b><small>Открывай новое</small></span></div><div class="land-chip chip-c">◎ <span><b>Твой профиль</b><small>Твоё пространство</small></span></div><i class="land-star s1">✦</i><i class="land-star s2">✧</i></div><div class="land-scroll">↓ ПРОКРУТИ ВНИЗ, ЧТОБЫ УЗНАТЬ БОЛЬШЕ</div></section>
-<section class="land-about" id="about"><div><small class="land-kicker">БОЛЬШЕ, ЧЕМ ПРОСТО ЛЕНТА</small><h2>Открой пространство<br><em>для своих идей.</em></h2></div><p>ORBIS объединяет публикации, темы и личные страницы в понятном и красивом интерфейсе. Без перегруженных меню — только самое главное.</p></section>
+<main class="land-main" id="home"><section class="land-hero land-hero-centered">
+ <div class="center-stage">
+  <div class="center-status"><i></i> НОВОЕ ПРОСТРАНСТВО УЖЕ ОТКРЫТО</div>
+  <div class="center-orbit-scene" aria-hidden="true">
+   <div class="center-glow"></div>
+   <div class="center-ring ring-one"><span>✦</span></div>
+   <div class="center-ring ring-two"><span>◈</span></div>
+   <div class="center-ring ring-three"><span>✧</span></div>
+   <div class="center-planet"><div class="planet-shine"></div><b>✳</b><strong>ORBIS</strong><small>YOUR WORLD</small></div>
+   <span class="scene-star star-one">✦</span><span class="scene-star star-two">✧</span><span class="scene-star star-three">·</span>
+   <div class="scene-label scene-label-left">IDEAS / 01</div><div class="scene-label scene-label-right">EXPLORE / 02</div>
+  </div>
+  <div class="center-copy">
+   <div class="center-eyebrow">ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</div>
+   <h1>Твой мир.<br><em>Твой ORBIS.</em></h1>
+   <p>Пространство для мыслей, открытий и твоих публикаций.</p>
+   <div class="center-actions"><button class="center-primary" data-open-auth="signup">Открыть ORBIS <span>↗</span></button><button class="center-secondary" data-open-auth="login">Войти в аккаунт</button></div>
+   <div class="center-proof"><span><i>✳</i> Лента</span><b></b><span><i>⌁</i> Navigator</span><b></b><span><i>◎</i> Профиль</span></div>
+  </div>
+  <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
+ </div>
+</section><section class="land-about" id="about"><div><small class="land-kicker">БОЛЬШЕ, ЧЕМ ПРОСТО ЛЕНТА</small><h2>Открой пространство<br><em>для своих идей.</em></h2></div><p>ORBIS объединяет публикации, темы и личные страницы в понятном и красивом интерфейсе. Без перегруженных меню — только самое главное.</p></section>
 <section class="land-features" id="features"><small class="land-kicker">ТРИ ПРОСТЫХ НАПРАВЛЕНИЯ</small><h2>Всё важное — <em>под рукой.</em></h2><div class="land-grid"><article><div class="feature-symbol">◉</div><small>01 / FEED</small><h3>Лента</h3><p>Публикации и идеи в одном потоке. Читай и делись тем, что тебе интересно.</p></article><article><div class="feature-symbol">⌁</div><small>02 / EXPLORE</small><h3>Navigator</h3><p>Открывай направления, переходи к темам и находи интересные публикации.</p></article><article><div class="feature-symbol">◎</div><small>03 / PROFILE</small><h3>Профиль</h3><p>Твоя личная страница в ORBIS — имя пользователя и собственное пространство.</p></article></div></section>
 <section class="land-creator" id="creator"><div class="land-monogram">ММ<span>✳</span></div><div><small class="land-kicker">ЗА ИДЕЕЙ СТОИТ ЧЕЛОВЕК</small><h2>Создаётся с идеей.<br><em>Растёт вместе с людьми.</em></h2><p>Меня зовут Мехти Мурадлы. ORBIS — проект о новых возможностях, интересных мыслях и цифровом пространстве, которое развивается шаг за шагом.</p><div class="land-social"><a href="https://www.youtube.com/@mehdimuradli" target="_blank" rel="noopener">▶ <span><small>YOUTUBE</small><b>Жизнь Мехти</b></span> ↗</a><a href="https://www.instagram.com/lifemehti/" target="_blank" rel="noopener">◎ <span><small>INSTAGRAM</small><b>@lifemehti</b></span> ↗</a></div></div></section>
 <section class="land-roadmap" id="land-roadmap">
