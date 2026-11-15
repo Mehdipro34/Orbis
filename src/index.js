@@ -64,6 +64,32 @@ async function allPosts(env, limit = 100) {
   const values = await Promise.all(keys.map(key => env.ORBIS_KV.get(key, "json")));
   return values.filter(Boolean);
 }
+async function findPost(env, id) {
+  const direct = await env.ORBIS_KV.get("postid:" + id);
+  if (direct) return env.ORBIS_KV.get(direct, "json");
+  const posts = await allPosts(env, 10000);
+  return posts.find(post => post.id === id) || null;
+}
+async function listPrefix(env, prefix, cap = 1000) {
+  const names = [];
+  let cursor;
+  let pages = 0;
+  do {
+    const options = { prefix, limit: 1000 };
+    if (cursor) options.cursor = cursor;
+    const result = await env.ORBIS_KV.list(options);
+    names.push(...result.keys.map(key => key.name));
+    cursor = result.list_complete ? undefined : result.cursor;
+    pages++;
+  } while (cursor && names.length < cap && pages < 10);
+  return names.slice(0, cap);
+}
+async function postView(env, post, user) {
+  const stats = await env.ORBIS_KV.get("poststats:" + post.id, "json") || { likes: 0 };
+  const liked = user ? Boolean(await env.ORBIS_KV.get("like:" + post.id + ":" + user.username)) : false;
+  return { ...post, likes: Number(stats.likes || 0), liked };
+}
+
 async function api(request, env, url) {
   await requireKV(env);
   const path = url.pathname;
@@ -108,7 +134,81 @@ async function api(request, env, url) {
     return json({ authenticated: true, user: { username: user.username, name: user.name, bio: user.bio, createdAt: user.createdAt } });
   }
   if (request.method === "GET" && path === "/api/posts") {
-    return json({ posts: await allPosts(env, 100) });
+    const user = await currentUser(request, env);
+    const topic = String(url.searchParams.get("topic") || "").trim().toLocaleLowerCase("ru");
+    const query = String(url.searchParams.get("q") || "").trim().toLocaleLowerCase("ru");
+    let posts = await allPosts(env, 100);
+    if (topic) posts = posts.filter(post => String(post.topic || "").toLocaleLowerCase("ru") === topic);
+    if (query) posts = posts.filter(post => [post.title, post.body, post.topic, post.author, post.username].join(" ").toLocaleLowerCase("ru").includes(query));
+    const views = await Promise.all(posts.map(post => postView(env, post, user)));
+    return json({ posts: views });
+  }
+  const likeMatch = path.match(/^\/api\/posts\/([a-f0-9-]+)\/like$/i);
+  if (request.method === "POST" && likeMatch) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Войди, чтобы поставить реакцию." }, 401);
+    const post = await findPost(env, likeMatch[1]);
+    if (!post) return json({ error: "Публикация не найдена." }, 404);
+    const key = "like:" + post.id + ":" + user.username;
+    const existing = await env.ORBIS_KV.get(key);
+    const statsKey = "poststats:" + post.id;
+    const stats = await env.ORBIS_KV.get(statsKey, "json") || { likes: 0 };
+    const liked = !existing;
+    if (liked) {
+      await env.ORBIS_KV.put(key, "1");
+      stats.likes = Math.max(0, Number(stats.likes || 0) + 1);
+    } else {
+      await env.ORBIS_KV.delete(key);
+      stats.likes = Math.max(0, Number(stats.likes || 0) - 1);
+    }
+    await env.ORBIS_KV.put(statsKey, JSON.stringify(stats));
+    return json({ ok: true, liked, likes: stats.likes });
+  }
+  const repliesMatch = path.match(/^\/api\/posts\/([a-f0-9-]+)\/replies$/i);
+  if (request.method === "GET" && repliesMatch) {
+    const parent = await findPost(env, repliesMatch[1]);
+    if (!parent) return json({ error: "Публикация не найдена." }, 404);
+    const user = await currentUser(request, env);
+    const replies = (await allPosts(env, 10000)).filter(post => post.replyTo === parent.id);
+    return json({ replies: await Promise.all(replies.map(post => postView(env, post, user))) });
+  }
+  if (request.method === "POST" && path === "/api/search") {
+    const body = await request.json();
+    const q = String(body.q || "").trim().toLocaleLowerCase("ru").slice(0, 80);
+    if (q.length < 2) return json({ users: [], posts: [] });
+    const [posts, userKeys] = await Promise.all([allPosts(env, 1000), listPrefix(env, "user:", 1000)]);
+    const users = (await Promise.all(userKeys.map(key => env.ORBIS_KV.get(key, "json"))))
+      .filter(Boolean)
+      .filter(user => [user.username, user.name, user.bio].join(" ").toLocaleLowerCase("ru").includes(q))
+      .slice(0, 20)
+      .map(user => ({ username: user.username, name: user.name, bio: user.bio }));
+    const foundPosts = posts.filter(post => [post.title, post.body, post.topic, post.username, post.author].join(" ").toLocaleLowerCase("ru").includes(q)).slice(0, 30);
+    const viewer = await currentUser(request, env);
+    return json({ users, posts: await Promise.all(foundPosts.map(post => postView(env, post, viewer))) });
+  }
+  const followMatch = path.match(/^\/api\/users\/([a-z0-9_.]{3,24})\/follow$/i);
+  if (request.method === "POST" && followMatch) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Войди, чтобы подписаться." }, 401);
+    const target = followMatch[1].toLowerCase();
+    if (target === user.username) return json({ error: "Нельзя подписаться на самого себя." }, 400);
+    if (!await env.ORBIS_KV.get("user:" + target)) return json({ error: "Пользователь не найден." }, 404);
+    const key = "follow:" + target + ":" + user.username;
+    const exists = await env.ORBIS_KV.get(key);
+    if (exists) await env.ORBIS_KV.delete(key); else await env.ORBIS_KV.put(key, "1");
+    return json({ ok: true, following: !exists });
+  }
+  if (request.method === "POST" && path === "/api/reports") {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Войди, чтобы отправить жалобу." }, 401);
+    const body = await request.json();
+    const postId = String(body.postId || "");
+    const reason = String(body.reason || "").trim().slice(0, 300);
+    if (!postId || !reason) return json({ error: "Укажи публикацию и причину." }, 400);
+    if (!await findPost(env, postId)) return json({ error: "Публикация не найдена." }, 404);
+    const reportId = crypto.randomUUID();
+    await env.ORBIS_KV.put("report:" + Date.now().toString().padStart(13, "0") + ":" + reportId, JSON.stringify({ id: reportId, postId, reason, reporter: user.username, createdAt: new Date().toISOString(), status: "new" }));
+    return json({ ok: true }, 201);
   }
   if (request.method === "POST" && path === "/api/posts") {
     const user = await currentUser(request, env);
@@ -119,8 +219,14 @@ async function api(request, env, url) {
     const topic = String(body.topic || "").trim().slice(0, 48);
     const text = String(body.body || "").trim().slice(0, 4000);
     if (!title || !topic || !text) return json({ error: "Заполни название, тему и текст публикации." }, 400);
-    const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString() };
-    const archiveText = "ORBIS · НОВАЯ ПУБЛИКАЦИЯ\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + "\n\n" + text + "\n\nID: " + post.id;
+    const replyTo = String(body.replyTo || "").trim();
+    let parentPost = null;
+    if (replyTo) {
+      parentPost = await findPost(env, replyTo);
+      if (!parentPost) return json({ error: "Исходная публикация не найдена." }, 404);
+    }
+    const post = { id: crypto.randomUUID(), title, topic, body: text, username: user.username, author: user.name, createdAt: new Date().toISOString(), replyTo: replyTo || null, replyToTitle: parentPost?.title || null };
+    const archiveText = "ORBIS · " + (replyTo ? "ОТВЕТ-ПУБЛИКАЦИЯ" : "НОВАЯ ПУБЛИКАЦИЯ") + "\n" + title + "\nТема: " + topic + "\nАвтор: @" + user.username + (replyTo ? "\nОтвет на: " + parentPost.title + " (" + replyTo + ")" : "") + "\n\n" + text + "\n\nID: " + post.id;
     try {
       const archived = await telegram("sendMessage", env, { chat_id: env.POSTS_CHANNEL_ID, text: archiveText, disable_web_page_preview: true });
       post.telegramMessageId = archived.result.message_id;
@@ -128,8 +234,11 @@ async function api(request, env, url) {
     } catch (error) {
       return json({ error: "Не удалось сохранить публикацию в Telegram: " + error.message }, 502);
     }
-    await env.ORBIS_KV.put("post:" + Date.now().toString().padStart(13, "0") + ":" + post.id, JSON.stringify(post));
-    return json({ ok: true, post }, 201);
+    const storageKey = "post:" + Date.now().toString().padStart(13, "0") + ":" + post.id;
+    await env.ORBIS_KV.put(storageKey, JSON.stringify(post));
+    await env.ORBIS_KV.put("postid:" + post.id, storageKey);
+    await env.ORBIS_KV.put("poststats:" + post.id, JSON.stringify({ likes: 0 }));
+    return json({ ok: true, post: await postView(env, post, user) }, 201);
   }
   if (request.method === "PUT" && path === "/api/profile") {
     const user = await currentUser(request, env);
@@ -147,11 +256,13 @@ async function api(request, env, url) {
     const username = decodeURIComponent(path.slice("/api/profile/".length)).toLowerCase();
     const user = await env.ORBIS_KV.get("user:" + username, "json");
     if (!user) return json({ error: "Профиль не найден." }, 404);
-    const posts = (await allPosts(env, 100)).filter(post => post.username === username);
-    return json({ user: { username, name: user.name, bio: user.bio, createdAt: user.createdAt }, posts });
+    const posts = (await allPosts(env, 10000)).filter(post => post.username === username);
+    const [followers, following] = await Promise.all([listPrefix(env, "follow:" + username + ":", 10000), listPrefix(env, "follow:", 10000)]);
+    const viewer = await currentUser(request, env);
+    return json({ user: { username, name: user.name, bio: user.bio, createdAt: user.createdAt }, posts: await Promise.all(posts.map(post => postView(env, post, viewer))), followers: followers.length, following: following.filter(key => key.endsWith(":" + username)).length, isFollowing: viewer ? Boolean(await env.ORBIS_KV.get("follow:" + username + ":" + viewer.username)) : false });
   }
   if (request.method === "GET" && path === "/api/navigator") {
-    const posts = await allPosts(env, 1000);
+    const posts = await allPosts(env, 10000);
     const counts = {};
     for (const post of posts) counts[post.topic] = (counts[post.topic] || 0) + 1;
     const topics = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }));
