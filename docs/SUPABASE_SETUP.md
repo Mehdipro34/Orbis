@@ -9,10 +9,10 @@
 
 ## Required one-time configuration
 1. In Supabase Dashboard, open Project Settings → Edge Functions → Secrets.
-2. Add `TELEGRAM_BOT_TOKEN` with the token of the official ORBIS Telegram bot. Never put this token in browser code, GitHub, or a public repository.
+2. Add `TELEGRAM_BOT_TOKEN` with the token of the official ORBIS Telegram bot. Never put this token in browser code, GitHub, or a public repository. The same token is used for sign-in validation and optional channel archiving.
 3. Confirm the Edge Function runtime has its standard `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` secrets.
-4. Configure the Telegram bot's Mini App / menu button to open the deployed ORBIS frontend URL. The app must be opened inside Telegram so `Telegram.WebApp.initData` is present.
-5. Configure the frontend hosting domain and HTTPS. The GitHub repository alone is source code; it does not publish a website automatically.
+4. Add `POSTS_CHANNEL_ID` for the private posts archive. Optionally add `MEDIA_CHANNEL_ID` for media and `STORIES_CHANNEL_ID` for Stories. Add the bot as an administrator with permission to post in each private channel. If a channel ID is missing, content still saves to Supabase and the API returns an archive warning.\n5. Configure the Telegram bot's Mini App / menu button to open the deployed ORBIS frontend URL. The app must be opened inside Telegram so `Telegram.WebApp.initData` is present.
+6. Configure the frontend hosting domain and HTTPS. The GitHub repository alone is source code; it does not publish a website automatically.
 
 ## Important current limitations
 - The Telegram bot token and hosting URL must be supplied/configured by the project owner; neither is embedded in the repository.
