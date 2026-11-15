@@ -2552,6 +2552,7 @@ document.addEventListener("click",event=>{
      const data=await api("/api/posts/"+encodeURIComponent(article.dataset.postId)+"/comments",{method:"POST",body:JSON.stringify({body})});
      list.querySelector(".orbis-comments-empty")?.remove();
      appendCommentRows(article,list,[data.comment]);input.value="";
+     const more=panel.querySelector(".orbis-comments-more");if(more)more.dataset.nextOffset=String((Number(more.dataset.nextOffset)||0)+1);
      const count=Number(data.comments)||0;
      target.textContent="◌ Комментарии · "+count;
      target.dataset.commentCount=String(count);
@@ -2579,6 +2580,7 @@ document.addEventListener("click",event=>{
     const data=await response.json().catch(()=>({error:"Не удалось прочитать ответ сервера."}));
     if(!response.ok)throw new Error(data.error||"Не удалось удалить комментарий.");
     row.remove();
+    const more=article.querySelector(".orbis-comments-more");if(more)more.dataset.nextOffset=String(Math.max(0,(Number(more.dataset.nextOffset)||0)-1));
     const button=article.querySelector('[data-action="comments"]');
     if(button)button.textContent="◌ Комментарии · "+(Number(data.comments)||0);
     if(!article.querySelector(".orbis-comment")){const empty=document.createElement("p");empty.className="orbis-comments-empty";empty.textContent="Пока нет комментариев. Начни обсуждение.";article.querySelector(".orbis-comments-list")?.append(empty)}
