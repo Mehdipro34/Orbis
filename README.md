@@ -9,7 +9,7 @@ ORBIS is a Telegram-first social network with a cinematic orbital identity.
 - Main feed, posts, reactions, replies, follows, bookmarks, Stories and topic Navigator are core product areas.
 - Stories expire after 24 hours; daily publication limits are enforced by database unique indexes.
 - Supabase Storage stores uploaded photos and videos for posts and Stories (one optional media file per Story).
-- Private Telegram channels are optional archive destinations; archive failure must not lose a successfully saved post.
+- Private Telegram channels are optional archive destinations for posts, media and Stories; archive failure must not lose a successfully saved post. Configure `POSTS_CHANNEL_ID`, optionally `MEDIA_CHANNEL_ID` and `STORIES_CHANNEL_ID`.
 - The app must never claim support for a traffic target until load tests prove it.
 
 ## Repository structure
