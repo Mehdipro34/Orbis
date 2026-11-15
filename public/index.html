@@ -367,6 +367,74 @@ button.is-pressed{animation:buttonPop .38s cubic-bezier(.2,.9,.3,1.3)}
 @media(max-width:520px){.intro-astronaut.third{right:7%;top:37%;width:48px;height:72px}.intro-orbit.a{width:94vw;height:44vw}.intro-orbit.b{width:108vw;height:66vw}.intro-orbit.c{width:120vw;height:82vw}.intro-hud{top:calc(50% + 133px);font-size:6px}}
 @media(prefers-reduced-motion:reduce){.intro-stars,.intro-stars:before,.intro-stars:after,.intro-orbit,.intro-astronaut.third{animation:none!important}}
 
+
+/* ORBIS motion festival: layered ambient animations */
+:root{--motion-ease:cubic-bezier(.2,.75,.25,1)}
+@keyframes nebulaPulse{0%,100%{opacity:.45;transform:scale(1) rotate(0)}50%{opacity:.85;transform:scale(1.12) rotate(8deg)}}
+@keyframes orbitSweep{from{transform:rotate(0) translateX(13px) rotate(0)}to{transform:rotate(360deg) translateX(13px) rotate(-360deg)}}
+@keyframes cardFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(.35deg)}}
+@keyframes softBreathe{0%,100%{box-shadow:0 13px 35px #5946a30b,0 2px 8px #5946a307}50%{box-shadow:0 20px 48px #7965ef20,0 0 0 1px #b7aaff55}}
+@keyframes iconWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(8deg)}}
+@keyframes gradientFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes borderGlow{0%,100%{opacity:.25}50%{opacity:.9}}
+@keyframes risePop{0%{opacity:0;transform:translateY(18px) scale(.97)}70%{opacity:1;transform:translateY(-2px) scale(1.005)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes shimmerSweep{0%{transform:translateX(-160%) skewX(-18deg)}55%,100%{transform:translateX(260%) skewX(-18deg)}}
+@keyframes navHover{0%{transform:translateX(0)}50%{transform:translateX(5px)}100%{transform:translateX(2px)}}
+@keyframes twinkleScale{0%,100%{transform:scale(.75);opacity:.45}50%{transform:scale(1.35);opacity:1}}
+@keyframes gentleTilt{0%,100%{transform:perspective(800px) rotateY(0) rotateX(0)}50%{transform:perspective(800px) rotateY(-1.2deg) rotateX(.7deg)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,14px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 #8d7bff55}50%{box-shadow:0 0 0 8px #8d7bff00}}
+@keyframes titleShine{0%,65%{background-position:0% 50%}100%{background-position:200% 50%}}
+body:after{animation:ambientDrift 18s ease-in-out infinite alternate,nebulaPulse 13s ease-in-out infinite}
+.brandmark{animation:logoFloat 4s ease-in-out infinite,softBreathe 5s ease-in-out infinite}
+.brandmark .orbit-ring{animation:ringTurn 7s linear infinite,orbitSweep 11s linear infinite}
+.brand-word{background-size:200% 100%;animation:titleShine 8s ease-in-out infinite}
+.hero{background-size:180% 180%;animation:gradientFlow 16s ease infinite,gentleTilt 10s ease-in-out infinite}
+.hero-visual{animation:cardFloat 7s ease-in-out infinite}
+.hero-planet{animation:planetBob 5s ease-in-out infinite,softBreathe 6s ease-in-out infinite}
+.hero-orbit{transform-origin:center;animation:heroOrbit 12s linear infinite,borderGlow 4s ease-in-out infinite}
+.hero-spark{animation:sparkBlink 2.4s ease-in-out infinite,twinkleScale 3s ease-in-out infinite}
+.story-ring{animation:softBreathe 7s ease-in-out infinite}
+.story:nth-child(2n) .story-ring{animation-delay:-1.5s}
+.story:nth-child(3n) .story-ring{animation-delay:-3s}
+.story:hover .story-ring{animation:iconWiggle .45s ease-in-out}
+.story-ring>div{transition:transform .35s var(--motion-ease)}
+.story:hover .story-ring>div{transform:rotate(10deg) scale(1.06)}
+.avatar{animation:softBreathe 8s ease-in-out infinite}
+.post{animation:risePop .65s var(--motion-ease) both}
+.post:nth-child(2){animation-delay:.12s}.post:nth-child(3){animation-delay:.2s}.post:nth-child(4){animation-delay:.28s}
+.post:hover{transform:translateY(-4px) scale(1.006)}
+.post:after,.side-card:after,.stories:after,.composer:after{content:"";position:absolute;pointer-events:none;inset:0;border-radius:inherit;border:1px solid #a995ff00;transition:border-color .3s;animation:borderGlow 6s ease-in-out infinite}
+.post:hover:after,.side-card:hover:after,.stories:hover:after,.composer:hover:after{border-color:#b9aaff80}
+.side-card,.stories,.composer{position:relative;overflow:hidden;animation:cardFloat 9s ease-in-out infinite}
+.side-card:nth-child(2){animation-delay:-3s}.side-card:nth-child(3){animation-delay:-6s}
+.nav button{transition:background .25s,color .25s,transform .25s var(--motion-ease)}
+.nav button:hover{animation:navHover .3s ease-out}
+.nav-icon{transition:transform .3s}.nav button:hover .nav-icon{transform:scale(1.2) rotate(-8deg)}
+.nav .create,.primary{background-size:200% 200%;animation:gradientFlow 8s ease infinite}
+.nav .create:before,.primary:before{content:"";position:absolute;inset:1px;border-radius:inherit;border:1px solid #ffffff55;pointer-events:none}
+.topic-filter button{transition:transform .22s,box-shadow .22s,background .22s}
+.topic-filter button:hover{transform:translateY(-3px) scale(1.035);box-shadow:0 8px 18px #7763e52a}
+.topic-filter button.active{animation:pulseDot 2.8s ease-in-out infinite}
+.bell{transition:transform .25s,color .25s,background .25s}.bell:hover{transform:rotate(-12deg) scale(1.08)}
+.compose-open{transition:transform .25s,box-shadow .25s,border-color .25s}
+.compose-open:hover{transform:translateY(-2px);box-shadow:0 8px 22px #7865ef18}
+.tiny:hover{transform:translateY(-2px)}
+.primary{position:relative;overflow:hidden}
+.primary:after{content:"";position:absolute;top:-50%;left:-70%;width:45%;height:200%;background:linear-gradient(90deg,transparent,#ffffff80,transparent);animation:shimmerSweep 4.8s ease-in-out infinite}
+.dialog{animation:risePop .35s var(--motion-ease) both}
+.modal.open .dialog{animation:risePop .35s var(--motion-ease) both}
+.toast{animation:toastIn .28s var(--motion-ease) both}
+.intro-chip{animation:cardFloat 5s ease-in-out infinite}
+.intro-chip:nth-child(2){animation-delay:-1.2s}.intro-chip:nth-child(3){animation-delay:-2.4s}.intro-chip:nth-child(4){animation-delay:-3.6s}
+.mobile-nav button{transition:transform .22s,color .22s,background .22s}
+.mobile-nav button:hover{transform:translateY(-4px) scale(1.08)}
+.mobile-nav button.active{animation:pulseDot 3s ease-in-out infinite}
+#orbisProgress{height:3px;background:linear-gradient(90deg,#6955ed,#a18cff,#ff8eaa,#65dcca);background-size:220% 100%;animation:gradientFlow 5s linear infinite;box-shadow:0 0 12px #8b79f488}
+@media(prefers-reduced-motion:reduce){
+ body:after,.brandmark,.brand-word,.hero,.hero-visual,.hero-planet,.hero-orbit,.hero-spark,.story-ring,.avatar,.post,.side-card,.stories,.composer,.topic-filter button.active,.nav .create,.primary,.intro-chip,.mobile-nav button.active,#orbisProgress{animation:none!important}
+}
+
 </style>
 </head>
 <body>
