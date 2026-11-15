@@ -1,11 +1,11 @@
 # ORBIS
 
-ORBIS is an email-first social network with a cinematic orbital identity.
+ORBIS is a guest-first social network with a cinematic orbital identity.
 
 ## Product rules
 
-- Registration and sign-in use email + password through Supabase Auth; Telegram is not required.
-- Supabase Auth provides durable sessions; PostgreSQL stores profiles and social data.
+- ORBIS opens directly in guest mode. No email, password, Telegram login or registration form is required.
+- Supabase Auth creates a private anonymous session automatically; PostgreSQL stores the guest profile and social data. The same browser keeps its session, but clearing browser data or switching devices loses access to that guest identity.
 - The feed uses paginated queries. Posts support likes, comments, post replies, media and bookmarks.
 - Comments are stored separately from posts and loaded 20 at a time.
 - Stories support text, photo or video and expire after 24 hours.
@@ -17,12 +17,12 @@ ORBIS is an email-first social network with a cinematic orbital identity.
 
 ## Repository structure
 
-- `public/index.html` — responsive web app UI, orbital intro, email sign-in, feed, comments, Stories, profile and Navigator.
+- `public/index.html` — responsive web app UI, orbital intro, automatic guest access, feed, comments, Stories, profile and Navigator.
 - `public/manifest.webmanifest`, `public/sw.js`, `public/orbis-icon.svg` — installable PWA shell and icon.
 - `src/index.js` — Cloudflare Worker serving static assets and RSS/news endpoints only.
 - `wrangler.toml` — Cloudflare Worker, static assets and RSS KV configuration.
 - `docs/ARCHITECTURE.md` — product and technical architecture.
-- `supabase/functions/orbis-api/index.ts` — deployed social API, email profile provisioning and media upload endpoint.
+- `supabase/functions/orbis-api/index.ts` — deployed social API, automatic guest profile provisioning and media upload endpoint.
 - `docs/DEPLOYMENT.md` — Cloudflare and Supabase launch checklist.
 
 ## Supabase project
@@ -38,12 +38,11 @@ ORBIS is an email-first social network with a cinematic orbital identity.
 
 ## Required owner configuration before live use
 
-1. Enable the Email provider in Supabase Authentication.
-2. Set the Supabase Auth Site URL to the deployed ORBIS HTTPS origin and add that origin/path to the Redirect URLs allow-list. The frontend sends email-confirmation links back to the current ORBIS URL.
-3. Confirm `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are available to the Edge Function runtime; never expose the service-role key in browser code.
-4. Confirm the `orbis-media` Storage bucket exists and is configured for public media URLs. The API validates each upload and stores it under the signed-in user's UUID.
-5. Confirm the `ORBIS_KV` namespace ID in `wrangler.toml`.
-6. Deploy the Cloudflare Worker with `npx wrangler deploy` and run the end-to-end checklist in `docs/DEPLOYMENT.md`.
+1. Enable **Anonymous Sign-Ins** in Supabase Authentication → Sign In / Providers. This is required for no-registration guest entry.
+2. Confirm `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are available to the Edge Function runtime; never expose the service-role key in browser code.
+3. Confirm the `orbis-media` Storage bucket exists and is configured for public media URLs. The API validates each upload and stores it under the guest user's UUID.
+4. Confirm the `ORBIS_KV` namespace ID in `wrangler.toml`.
+5. Deploy the Cloudflare Worker with `npx wrangler deploy` and run the end-to-end checklist in `docs/DEPLOYMENT.md`.
 
 ## Known limits
 
