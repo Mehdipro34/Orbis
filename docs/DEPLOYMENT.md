@@ -1,79 +1,66 @@
-# ORBIS deployment checklist
+# ORBIS deployment and smoke-test checklist
 
-This repository contains the application source. A GitHub commit does not automatically publish it.
+## Current production
+
+- App: https://orbis-mehdipro34.vercel.app
+- Hosting: Vercel, connected to the GitHub `main` branch.
+- Static app: `public/`.
+- RSS endpoint: `api/news.js`.
+- Social API and media uploads: Supabase Edge Function `orbis-api`.
+- Supabase project ref: `wdwvcvpgovvkoodozbxf`.
+
+A GitHub commit to `main` triggers a Vercel production deployment. Confirm the deployment state is `READY` before sharing the release.
 
 ## 1. Supabase Auth configuration
 
 Open the ORBIS Supabase project → Authentication → Sign In / Providers.
 
 1. Ensure the **Email** provider is enabled.
-2. Keep email confirmation enabled and configure Authentication → URL Configuration → Site URL and Redirect URLs for the deployed HTTPS origin.
-3. Registration uses email, username and password. Login accepts either email or username plus password.
-4. Username-to-email mapping is held in the server-only `account_lookup` table; the browser never receives another user's email address.
-5. Supabase Auth stores credentials and issues persistent sessions. The public profile table does not store passwords or expose email addresses.
-6. The Edge Function uses `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; never place the service-role key in frontend code.
+2. Keep email confirmation enabled.
+3. In Authentication → URL Configuration, set the Site URL to `https://orbis-mehdipro34.vercel.app` and add that exact origin to Redirect URLs.
+4. Registration uses email, username and password. Login accepts either email or username plus password.
+5. Username-to-email mapping is stored in the server-only `account_lookup` table; the browser never receives another user's email address.
+6. Enable leaked-password protection in Auth password security settings.
+7. Keep `SUPABASE_SERVICE_ROLE_KEY` in Edge Function secrets only. Never add it to frontend code.
 
-## 2. Cloudflare Worker
+## 2. Production smoke test
 
-The Worker serves the static PWA and the RSS/news proxy. The social API and account system are served by Supabase.
+Use a test account that you control. Never send passwords, confirmation links or recovery tokens to anyone.
 
-1. Sign in to the Cloudflare account that owns the Worker.
-2. Confirm a Workers KV namespace exists with ID matching `ORBIS_KV` in `wrangler.toml`. If it does not, create one and replace the ID in that file.
-3. From the repository root, install Wrangler if needed and authenticate:
-   ```sh
-   npm install --global wrangler
-   wrangler login
-   ```
-4. Deploy:
-   ```sh
-   wrangler deploy
-   ```
-5. Save the HTTPS `workers.dev` URL returned by Wrangler.
+1. Open the production URL and create an account using email, username and password.
+2. Confirm the email using the message from Supabase Auth.
+3. Sign in using the email address.
+4. Sign out and sign in again using the username and the same password.
+5. Refresh the page and confirm that the session is restored.
+6. Edit the profile and confirm that the changes persist.
+7. Publish a text post and confirm it appears in the feed after refresh.
+8. Upload a photo, then a short supported video, and confirm each appears in the post.
+9. Test likes, comments, post replies, follows, bookmarks and search.
+10. Publish a Story and confirm it appears in the Stories area.
+11. Test a one-to-one message, notifications and clan membership.
+12. Submit a report on a test post and confirm it is stored for review.
 
-No R2 bucket is required. User media is stored in Supabase Storage. The Worker KV namespace is only used for RSS cache and news rate limiting.
+## 3. Media rules
 
-### Fix the current Cloudflare error 10085
+- Bucket: `orbis-media`.
+- Photos: JPEG, PNG, WebP or GIF, up to 12 MB.
+- Videos: MP4 or WebM, up to 50 MB.
+- Maximum four files per post and one file per Story.
+- Uploads require a valid authenticated session and are stored under the user's UUID.
 
-The supplied build log shows a stale dashboard binding named `ORBIS_MEDIA` pointing to an R2 bucket that does not exist. It is not present in the current `wrangler.toml`, and the current Worker source does not use R2.
+## 4. Architecture notes
 
-In Cloudflare Dashboard:
-1. Open **Workers & Pages** → **orbissocial**.
-2. Open **Settings** → **Bindings**.
-3. Find the R2 bucket binding named **ORBIS_MEDIA**.
-4. Remove that binding and save the settings. Do not create an R2 bucket for this project; Supabase Storage is the single media store.
-5. Retry the existing Worker deployment. The build log should list `ASSETS` and `ORBIS_KV`, and should no longer list `ORBIS_MEDIA`.
+- Vercel is the current production host for the PWA and `api/news.js`.
+- Supabase Auth handles account credentials and sessions.
+- Supabase PostgreSQL stores profiles and social data.
+- Supabase Storage stores post and Story media.
+- Supabase Edge Function `orbis-api` validates access tokens and handles social actions.
+- `src/index.js` and `wrangler.toml` describe an optional Cloudflare Worker path; it is not required for the current Vercel production URL.
 
-This binding is stored in Cloudflare account settings, not in the GitHub repository. Changing source files alone will not remove it.
+## 5. Limits and launch safety
 
-## 3. Registration, login and first post
-
-1. Open the ORBIS HTTPS site and create an account using email, username and password.
-2. Confirm the email using the message sent by Supabase Auth, then sign in using either the email address or username and password.
-3. Confirm the profile appears in Supabase `profiles` and the username/email mapping is stored in the server-only `account_lookup` table.
-3. Publish a text post, then test a like, comment, bookmark and follow.
-4. Upload a photo or video. The upload endpoint stores it in `orbis-media` under the guest user's UUID; the feed renders the media with the post.
-5. Refresh the page. The authenticated account and its posts should still be available in that browser.
-
-## 4. First live smoke test
-
-After deployment and configuration:
-
-- Open `/health` on the Worker URL; expect `ok: true`.
-- Open `/api/news/sources`; expect four configured news sources.
-- Register with email, username and password, confirm the email, and sign in.
-- Repeat login using the username instead of the email.
-- Confirm the profile appears in `profiles` and its private lookup row appears in `account_lookup`.
-- Publish one test post; confirm it appears in the Supabase feed.
-- Add a comment and a like; confirm counts update and comments load 20 at a time.
-- Upload a photo to a post and a Story; confirm media appears in the `orbis-media` bucket.
-- Test like, comment, reply-as-post, follow, bookmark, profile edit, report, logout and a fresh sign-in.
-- Install the PWA from the browser menu on a supported device. The service worker caches the static shell only; social actions still need internet.
-
-## 5. Limits and safety
-
-- The database was empty at the last project inspection. Guest-mode end-to-end use still needs to be verified after Anonymous Sign-Ins are enabled.
-- Do not announce a public launch until the full smoke test is complete.
-- Free tiers have quotas and can pause/throttle. There is no verified guarantee of 10,000 or 100,000 concurrent users.
-- Keep the Supabase service-role key private.
-- The project has report submission, lightweight rule-based anti-spam checks and per-user rate limits. It does not yet have a complete human moderation console or proven automated AI moderation.
-- Direct messages, a notification center, clans, Stars/Premium and ad management are not yet implemented.
+- The latest Vercel production deployment reported `READY`; this is not a substitute for the smoke test above.
+- No full browser E2E suite or load test has been completed.
+- Free-tier quotas can pause or throttle services.
+- The app has report submission and basic anti-spam checks, but no full human moderation console yet.
+- Do not advertise a user-capacity or concurrent-user figure until load testing supports it.
