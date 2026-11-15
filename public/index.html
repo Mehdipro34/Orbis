@@ -1852,21 +1852,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ORBIS">
-<style id="orbis-comments-ui">
-.orbis-comments-panel{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#fbfaff,#fff8fb)}
-.orbis-comments-heading{font-size:12px;font-weight:850;margin-bottom:10px;color:var(--ink)}
-.orbis-comments-list{display:grid;gap:8px;max-height:390px;overflow:auto;overscroll-behavior:contain}
-.orbis-comment{padding:10px 11px;border:1px solid #eeeafa;border-radius:12px;background:#fff}
-.orbis-comment-head{display:flex;flex-wrap:wrap;align-items:center;gap:7px;font-size:10px}
-.orbis-comment-head strong{color:#4d438c}.orbis-comment-head span,.orbis-comment-head time{color:#a09bb5}
-.orbis-comment-head time{margin-left:auto}.orbis-comment p{font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 0;color:#5c5873}
-.orbis-comment-delete{border:0;background:transparent;color:#c07891;font-size:10px;padding:4px 0;margin-top:5px}
-.orbis-comment-form{display:flex;align-items:flex-end;gap:8px;margin-top:10px}
-.orbis-comment-form textarea{flex:1;min-width:0;resize:vertical;min-height:42px;max-height:120px;border:1px solid #e8e4f5;border-radius:12px;padding:10px 12px;background:#fff;color:#332d53;font:inherit;font-size:12px}
-.orbis-comment-form .primary{white-space:nowrap;padding:10px 13px}
-.orbis-comments-empty{font-size:11px;color:#9994ac;padding:8px 2px;margin:0}
-.orbis-comments-more{display:block;margin:10px auto 0;border:1px solid #e6e1f7;background:#fff;color:#6958d9;padding:8px 12px;border-radius:10px;font-size:10px}
-@media(max-width:480px){.orbis-comment-form{align-items:stretch;flex-direction:column}.orbis-comment-form .primary{width:100%}}
 </style>
 <style id="orbis-feature-grid">
 #features .land-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -2080,7 +2065,7 @@ function setOrbisScreen(view){
   orbisScreen.innerHTML='<div class="screen-heading"><h2>Сообщения</h2><p>Личные диалоги ORBIS.</p></div><form id="orbisNewDmForm" class="orbis-feature-form"><input name="username" required minlength="3" maxlength="24" placeholder="Username участника"><button class="primary" type="submit">Открыть диалог</button><p id="orbisDmNote"></p></form><div class="orbis-feature-columns"><section><h3>Диалоги</h3><div id="orbisConversationList"></div></section><section id="orbisChatPanel"><p>Выбери диалог.</p></section></div>';
   window.orbisShowMessages?.();
  }else if(view==="Уведомления"){
-  orbisScreen.innerHTML='<div class="screen-heading"><h2>Уведомления</h2><p>Подписчики, реакции, комментарии и сообщения.</p></div><div id="orbisUnreadCount"></div><button id="orbisReadAll" class="secondary" type="button">Отметить всё прочитанным</button><div id="orbisNotificationsList"></div>';
+  orbisScreen.innerHTML='<div class="screen-heading"><h2>Уведомления</h2><p>Подписки, реакции и сообщения.</p></div><div id="orbisUnreadCount"></div><button id="orbisReadAll" class="secondary" type="button">Отметить всё прочитанным</button><div id="orbisNotificationsList"></div>';
   window.orbisShowNotifications?.();
  }else if(view==="Кланы"){
   orbisScreen.innerHTML='<div class="screen-heading"><h2>Кланы</h2><p>Создай клан или присоединись к одному.</p></div><form id="orbisClanForm" class="orbis-feature-form"><input name="name" required minlength="3" maxlength="40" placeholder="Название клана"><textarea name="description" maxlength="240" placeholder="Описание"></textarea><button class="primary" type="submit">Создать клан</button><p id="orbisClanNote"></p></form><div id="orbisClansList"></div>';
@@ -2369,13 +2354,12 @@ document.addEventListener("click",event=>{
   }
   const actions=document.createElement("div");actions.className="post-actions";
   const like=document.createElement("button");like.type="button";like.dataset.action="like";like.textContent=(post.liked?"♥ ":"♡ ")+(post.likes||0)+" · Нравится";like.setAttribute("aria-pressed",String(Boolean(post.liked)));if(post.liked)like.style.color="#e36c91";
-  const comments=document.createElement("button");comments.type="button";comments.dataset.action="comments";comments.textContent="◌ Комментарии · "+(post.comments||0);comments.setAttribute("aria-label","Открыть комментарии");
   const reply=document.createElement("button");reply.type="button";reply.dataset.action="reply";reply.textContent="↩ Ответить постом";
   const showReplies=document.createElement("button");showReplies.type="button";showReplies.dataset.action="show-replies";showReplies.textContent="◌ Ответы-посты";
   const share=document.createElement("button");share.type="button";share.dataset.action="share";share.textContent="↗ Поделиться";
   const save=document.createElement("button");save.type="button";save.dataset.action="bookmark";save.textContent=post.saved?"✓ Сохранено":"⌑ Сохранить";save.setAttribute("aria-pressed",String(Boolean(post.saved)));
   const report=document.createElement("button");report.type="button";report.dataset.action="report";report.textContent="⚑ Пожаловаться";
-  actions.append(like,comments,reply,showReplies,share,save,report);article.append(top,title,topic);if(post.body)article.append(body);if(mediaWrap)article.append(mediaWrap);article.append(actions);return article;
+  actions.append(like,reply,showReplies,share,save,report);article.append(top,title,topic);if(post.body)article.append(body);if(mediaWrap)article.append(mediaWrap);article.append(actions);return article;
  }
  let feedOffset=0,feedHasMore=false,feedLoading=false,feedTopic="";
  async function loadFeed(reset=true,topic=feedTopic){
@@ -2496,7 +2480,7 @@ document.addEventListener("click",event=>{
    });
    box.append(media);
   }
-  const meta=document.createElement("div");meta.className="post-meta";meta.textContent="♥ "+(post.likes||0)+" реакций · "+(post.comments||0)+" комментариев";
+  const meta=document.createElement("div");meta.className="post-meta";meta.textContent="♥ "+(post.likes||0)+" реакций";
   box.append(meta);return box;
  }
  document.addEventListener("submit",async event=>{
@@ -2608,40 +2592,6 @@ document.addEventListener("click",event=>{
   setOrbisScreen("Лента");
   requestAnimationFrame(()=>article.scrollIntoView({behavior:"smooth",block:"center"}));
  }
- async function appendCommentRows(article,list,items){
-  items.forEach(item=>{
-   const row=document.createElement("div");row.className="orbis-comment";row.dataset.commentId=item.id;
-   const head=document.createElement("div");head.className="orbis-comment-head";
-   const author=document.createElement("strong");author.textContent=item.author||item.username||"Участник";
-   const handle=document.createElement("span");handle.textContent="@"+(item.username||"user");
-   const time=document.createElement("time");time.textContent=new Date(item.createdAt).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-   head.append(author,handle,time);
-   const body=document.createElement("p");body.textContent=item.body;
-   row.append(head,body);
-   if(item.own){
-    const remove=document.createElement("button");remove.type="button";remove.className="orbis-comment-delete";remove.dataset.action="delete-comment";remove.dataset.commentId=item.id;remove.textContent="Удалить";
-    row.append(remove);
-   }
-   list.append(row);
-  });
- }
- async function fetchCommentPage(article,panel,offset=0,append=false){
-  const id=article.dataset.postId;
-  const list=panel.querySelector(".orbis-comments-list");
-  const more=panel.querySelector(".orbis-comments-more");
-  if(more)more.remove();
-  const data=await api("/api/posts/"+encodeURIComponent(id)+"/comments?limit=20&offset="+offset);
-  if(!append)list.replaceChildren();
-  if(!data.comments.length&&!append){
-   const empty=document.createElement("p");empty.className="orbis-comments-empty";empty.textContent="Пока нет комментариев. Начни обсуждение.";
-   list.append(empty);
-  }else appendCommentRows(article,list,data.comments);
-  if(data.hasMore){
-   const button=document.createElement("button");button.type="button";button.className="orbis-comments-more";button.textContent="Загрузить ещё комментарии";
-   button.dataset.nextOffset=String(data.nextOffset);panel.append(button);
-  }
- }
-
  document.addEventListener("click",async event=>{
   const target=event.target.closest("button");if(!target)return;
   if(target.closest("#topicFilter")){event.preventDefault();event.stopImmediatePropagation();const buttons=target.closest("#topicFilter").querySelectorAll("button");buttons.forEach(x=>x.classList.toggle("active",x===target));loadFeed(true,target.textContent.trim()==="Все темы"?"":target.textContent.trim());return}
@@ -2664,62 +2614,6 @@ document.addEventListener("click",event=>{
    target.disabled=true;
    try{const data=await api("/api/posts/"+encodeURIComponent(article.dataset.postId)+"/like",{method:"POST",body:"{}"});target.setAttribute("aria-pressed",String(data.liked));target.textContent=(data.liked?"♥ ":"♡ ")+data.likes+" · Реакция";target.style.color=data.liked?"#e36c91":""}
    catch(error){window.notify?.(error.message)}finally{target.disabled=false}
-   return;
-  }
-  if(target.dataset.action==="comments"){
-   event.preventDefault();event.stopImmediatePropagation();
-   const article=target.closest("[data-post-id]");if(!article)return;
-   const existing=article.querySelector(".orbis-comments-panel");
-   if(existing){existing.hidden=!existing.hidden;target.setAttribute("aria-expanded",String(!existing.hidden));return}
-   const panel=document.createElement("section");panel.className="orbis-comments-panel";
-   const heading=document.createElement("div");heading.className="orbis-comments-heading";heading.textContent="Комментарии";
-   const list=document.createElement("div");list.className="orbis-comments-list";list.setAttribute("aria-live","polite");
-   const form=document.createElement("form");form.className="orbis-comment-form";
-   const input=document.createElement("textarea");input.maxLength=1000;input.rows=2;input.placeholder="Напиши комментарий…";input.required=true;input.setAttribute("aria-label","Текст комментария");
-   const submit=document.createElement("button");submit.type="submit";submit.className="primary";submit.textContent="Отправить";
-   form.append(input,submit);panel.append(heading,list,form);article.append(panel);
-   target.setAttribute("aria-expanded","true");
-   form.addEventListener("submit",async e=>{
-    e.preventDefault();const body=input.value.trim();if(!body)return;
-    submit.disabled=true;submit.textContent="Отправляем…";
-    try{
-     const data=await api("/api/posts/"+encodeURIComponent(article.dataset.postId)+"/comments",{method:"POST",body:JSON.stringify({body})});
-     list.querySelector(".orbis-comments-empty")?.remove();
-     appendCommentRows(article,list,[data.comment]);input.value="";
-     const more=panel.querySelector(".orbis-comments-more");if(more)more.dataset.nextOffset=String((Number(more.dataset.nextOffset)||0)+1);
-     const count=Number(data.comments)||0;
-     target.textContent="◌ Комментарии · "+count;
-     target.dataset.commentCount=String(count);
-     window.notify?.("Комментарий опубликован.");
-    }catch(error){window.notify?.(error.message)}
-    finally{submit.disabled=false;submit.textContent="Отправить"}
-   });
-   list.textContent="Загружаем комментарии…";
-   try{await fetchCommentPage(article,panel,0,false)}catch(error){list.textContent=error.message}
-   return;
-  }
-  if(target.dataset.action==="comments-more"){
-   const article=target.closest("[data-post-id]"),panel=target.closest(".orbis-comments-panel");if(!article||!panel)return;
-   target.disabled=true;target.textContent="Загружаем…";
-   try{await fetchCommentPage(article,panel,Number(target.dataset.nextOffset)||0,true)}
-   catch(error){window.notify?.(error.message);target.disabled=false;target.textContent="Повторить"}
-   return;
-  }
-  if(target.dataset.action==="delete-comment"){
-   const article=target.closest("[data-post-id]"),row=target.closest(".orbis-comment");if(!article||!row)return;
-   if(!confirm("Удалить свой комментарий?"))return;
-   target.disabled=true;
-   try{
-    const response=await fetch("/api/comments/"+encodeURIComponent(target.dataset.commentId),{method:"DELETE"});
-    const data=await response.json().catch(()=>({error:"Не удалось прочитать ответ сервера."}));
-    if(!response.ok)throw new Error(data.error||"Не удалось удалить комментарий.");
-    row.remove();
-    const more=article.querySelector(".orbis-comments-more");if(more)more.dataset.nextOffset=String(Math.max(0,(Number(more.dataset.nextOffset)||0)-1));
-    const button=article.querySelector('[data-action="comments"]');
-    if(button)button.textContent="◌ Комментарии · "+(Number(data.comments)||0);
-    if(!article.querySelector(".orbis-comment")){const empty=document.createElement("p");empty.className="orbis-comments-empty";empty.textContent="Пока нет комментариев. Начни обсуждение.";article.querySelector(".orbis-comments-list")?.append(empty)}
-    window.notify?.("Комментарий удалён.");
-   }catch(error){window.notify?.(error.message)}finally{target.disabled=false}
    return;
   }
   if(target.dataset.action==="show-replies"){
