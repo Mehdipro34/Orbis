@@ -2871,9 +2871,9 @@ document.addEventListener("click",event=>{
     recoverySave.disabled=true;
     if(note){note.className="auth-form-note";note.textContent="Сохраняем новый пароль…"}
     try{
-     const result=await client.auth.updateUser({password:first});
+     const result=await window.orbisSupabase.auth.updateUser({password:first});
      if(result.error)throw result.error;
-     await client.auth.signOut();
+     await window.orbisSupabase.auth.signOut();
      window.orbisRecoveryRequested=false;
      if(recoveryPanel)recoveryPanel.hidden=true;
      if(authTabs)authTabs.hidden=false;
@@ -2894,7 +2894,7 @@ document.addEventListener("click",event=>{
     resetButton.disabled=true;
     if(note){note.className="auth-form-note";note.textContent="Отправляем письмо для восстановления…"}
     try{
-     const result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+     const result=await window.orbisSupabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
      if(result.error)throw result.error;
      if(note){note.className="auth-form-note success";note.textContent="Если аккаунт с таким адресом существует, письмо для восстановления уже отправлено. Проверь входящие и папку «Спам»."}
     }catch(error){if(note){note.className="auth-form-note error";note.textContent=error.message||"Не удалось отправить письмо."}}
@@ -2903,11 +2903,11 @@ document.addEventListener("click",event=>{
   }catch(error){if(note)note.textContent=error.message||"Не удалось подключить авторизацию.";return}
   try{
    await window.orbisSupabaseReady;
-   let current=await client.auth.getSession();
+   let current=await window.orbisSupabase.auth.getSession();
    if(!current.data.session){
-    const guest=await client.auth.signInAnonymously({options:{data:{display_name:"Гость"}}});
+    const guest=await window.orbisSupabase.auth.signInAnonymously({options:{data:{display_name:"Гость"}}});
     if(guest.error)throw guest.error;
-    current=await client.auth.getSession();
+    current=await window.orbisSupabase.auth.getSession();
    }
    const data=await api("/api/auth/me");
    window.orbisUser=data.user;
