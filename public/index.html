@@ -1536,6 +1536,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .center-copy>p{font-size:14px;color:#aaa8c8;letter-spacing:.2px;margin:0}
 .center-actions{display:flex;justify-content:center;gap:12px;margin-top:28px}
 .center-actions button{height:50px;padding:0 23px;border-radius:14px;font-size:12px;font-weight:850;cursor:pointer;transition:transform .25s,box-shadow .25s}
+.center-actions .center-secondary{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;height:50px;padding:0 23px;border-radius:14px;font-size:12px;font-weight:850}
 .center-actions button:hover{transform:translateY(-3px)}
 .center-primary{border:0;color:#17132d;background:linear-gradient(110deg,#c7bbff,#9280ff 58%,#ffb4ce);box-shadow:0 12px 42px #a38cff42}
 .center-primary span{font-size:17px;margin-left:17px}
@@ -1891,7 +1892,7 @@ document.addEventListener("DOMContentLoaded",()=>{
    <div class="center-eyebrow">ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</div>
    <h1>Твой мир.<br><em>Твой ORBIS.</em></h1>
    <p>Социальная сеть для мыслей, открытий и публикаций. Вход и регистрация — только через Telegram.</p>
-   <div class="center-actions"><button class="center-primary" data-open-auth="login">Продолжить через Telegram <span>↗</span></button><button class="center-secondary" data-open-auth="login">О проекте</button></div>
+   <div class="center-actions"><button class="center-primary" data-open-auth="login">Продолжить через Telegram <span>↗</span></button><a class="center-secondary" href="#about">О проекте</a></div>
    <div class="center-proof"><span><i>✳</i> Лента</span><b></b><span><i>⌁</i> Navigator</span><b></b><span><i>◎</i> Профиль</span></div>
   </div>
   <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
