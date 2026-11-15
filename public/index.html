@@ -1360,6 +1360,63 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 @media(max-width:380px){.auth-card{padding:22px 17px}.auth-showcase-copy h1{font-size:43px}.auth-gateway{padding-inline:13px}}
 @media(prefers-reduced-motion:reduce){.auth-gateway:before,.auth-nebula,.auth-planet,.auth-orbit,.auth-star,.auth-card{animation:none!important}.auth-tabs button,.auth-tab-glider,.auth-input-wrap,.auth-submit{transition:none!important}}
 
+
+/* ORBIS cinematic intro — final entrance sequence */
+.orbis-intro{background:radial-gradient(ellipse at 50% 47%,#54419a 0%,#252052 32%,#10152f 67%,#050916 100%)!important;transition:opacity 1.05s cubic-bezier(.2,.7,.2,1),visibility 1.05s,transform 1.05s,filter 1.05s!important}
+.orbis-intro:before{inset:-45%;opacity:.8;background:repeating-radial-gradient(ellipse at center,transparent 0 74px,#a89bff17 75px 76px,transparent 77px 150px),conic-gradient(from 40deg at 50% 50%,transparent,#73e6e022,transparent,#b79aff20,transparent);animation:orbisIntroCosmos 72s linear infinite!important}
+@keyframes orbisIntroCosmos{to{transform:rotate(360deg) scale(1.08)}}
+.orbis-intro:after{width:min(82vw,760px);border-color:#c9baff45;box-shadow:0 0 0 15px #ffffff09,0 0 0 48px #ffffff06,0 0 0 95px #ffffff03,0 0 120px #917cff35,inset 0 0 95px #8d7aff20;animation:orbisIntroPortal 5s ease-in-out infinite!important}
+@keyframes orbisIntroPortal{0%,100%{transform:scale(.91);opacity:.42}50%{transform:scale(1.08);opacity:1}}
+.intro-scene{perspective:1000px}
+.intro-nebula{inset:-28%;opacity:1;filter:blur(30px);background:radial-gradient(ellipse at 22% 50%,#ff7fb53a 0,transparent 27%),radial-gradient(ellipse at 78% 34%,#7c8dff4a 0,transparent 31%),radial-gradient(ellipse at 54% 84%,#52e3d54a 0,transparent 28%),radial-gradient(ellipse at 50% 10%,#b58aff30 0,transparent 34%);animation:orbisNebulaBreathe 10s ease-in-out infinite alternate!important}
+@keyframes orbisNebulaBreathe{to{transform:scale(1.13) rotate(5deg);filter:blur(42px);opacity:.75}}
+.intro-grid{opacity:.32!important;background-size:56px 56px!important;filter:drop-shadow(0 0 9px #8d7aff22)}
+.intro-portal{width:min(66vw,680px);border-color:#d0c5ff88;box-shadow:0 0 0 8px #a99bff0d,0 0 0 26px #9e8cff0b,0 0 0 62px #9e8cff07,0 0 100px #9a7bff55,inset 0 0 90px #9a7bff28;animation:orbisPortalCharge 5.8s ease-in-out infinite!important}
+.intro-portal:before{border-width:2px;border-color:#c9baff77;filter:drop-shadow(0 0 8px #9f8bff66)}
+.intro-portal:after{border-color:#82e7ed88;box-shadow:0 0 38px #83e7ed3b,inset 0 0 35px #83e7ed12}
+@keyframes orbisPortalCharge{0%,100%{opacity:.5;scale:.88;filter:hue-rotate(0)}50%{opacity:1;scale:1.08;filter:hue-rotate(22deg)}}
+.intro-holo-ring{filter:drop-shadow(0 0 12px #9e8cff44)}
+.intro-light-beam{height:75vh;opacity:.38;background:linear-gradient(#e6e0ff99,transparent 82%);filter:blur(3px)}
+.intro-planet.one{width:72px;height:72px;box-shadow:0 0 38px #ff9bcf66}
+.intro-planet.two{width:38px;height:38px;box-shadow:0 0 32px #65e8e466}
+.intro-planet.three{width:23px;height:23px;box-shadow:0 0 22px #ffc76c66}
+.intro-rocket-wrap{animation:rocketLaunch 6.3s cubic-bezier(.45,.02,.22,1) forwards!important}
+.intro-rocket{background:linear-gradient(90deg,#a99aff 0%,#fff 22%,#f8f4ff 55%,#8c78ed 100%);box-shadow:inset -9px 0 16px #6a53d655,0 0 42px #b8a5ff88,0 0 85px #8b79ff33}
+.intro-rocket:before{border-bottom-color:#ff9fc8}
+.rocket-flame{height:112px;width:36px;background:linear-gradient(#fff 0%,#fff0a8 18%,#ffc45f 43%,#ff7e89 73%,transparent 100%);filter:blur(3px);box-shadow:0 0 26px #ffad72aa}
+.intro-astronaut{filter:drop-shadow(0 20px 32px #07051caa) drop-shadow(0 0 18px #8e80ff33)}
+.intro-astronaut.left{animation:orbisAstronautLeft 7.5s ease-in-out infinite!important}
+.intro-astronaut.right{animation:orbisAstronautRight 8s ease-in-out infinite!important}
+@keyframes orbisAstronautLeft{0%,100%{transform:translate3d(0,0,0) rotate(-15deg)}50%{transform:translate3d(10px,-22px,0) rotate(-7deg)}}
+@keyframes orbisAstronautRight{0%,100%{transform:translate3d(0,0,0) rotate(8deg)}50%{transform:translate3d(-12px,18px,0) rotate(17deg)}}
+.intro-astronaut svg{filter:drop-shadow(0 0 12px #a7a0ff33)}
+.intro-chip{border-color:#c6b9ff55!important;background:linear-gradient(135deg,#ffffff2c,#b4aaff0d)!important;box-shadow:0 18px 42px #05071966,0 0 24px #9a87ff17,inset 0 1px #ffffff4a!important;backdrop-filter:blur(18px) saturate(145%)!important}
+.intro-chip small{color:#e5e4ff!important}
+.intro-chip.posts{animation:orbisChipA 4.6s ease-in-out infinite!important}
+.intro-chip.stories{animation:orbisChipB 5.2s ease-in-out infinite!important}
+.intro-chip.likes{animation:orbisChipC 4.8s ease-in-out infinite!important}
+.intro-chip.community{animation:orbisChipD 5.4s ease-in-out infinite!important}
+@keyframes orbisChipA{50%{transform:translate(8px,-13px) rotate(2deg)}}
+@keyframes orbisChipB{50%{transform:translate(-7px,12px) rotate(-2deg)}}
+@keyframes orbisChipC{50%{transform:translate(10px,9px) rotate(2deg)}}
+@keyframes orbisChipD{50%{transform:translate(-9px,-11px) rotate(-2deg)}}
+.intro-brand-block{bottom:clamp(88px,12vh,130px)!important;width:min(94vw,620px)!important}
+.intro-word{font-size:clamp(54px,9vw,88px)!important;letter-spacing:clamp(12px,2.2vw,22px)!important;background:linear-gradient(100deg,#fff 3%,#d8d0ff 38%,#9cebe8 70%,#ffbfd9 98%);background-clip:text;-webkit-background-clip:text;color:transparent!important;filter:drop-shadow(0 0 28px #bbaaff88)!important;animation:orbisWordReveal 1.45s .55s cubic-bezier(.16,1,.3,1) both,orbisWordGlow 3.4s 2s ease-in-out infinite!important}
+@keyframes orbisWordReveal{from{opacity:0;transform:translateY(35px) scale(.82);letter-spacing:32px;filter:blur(12px)}to{opacity:1;transform:none;letter-spacing:clamp(12px,2.2vw,22px);filter:blur(0)}}
+@keyframes orbisWordGlow{0%,100%{filter:drop-shadow(0 0 15px #bbaaff55)}50%{filter:drop-shadow(0 0 42px #a9a0ffcc)}}
+.intro-caption{color:#f1edff!important;font-weight:800!important;text-shadow:0 0 20px #a99bff99!important;animation:captionRise 1s 1.15s both!important}
+.intro-hud{top:max(24px,env(safe-area-inset-top))!important;padding:11px 18px!important;border-color:#b9adff66!important;background:linear-gradient(110deg,#11152dbb,#243454aa)!important;box-shadow:0 10px 38px #02061777,0 0 30px #9b83ff25,inset 0 1px #ffffff25!important;letter-spacing:2px!important}
+.hud-dot{box-shadow:0 0 0 4px #68eadc20,0 0 16px #68eadc!important}
+.intro-loader{width:clamp(160px,24vw,230px)!important;height:5px!important;margin-top:23px!important;border:1px solid #ffffff32!important;background:#ffffff1b!important;box-shadow:0 0 24px #9c83ff3b!important}
+.intro-loader span{width:35%!important;background:linear-gradient(90deg,#78e9e0,#fff,#ffb8d0,#a99aff)!important;box-shadow:0 0 17px #c9bdff!important;animation:introLoad 6.7s cubic-bezier(.4,0,.2,1) forwards!important}
+.intro-skip{bottom:calc(26px + env(safe-area-inset-bottom))!important;padding:13px 23px!important;border:1px solid #c6bcff75!important;background:linear-gradient(110deg,#ffffff20,#ffffff0a)!important;box-shadow:0 10px 32px #02061766,inset 0 1px #ffffff35!important;color:#fff!important;font-weight:800!important;letter-spacing:.4px!important;transition:transform .25s,background .25s,box-shadow .25s!important;backdrop-filter:blur(18px) saturate(140%)!important;animation:captionRise .8s 1.8s both}
+.intro-skip:hover{transform:translateY(-3px)!important;background:linear-gradient(110deg,#a18aff55,#58ded344)!important;box-shadow:0 15px 42px #8374ff44!important}
+.intro-skip:active{transform:scale(.96)!important}
+.orbis-intro.hide{transform:scale(1.22)!important;filter:blur(18px) brightness(1.35)!important}
+@media(max-width:760px){.intro-astronaut.left{left:calc(50% - 190px);top:calc(50% - 125px);width:90px;height:132px}.intro-astronaut.right{right:calc(50% - 190px);top:calc(50% - 90px);width:78px;height:115px}.intro-portal{width:min(90vw,520px)}.intro-ui-float{width:94vw;transform:translate(-50%,-50%) scale(.78)}.intro-chip{white-space:normal;max-width:142px}.intro-brand-block{bottom:clamp(105px,16vh,145px)!important}.intro-word{font-size:clamp(48px,12vw,70px)!important;letter-spacing:9px!important}.intro-caption{max-width:90vw;font-size:8px!important;letter-spacing:2px!important}.intro-hud{font-size:7px!important;letter-spacing:1.2px!important}.intro-skip{font-size:11px!important}}
+@media(max-height:650px) and (min-width:761px){.intro-brand-block{bottom:76px!important}.intro-word{font-size:52px!important}.intro-astronaut.left{top:calc(50% - 100px)}.intro-astronaut.right{top:calc(50% - 75px)}.intro-skip{bottom:14px!important}}
+@media(prefers-reduced-motion:reduce){.orbis-intro:before,.orbis-intro:after,.intro-nebula,.intro-rocket-wrap,.rocket-flame,.intro-planet,.intro-chip,.intro-word,.intro-caption,.intro-loader span,.intro-stars i,.intro-astronaut,.intro-portal{animation:none!important}.intro-rocket-wrap{opacity:1;transform:translate(-50%,-50%)}}
+
 </style>
 </head>
 <body>
@@ -1717,7 +1774,7 @@ document.addEventListener("click",event=>{
  function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}if(gateway)gateway.hidden=false}
  function enterDemo(){if(gateway)gateway.hidden=true;if(shell)shell.hidden=false;document.body.classList.add("orbis-demo-open")}
  if(skip)skip.addEventListener("click",showAccess);
- if(intro){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)showAccess();else window.setTimeout(showAccess,6200)}
+ if(intro){if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)showAccess();else window.setTimeout(showAccess,8200)}
  tabs.forEach(tab=>tab.addEventListener("click",()=>{
   mode=tab.dataset.authMode;tabs.forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active))});
   tabWrap.classList.toggle("signup",mode==="signup");
