@@ -209,8 +209,8 @@ async function api(request, env, url) {
     let posts = await allPosts(env, topic || query ? 10000 : pageSize + 1, topic || query ? 0 : offset);
     if (topic) posts = posts.filter(post => String(post.topic || "").toLocaleLowerCase("ru") === topic);
     if (query) posts = posts.filter(post => [post.title, post.body, post.topic, post.author, post.username].join(" ").toLocaleLowerCase("ru").includes(query));
-    const hasMore = posts.length > offset + pageSize;
-    posts = posts.slice(offset, offset + pageSize);
+    const hasMore = topic || query ? posts.length > offset + pageSize : posts.length > pageSize;
+    posts = topic || query ? posts.slice(offset, offset + pageSize) : posts.slice(0, pageSize);
     const views = await Promise.all(posts.map(post => postView(env, post, user)));
     return json({ posts: views, hasMore, nextOffset: offset + views.length });
   }
