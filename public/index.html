@@ -2266,6 +2266,17 @@ document.addEventListener("click",event=>{
  },true);
  let replyToPostId=null;
  let lastSearchQuery="";
+ async function refreshNewestPosts(){
+  if(feedLoading)return;
+  const feed=$("feed");if(!feed)return;
+  try{
+   const params=new URLSearchParams({limit:"20",offset:"0"});if(feedTopic)params.set("topic",feedTopic);
+   const data=await api("/api/posts?"+params.toString());
+   [...data.posts].reverse().forEach(post=>{
+    if(!document.getElementById("post-"+post.id)){const el=card(post);el.classList.add("api-post");feed.prepend(el)}
+   });
+  }catch(error){console.warn("ORBIS auto-refresh:",error.message)}
+ }
  async function loadNews(sourceId){
   const feed=$("newsFeed"),status=$("newsStatus");if(!feed||!status)return;
   feed.replaceChildren();status.textContent="Загружаем свежие заголовки…";
@@ -2418,7 +2429,7 @@ document.addEventListener("click",event=>{
     ["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
     if($("postMedia"))$("postMedia").value="";
     replyToPostId=null;$("dialogTitle").textContent="Новая публикация";
-    $("modal").classList.remove("open");window.notify?.("Публикация сохранена в ORBIS и архивирована в Telegram.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
+    $("modal").classList.remove("open");await loadFeed(true,feedTopic);window.notify?.("Публикация сохранена в ORBIS и архивирована в Telegram.");if(data.archiveWarning)window.notify?.(data.archiveWarning);
    }catch(error){window.notify?.(error.message)}
    finally{target.disabled=false;target.textContent="Продолжить"}
   }
@@ -2445,6 +2456,11 @@ document.addEventListener("click",event=>{
   }
  },true);
  document.addEventListener("change",event=>{if(event.target.id==="newsSourceSelect")loadNews(event.target.value)});
+ window.setInterval(()=>{
+  if(document.hidden)return;
+  if(document.querySelector('[data-view="Лента"].active'))refreshNewestPosts();
+  if(document.querySelector('[data-view="Навигатор"].active'))loadNews($("newsSourceSelect")?.value||"bbc-ru");
+ },300000);
  const searchInput=$("orbisSearchInput");
  document.addEventListener("keydown",event=>{if(event.key==="Enter"&&event.target===$("orbisSearchInput")){event.preventDefault();runSearch()}});
  window.addEventListener("orbis:login",()=>{loadFeed()});
