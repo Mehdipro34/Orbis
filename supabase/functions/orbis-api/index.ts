@@ -78,55 +78,6 @@ Deno.serve(async (req: Request) => {
     if(error)return out({available:false,error:"Не удалось проверить username. Попробуй ещё раз."},503);
     return out({available:!data});
   }
-  if (req.method==="POST" && path==="/api/auth/login") {
-    const login=String(body.login||"").trim().toLowerCase();
-    const password=String(body.password||"");
-    if(!login || login.length>254 || password.length<8 || password.length>256)
-      return out({error:"Неверный email/username или пароль."},401);
-    const clientIp=req.headers.get("cf-connecting-ip")||req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||"unknown";
-    const ipDigest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(clientIp));
-    const ipHash=Array.from(new Uint8Array(ipDigest),b=>b.toString(16).padStart(2,"0")).join("");
-    if(await isRateLimited(admin,ipHash,"auth_login",12,600))
-      return out({error:"Слишком много попыток входа. Подожди 10 минут."},429);
-    let email=login;
-    if(!login.includes("@")) {
-      if(!/^[a-zA-Z0-9_.]{3,24}$/.test(login)) return out({error:"Неверный email/username или пароль."},401);
-      // Resolve usernames from canonical profiles; email accounts may not have a legacy lookup row.
-      const {data:profile,error:profileError}=await admin.from("profiles").select("id").eq("username",login).maybeSingle();
-      if(profileError) return out({error:"Неверный email/username или пароль."},401);
-      if(profile?.id){
-        const {data:userData,error:userError}=await admin.auth.admin.getUserById(profile.id);
-        if(!userError && userData?.user?.email) email=userData.user.email;
-        else {
-          const {data:account,error}=await admin.from("account_lookup").select("email").eq("username",login).maybeSingle();
-          if(error || !account?.email) return out({error:"Неверный email/username или пароль."},401);
-          email=account.email;
-        }
-      }else{
-        const {data:account,error}=await admin.from("account_lookup").select("email").eq("username",login).maybeSingle();
-        if(error || !account?.email) return out({error:"Неверный email/username или пароль."},401);
-        email=account.email;
-      }
-    } else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login)) {
-      return out({error:"Неверный email/username или пароль."},401);
-    }
-    const publishableKey=Deno.env.get("SUPABASE_ANON_KEY")||req.headers.get("apikey")||"";
-    if(!publishableKey)return out({error:"Сервис авторизации временно недоступен."},503);
-    let authResponse:any={};
-    try {
-      const response=await fetch(url+"/auth/v1/token?grant_type=password",{
-        method:"POST",headers:{"apikey":publishableKey,"Content-Type":"application/json"},
-        body:JSON.stringify({email,password})
-      });
-      authResponse=await response.json().catch(()=>({}));
-      if(!response.ok || !authResponse.access_token || !authResponse.refresh_token)
-        return out({error:"Неверный email/username или пароль. Если адрес ещё не подтверждён, проверь почту."},401);
-    } catch {
-      return out({error:"Не удалось подключиться к сервису авторизации. Попробуй ещё раз."},503);
-    }
-    return out({access_token:authResponse.access_token,refresh_token:authResponse.refresh_token,expires_in:authResponse.expires_in,token_type:authResponse.token_type||"bearer"});
-  }
-
   if (req.method==="GET" && path==="/api/auth/me") {
     if (!uid || !authUser) return out({authenticated:false},401);
     let {data:p}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
