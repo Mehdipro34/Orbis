@@ -1957,7 +1957,7 @@ document.addEventListener("DOMContentLoaded",()=>{
    <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
    <form id="orbisAuthForm" novalidate>
     <label class="auth-field auth-username-field" id="authUsernameField" hidden><span>ИМЯ ПОЛЬЗОВАТЕЛЯ</span><span class="auth-input-wrap"><i>@</i><input id="authUsername" type="text" autocomplete="username" placeholder="Твой username" minlength="3" maxlength="24"></span></label>
-    <label class="auth-field auth-email-field" id="authEmailField"><span>ЭЛЕКТРОННАЯ ПОЧТА</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com" required></span></label>
+    <label class="auth-field auth-email-field" id="authEmailField"><span>EMAIL ИЛИ USERNAME</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="text" autocomplete="username" placeholder="Email или username" required></span></label>
     <label class="auth-field"><span>ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authPassword" type="password" autocomplete="current-password" placeholder="Твой пароль" minlength="8" required><button class="auth-eye" id="authEye" type="button" aria-label="Показать пароль">◉</button></span></label>
     <label class="auth-field auth-confirm-field" id="authConfirmField" hidden><span>ПОВТОРИ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Ещё раз пароль"></span></label>
     <div class="auth-form-note" id="authFormNote" aria-live="polite"> </div>
@@ -2262,10 +2262,15 @@ document.addEventListener("click",event=>{
   mode=tab.dataset.authMode;tabs.forEach(t=>{const active=t===tab;t.classList.toggle("active",active);t.setAttribute("aria-selected",String(active))});
   tabWrap.classList.toggle("signup",mode==="signup");
   title.textContent=mode==="login"?"С возвращением":"Создай аккаунт";
-  subtitle.textContent=mode==="login"?"Войди по электронной почте и паролю.":"Создай username и защити аккаунт паролем.";
+  subtitle.textContent=mode==="login"?"Войди по email или username и паролю.":"Создай username и защити аккаунт паролем.";
   confirmField.hidden=mode!=="signup";confirmInput.required=mode==="signup";
   usernameField.hidden=mode!=="signup";username.required=mode==="signup";
   emailField.hidden=false;email.required=true;
+  const emailCaption=emailField.querySelector("span");
+  if(emailCaption)emailCaption.textContent=mode==="login"?"EMAIL ИЛИ USERNAME":"ЭЛЕКТРОННАЯ ПОЧТА";
+  email.type=mode==="login"?"text":"email";
+  email.autocomplete=mode==="login"?"username":"email";
+  email.placeholder=mode==="login"?"Email или username":"name@example.com";
   password.autocomplete=mode==="login"?"current-password":"new-password";
   const resetButton=document.getElementById("authResetButton");if(resetButton)resetButton.hidden=mode!=="login";
   submitText.textContent=mode==="login"?"Войти":"Создать аккаунт";
@@ -2495,7 +2500,8 @@ document.addEventListener("click",event=>{
   const email=$("authEmail").value.trim().toLowerCase();
   const password=$("authPassword").value;
   const username=$("authUsername").value.trim().toLowerCase();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){note.textContent="Введи корректную электронную почту.";return}
+  if(mode==="signup"&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){note.textContent="Введи корректную электронную почту.";return}
+  if(mode==="login"&&(!email||email.length>254)){note.textContent="Введи email или username.";return}
   if(password.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";return}
   if(mode==="signup"&&!/^[a-zA-Z0-9_.]{3,24}$/.test(username)){note.textContent="Username: 3–24 символа, латиница, цифры, точка или _.";return}
   if(mode==="signup"&&password!==$("authConfirm").value){note.textContent="Пароли не совпадают.";return}
@@ -2527,7 +2533,8 @@ document.addEventListener("click",event=>{
      return;
     }
    }else{
-    result=await window.orbisSupabase.auth.signInWithPassword({email,password});
+    const loginResult=await api("/api/auth/login",{method:"POST",body:JSON.stringify({login:email,password})});
+    result=await window.orbisSupabase.auth.setSession({access_token:loginResult.access_token,refresh_token:loginResult.refresh_token});
     if(result.error)throw result.error;
    }
    const data=await api("/api/auth/me");
