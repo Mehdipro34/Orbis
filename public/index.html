@@ -1,90 +1,80 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#090d18">
-  <title>ORBIS — твоя лента</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root{color-scheme:dark;--bg:#090d18;--panel:#111827;--panel2:#172235;--line:#25334a;--text:#f4f7fb;--muted:#91a0b7;--accent:#6c8cff;--cyan:#5de0d0}
-    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a2b50 0,transparent 45%),var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-    button,input,textarea{font:inherit}button{cursor:pointer;color:inherit}.shell{max-width:1120px;margin:auto;min-height:100dvh;display:grid;grid-template-columns:220px minmax(0,1fr) 260px;gap:22px;padding:22px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:22px;letter-spacing:2px;padding:7px 4px 25px}.orb{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--cyan));display:grid;place-items:center;color:#08111d;font-weight:1000}
-    .nav{display:grid;gap:7px;position:sticky;top:18px}.nav button,.mobile-nav button{background:transparent;border:0;text-align:left;padding:12px 14px;border-radius:13px;color:var(--muted);display:flex;gap:12px;align-items:center}.nav button.active,.nav button:hover{background:var(--panel2);color:var(--text)}.nav .create{background:linear-gradient(110deg,#6c8cff,#526ee4);color:white;justify-content:center;font-weight:750;margin-top:14px}
-    main{min-width:0}.top{display:flex;justify-content:space-between;align-items:center;padding:7px 2px 17px}.top h1{font-size:21px;margin:0}.pill{font-size:12px;color:var(--cyan);border:1px solid #285c62;background:#103039;padding:5px 9px;border-radius:99px}
-    .composer{background:linear-gradient(145deg,#15223a,#111827);border:1px solid var(--line);padding:16px;border-radius:18px;margin-bottom:18px}.compose-row{display:flex;gap:12px;align-items:center}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8a9fff,#54d8c8);color:#09111c;font-weight:900;flex:none}.fake-input{border:1px solid var(--line);background:#0d1524;border-radius:13px;color:var(--muted);padding:12px 14px;text-align:left;flex:1}.compose-actions{display:flex;gap:8px;margin:13px 0 0 52px}.chip{border:1px solid var(--line);background:#121e31;color:#aebbd0;padding:7px 10px;border-radius:10px;font-size:12px}
-    .filters{display:flex;gap:8px;overflow:auto;padding:2px 0 14px}.filter{white-space:nowrap;border:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 13px;border-radius:99px}.filter.active{background:#263b68;color:#fff;border-color:#4d6fba}
-    .post{background:rgba(17,24,39,.92);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:12px}.post-head{display:flex;align-items:center;gap:10px}.post-name{font-weight:750}.handle,.time,.muted{color:var(--muted);font-size:12px}.post-text{margin:14px 0 13px;white-space:pre-wrap}.tag{color:#82a4ff}.post-foot{display:flex;gap:8px;flex-wrap:wrap}.post-foot button{border:1px solid var(--line);background:#111d30;color:#b6c3d8;border-radius:10px;padding:7px 10px;font-size:12px}
-    aside .side-card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:13px}.side-card h3{font-size:14px;margin:0 0 12px}.trend{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid #202c40}.trend b{font-size:13px}.trend span{font-size:11px;color:var(--muted)}.note{font-size:12px;color:var(--muted)}
-    .mobile-nav{display:none}.modal{position:fixed;inset:0;background:#030711cc;display:none;place-items:center;padding:18px;z-index:5}.modal.open{display:grid}.dialog{width:min(540px,100%);background:#111a2a;border:1px solid var(--line);border-radius:20px;padding:18px}.dialog h2{margin:0 0 14px}.dialog textarea{width:100%;min-height:150px;resize:vertical;background:#0a1220;color:var(--text);border:1px solid var(--line);border-radius:13px;padding:13px;outline:none}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:12px}.primary{background:var(--accent);border:0;border-radius:11px;padding:10px 16px;font-weight:750}.secondary{background:#202c40;border:1px solid var(--line);border-radius:11px;padding:10px 16px}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c2c45;border:1px solid #425b85;padding:10px 15px;border-radius:12px;display:none;z-index:8}
-    @media(max-width:850px){.shell{grid-template-columns:68px minmax(0,1fr);padding:14px;gap:14px}.brand{font-size:0;justify-content:center}.brand .orb{width:40px;height:40px}.nav button{justify-content:center;font-size:0;padding:13px}.nav button span{font-size:19px}.nav .create{font-size:0}.nav .create span{font-size:20px}aside{display:none}}
-    @media(max-width:560px){.shell{display:block;padding:12px 12px 82px}.left{display:none}.top{padding-top:5px}.top h1{font-size:19px}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#0c1423f2;border-top:1px solid var(--line);justify-content:space-around;padding:8px 5px calc(8px + env(safe-area-inset-bottom));z-index:4;backdrop-filter:blur(15px)}.mobile-nav button{font-size:18px;padding:8px 12px}.compose-actions{margin-left:0}.composer{padding:13px}.post{padding:14px}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b12"><title>ORBIS — пространство идей</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#090b12;--panel:#111520;--panel2:#171d2b;--line:#252d3e;--text:#f4f6fb;--muted:#929caf;--blue:#8295ff;--mint:#75e4d1;--gold:#f3c77b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -30%,#25315c 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,sans-serif}button,input,textarea{font:inherit}button{cursor:pointer;color:inherit}.layout{max-width:1280px;margin:auto;min-height:100dvh;display:grid;grid-template-columns:225px minmax(0,690px) 285px;gap:26px;padding:24px}.left{position:sticky;top:24px;height:calc(100dvh - 48px)}.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:900;letter-spacing:3px;padding:3px 8px 34px}.logo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;color:#09101a;background:linear-gradient(135deg,#9aa8ff,#71e2d0);box-shadow:0 8px 30px #8295ff35;font-size:20px}.nav{display:grid;gap:7px}.nav button{border:0;background:transparent;color:var(--muted);text-align:left;padding:13px 15px;border-radius:14px;display:flex;align-items:center;gap:14px;font-weight:650}.nav button.active,.nav button:hover{background:#1b2334;color:white}.nav .create{margin-top:16px;justify-content:center;background:linear-gradient(110deg,#8295ff,#687be9);color:#fff;box-shadow:0 12px 32px #667ce933}.nav-icon{font-size:19px;width:22px;text-align:center}.left-note{position:absolute;bottom:0;left:8px;color:#697488;font-size:11px}
+main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-between;padding:5px 2px 22px}.eyebrow{font-size:10px;letter-spacing:2px;color:var(--mint);font-weight:800}.topbar h1{font-size:26px;letter-spacing:-.8px;margin:2px 0 0}.live{border:1px solid #2b625c;background:#102923;color:var(--mint);font-size:11px;border-radius:99px;padding:6px 10px}.stories{margin-bottom:20px;padding:15px 16px 13px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(120deg,#171d2d,#111520)}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.section-head h2{font-size:14px;margin:0}.section-head span{font-size:11px;color:var(--muted)}.story-row{display:flex;gap:15px;overflow:auto;padding:2px 0 4px}.story{flex:0 0 62px;text-align:center}.story-ring{width:58px;height:58px;padding:3px;border-radius:50%;background:conic-gradient(#8d9cff,#75e4d1,#d6a5ff,#8d9cff);margin:auto auto 6px}.story-ring>div{height:100%;border-radius:50%;border:3px solid #111520;background:linear-gradient(145deg,#293b5a,#172237);display:grid;place-items:center;font-weight:800}.story small{font-size:10px;color:#c4cada;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.story.add .story-ring{background:#333d53}.story.add .story-ring>div{color:var(--mint);font-size:23px}
+.composer{padding:16px;border:1px solid var(--line);border-radius:19px;background:#111722;margin-bottom:17px}.compose-line{display:flex;align-items:center;gap:12px}.avatar{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#9ba9ff,#72dfce);color:#101522;font-weight:900;flex:none}.compose-open{flex:1;text-align:left;border:1px solid #2b3446;background:#0d121d;border-radius:13px;padding:12px 15px;color:#9ba6b9}.compose-bottom{display:flex;align-items:center;justify-content:space-between;margin:13px 0 0 54px}.compose-tools{display:flex;gap:8px}.tiny{border:1px solid #2b3446;background:#171f2d;color:#b8c2d3;padding:7px 10px;border-radius:10px;font-size:11px}.tiny:disabled{opacity:.65;cursor:default}.topic-filter{display:flex;gap:8px;overflow:auto;padding:0 0 16px}.topic-filter button{border:1px solid var(--line);background:#101520;color:#a9b2c4;padding:7px 12px;border-radius:99px;white-space:nowrap;font-size:12px}.topic-filter button.active{background:#273354;border-color:#5269a8;color:#fff}
+.post{background:linear-gradient(145deg,#141a27,#101520);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:13px}.post-top{display:flex;align-items:center;gap:11px}.author{font-weight:750;font-size:13px}.handle{color:var(--muted);font-size:11px;margin-left:5px}.post-title{font-size:18px;line-height:1.3;font-weight:800;letter-spacing:-.35px;margin:15px 0 7px}.topic{color:var(--mint);font-size:11px;font-weight:750;letter-spacing:.2px}.post-body{color:#d4d9e4;white-space:pre-wrap;margin:9px 0 15px;line-height:1.65}.post-actions{display:flex;gap:8px;border-top:1px solid #252d3c;padding-top:12px}.post-actions button{border:0;background:transparent;color:#9da9bd;font-size:12px;padding:4px 7px}.post-actions button:hover{color:white}.demo{margin-left:auto;color:#697589;font-size:10px}
+.right{padding-top:70px}.side-card{background:#111520;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px}.side-card h3{font-size:13px;margin:0 0 12px}.topic-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #252d3c}.topic-dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px #75e4d166}.topic-item b{font-size:12px;display:block}.topic-item small{font-size:10px;color:var(--muted)}.topic-item em{margin-left:auto;color:#79869b;font-size:10px;font-style:normal}.profile-preview{display:flex;align-items:center;gap:11px}.profile-preview p{margin:0;font-size:12px}.profile-preview small{color:var(--muted);font-size:10px}.side-copy{color:var(--muted);font-size:11px;line-height:1.6;margin:10px 0 0}
+.modal{position:fixed;inset:0;background:#03050bdc;display:none;place-items:center;padding:18px;z-index:10;backdrop-filter:blur(9px)}.modal.open{display:grid}.dialog{width:min(560px,100%);background:#151b29;border:1px solid #303a50;border-radius:22px;padding:20px;box-shadow:0 30px 100px #0009}.dialog h2{margin:0 0 14px;font-size:19px}.dialog input,.dialog textarea{width:100%;background:#0c111c;border:1px solid #30394b;border-radius:12px;color:white;padding:12px;outline:none;margin-bottom:10px}.dialog textarea{min-height:135px;resize:vertical}.dialog-actions{display:flex;justify-content:flex-end;gap:9px}.primary{border:0;border-radius:11px;background:linear-gradient(110deg,#8295ff,#687be9);padding:10px 16px;font-weight:750}.secondary{border:1px solid #30394b;border-radius:11px;background:#1d2637;padding:10px 16px}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#1c2a40;border:1px solid #405477;border-radius:12px;padding:10px 15px;z-index:20;display:none;font-size:12px}.mobile-nav{display:none}
+@media(max-width:1000px){.layout{grid-template-columns:190px minmax(0,1fr);gap:18px}.right{display:none}}
+@media(max-width:620px){.layout{display:block;padding:13px 12px 82px}.left{display:none}.topbar h1{font-size:22px}.topbar{padding-bottom:16px}.stories{padding:13px}.composer{padding:13px}.compose-bottom{margin-left:0}.post{padding:15px}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:5;justify-content:space-around;background:#0c111df2;border-top:1px solid var(--line);padding:8px 5px calc(8px + env(safe-area-inset-bottom));backdrop-filter:blur(16px)}.mobile-nav button{border:0;background:transparent;color:#aeb8ca;font-size:19px;padding:7px 13px}.mobile-nav button.active{color:var(--mint)}}
+</style>
 </head>
 <body>
-<div class="shell">
-  <aside class="left">
-    <div class="brand"><div class="orb">O</div> ORBIS</div>
-    <nav class="nav">
-      <button class="active" data-page="Лента"><span>⌂</span> Лента</button>
-      <button data-page="Поиск"><span>⌕</span> Поиск</button>
-      <button data-page="Популярное"><span>↗</span> Популярное</button>
-      <button data-page="Закладки"><span>▤</span> Закладки</button>
-      <button data-page="Профиль"><span>◉</span> Профиль</button>
-      <button class="create" id="openComposer"><span>＋</span> Создать пост</button>
-    </nav>
-  </aside>
-  <main>
-    <header class="top"><h1 id="pageTitle">Твоя лента</h1><span class="pill">BETA · 0.1</span></header>
-    <section class="composer">
-      <div class="compose-row"><div class="avatar" id="userAvatar">O</div><button class="fake-input" id="openComposer2">О чём думаешь?</button></div>
-      <div class="compose-actions"><button class="chip" id="textPost">✎ Текст</button><button class="chip" id="photoHint">▧ Фото — скоро</button></div>
-    </section>
-    <div class="filters" id="filters">
-      <button class="filter active">Для тебя</button><button class="filter">Новости</button><button class="filter">Технологии</button><button class="filter">Бизнес</button><button class="filter">Общество</button><button class="filter">#ORBiS</button>
-    </div>
-    <section id="feed">
-      <article class="post">
-        <div class="post-head"><div class="avatar">O</div><div><div class="post-name">Команда ORBIS <span class="handle">@orbis · официальный</span></div><div class="time">Только что · Пример публикации</div></div></div>
-        <div class="post-text">Добро пожаловать в ORBIS! 🌐
-
-Здесь начинается пространство идей, новостей и общения. Это демонстрационная публикация интерфейса — скоро здесь появятся реальные посты пользователей.</div>
-        <div class="post-foot"><button>◇ В закладки</button><button>↗ Поделиться</button></div>
-      </article>
-      <article class="post">
-        <div class="post-head"><div class="avatar" style="background:linear-gradient(135deg,#ffcf8b,#ed8b9d)">N</div><div><div class="post-name">Новости и идеи <span class="handle">@daily_digest</span></div><div class="time">Пример публикации</div></div></div>
-        <div class="post-text">Небольшие идеи могут стать большими проектами. Главное — начать, проверить гипотезу и постепенно улучшать результат. <span class="tag">#идеи</span> <span class="tag">#развитие</span></div>
-        <div class="post-foot"><button>◇ В закладки</button><button>↗ Поделиться</button></div>
-      </article>
-    </section>
-    <p class="note">Демонстрационный интерфейс. Публикации пока не сохраняются на сервере.</p>
-  </main>
-  <aside>
-    <section class="side-card"><h3>Популярные темы</h3><div class="trend"><div><b>#Технологии</b><br><span>Технологии</span></div><span>тема</span></div><div class="trend"><div><b>#Бизнес</b><br><span>Идеи и проекты</span></div><span>тема</span></div><div class="trend"><div><b>#Новости</b><br><span>Главное сегодня</span></div><span>тема</span></div></section>
-    <section class="side-card"><h3>О проекте</h3><p class="note">ORBIS — социальная платформа, которая начинается внутри Telegram. Сейчас собираем первый интерфейс.</p></section>
-  </aside>
+<div class="layout">
+<aside class="left">
+ <div class="brand"><div class="logo">O</div> ORBIS</div>
+ <nav class="nav">
+  <button class="active" data-view="Лента"><span class="nav-icon">⌂</span>Лента</button>
+  <button data-view="Stories"><span class="nav-icon">◉</span>Stories</button>
+  <button data-view="Навигатор"><span class="nav-icon">✳</span>Навигатор</button>
+  <button data-view="Профиль"><span class="nav-icon">◎</span>Профиль</button>
+  <button class="create" id="openComposer"><span class="nav-icon">＋</span>Новая публикация</button>
+ </nav>
+ <div class="left-note">ORBIS · пространство идей</div>
+</aside>
+<main>
+ <header class="topbar"><div><div class="eyebrow">YOUR WORLD, IN ONE FLOW</div><h1 id="pageTitle">Твоя лента</h1></div><span class="live">● LIVE FEED</span></header>
+ <section class="stories">
+  <div class="section-head"><h2>Свежие Stories</h2><span>Только новые</span></div>
+  <div class="story-row">
+   <div class="story add"><div class="story-ring"><div>＋</div></div><small>Добавить</small></div>
+   <div class="story"><div class="story-ring"><div>А</div></div><small>Алина</small></div>
+   <div class="story"><div class="story-ring"><div>М</div></div><small>Мурад</small></div>
+   <div class="story"><div class="story-ring"><div>К</div></div><small>Камран</small></div>
+   <div class="story"><div class="story-ring"><div>С</div></div><small>Севда</small></div>
+   <div class="story"><div class="story-ring"><div>R</div></div><small>Research</small></div>
+  </div>
+ </section>
+ <section class="composer"><div class="compose-line"><div class="avatar" id="avatar">O</div><button class="compose-open" id="openComposer2">Какая мысль сегодня?</button></div><div class="compose-bottom"><div class="compose-tools"><button class="tiny" id="newText">✎ Текст</button><button class="tiny" id="newStory">◉ Story</button></div><span class="demo">до 1 поста в день</span></div></section>
+ <div class="topic-filter" id="topicFilter"><button class="active">Все темы</button><button>Новости</button><button>Технологии</button><button>Бизнес</button><button>Общество</button><button>Наука</button><button>Идеи</button></div>
+ <section id="feed">
+  <article class="post"><div class="post-top"><div class="avatar">O</div><div><div class="author">ORBIS <span class="handle">@orbis · Admin</span></div><div class="handle">Демонстрационная запись</div></div><span class="demo">ПРИМЕР</span></div><div class="post-title">Здесь начинается новая лента</div><div class="topic">ЗАПУСК · ORBIS</div><div class="post-body">ORBIS объединяет мысли, идеи и события в одном живом потоке. Лента будет обновляться постоянно, а старые публикации смогут возвращаться в подборку вместе с новыми.</div><div class="post-actions"><button>♡ Реакция</button><button>↗ Поделиться</button><button>⌑ Сохранить</button></div></article>
+  <article class="post"><div class="post-top"><div class="avatar" style="background:linear-gradient(135deg,#f3c77b,#e89baf)">И</div><div><div class="author">Идеи дня <span class="handle">@ideas_daily</span></div><div class="handle">Демонстрационная запись</div></div><span class="demo">ПРИМЕР</span></div><div class="post-title">Большие проекты начинаются с одного вопроса</div><div class="topic">ИДЕИ · РАЗВИТИЕ</div><div class="post-body">Что можно сделать проще, быстрее или полезнее? Иногда именно такой вопрос становится началом продукта, который нужен тысячам людей.</div><div class="post-actions"><button>♡ Реакция</button><button>↗ Поделиться</button><button>⌑ Сохранить</button></div></article>
+ </section>
+</main>
+<aside class="right">
+ <section class="side-card"><h3>Навигатор · Темы</h3>
+  <div class="topic-item"><i class="topic-dot"></i><div><b>Новости</b><small>События и важное</small></div><em>Открыть →</em></div>
+  <div class="topic-item"><i class="topic-dot" style="background:#9aa8ff"></i><div><b>Технологии</b><small>Наука и разработки</small></div><em>Открыть →</em></div>
+  <div class="topic-item"><i class="topic-dot" style="background:#f3c77b"></i><div><b>Бизнес</b><small>Компании и идеи</small></div><em>Открыть →</em></div>
+  <div class="topic-item"><i class="topic-dot" style="background:#d6a5ff"></i><div><b>Общество</b><small>Люди и культура</small></div><em>Открыть →</em></div>
+  <div class="topic-item"><i class="topic-dot" style="background:#ff9d9d"></i><div><b>Наука</b><small>Открытия и знания</small></div><em>Открыть →</em></div>
+ </section>
+ <section class="side-card"><h3>Твой профиль</h3><div class="profile-preview"><div class="avatar">O</div><div><p>Гость ORBIS</p><small>Имя · @username</small></div></div><p class="side-copy">Минимальный профиль: имя, никнейм и короткое описание. Ничего лишнего.</p></section>
+ <section class="side-card"><h3>Принцип ORBIS</h3><p class="side-copy">Одна живая лента. Только свежие Stories. Отдельный Навигатор по темам. Быстро, понятно и без лишних разделов.</p></section>
+</aside>
 </div>
-<nav class="mobile-nav"><button data-page="Лента">⌂</button><button data-page="Поиск">⌕</button><button id="mobileCreate">＋</button><button data-page="Популярное">↗</button><button data-page="Профиль">◉</button></nav>
-<div class="modal" id="composerModal"><div class="dialog"><h2>Новая публикация</h2><textarea id="postText" maxlength="2000" placeholder="Поделись своей мыслью..."></textarea><div class="dialog-actions"><button class="secondary" id="cancelPost">Отмена</button><button class="primary" id="publishPost">Предпросмотр</button></div></div></div>
+<nav class="mobile-nav"><button class="active" data-view="Лента">⌂</button><button data-view="Stories">◉</button><button id="mobileCreate">＋</button><button data-view="Навигатор">✳</button><button data-view="Профиль">◎</button></nav>
+<div class="modal" id="modal"><div class="dialog"><h2 id="dialogTitle">Новая публикация</h2><input id="postTitle" maxlength="120" placeholder="Название поста"><input id="postTopic" maxlength="48" placeholder="Тематика, например: Технологии"><textarea id="postBody" maxlength="4000" placeholder="Текст публикации..."></textarea><div class="dialog-actions"><button class="secondary" id="cancel">Отмена</button><button class="primary" id="publish">Проверить публикацию</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
-  const tg = window.Telegram?.WebApp;
-  if (tg) { tg.ready(); tg.expand(); }
-  const $ = id => document.getElementById(id);
-  const modal = $("composerModal"), toast = $("toast");
-  function notify(message){toast.textContent=message;toast.style.display="block";setTimeout(()=>toast.style.display="none",2600)}
-  function openComposer(){modal.classList.add("open");$("postText").focus()}
-  $("openComposer").addEventListener("click",openComposer);
-  $("openComposer2").addEventListener("click",openComposer);
-  $("textPost").addEventListener("click",openComposer);
-  $("mobileCreate").addEventListener("click",openComposer);
-  $("photoHint").addEventListener("click",()=>notify("Загрузка фотографий появится на следующем этапе."));
-  $("cancelPost").addEventListener("click",()=>modal.classList.remove("open"));
-  $("publishPost").addEventListener("click",()=>{const value=$("postText").value.trim();if(!value){notify("Сначала напиши текст публикации.");return;}notify("Это пока предпросмотр. Сохранение постов подключим следующим этапом.");});
-  document.querySelectorAll("[data-page]").forEach(button=>button.addEventListener("click",()=>{document.querySelectorAll("[data-page]").forEach(x=>x.classList.remove("active"));button.classList.add("active");$("pageTitle").textContent=button.dataset.page==="Лента"?"Твоя лента":button.dataset.page; if(button.dataset.page!=="Лента")notify("Раздел «"+button.dataset.page+"» подключим следующим этапом.");}));
-  document.querySelectorAll(".filter").forEach(button=>button.addEventListener("click",()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));button.classList.add("active");notify("Фильтр выбран: "+button.textContent);}));
-  if(tg?.initDataUnsafe?.user){const user=tg.initDataUnsafe.user;$("userAvatar").textContent=(user.first_name||"O").slice(0,1).toUpperCase();}
+const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand()}
+const $=id=>document.getElementById(id),modal=$("modal"),toast=$("toast");
+function notify(s){toast.textContent=s;toast.style.display="block";clearTimeout(window.orbisToastTimer);window.orbisToastTimer=setTimeout(()=>toast.style.display="none",2600)}
+function openComposer(){ $("dialogTitle").textContent="Новая публикация";modal.classList.add("open");$("postTitle").focus()}
+["openComposer","openComposer2","newText","mobileCreate"].forEach(id=>$(id).addEventListener("click",openComposer));
+$("newStory").addEventListener("click",()=>notify("Создание Stories подключим вместе с серверным лимитом: одна Story в сутки."));
+$("cancel").addEventListener("click",()=>modal.classList.remove("open"));
+$("publish").addEventListener("click",()=>{if(!$("postTitle").value.trim()||!$("postTopic").value.trim()||!$("postBody").value.trim()){notify("Заполни название, тематику и текст.");return}notify("Поля заполнены. Серверное сохранение ещё не подключено — это пока проверка формы.")});
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-view]").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("pageTitle").textContent=b.dataset.view==="Лента"?"Твоя лента":b.dataset.view;notify("Раздел «"+b.dataset.view+"»: интерфейсная основа. Подключение данных — следующий этап.")}));
+document.querySelectorAll("#topicFilter button").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("#topicFilter button").forEach(x=>x.classList.remove("active"));b.classList.add("active");notify("Выбрана тема: "+b.textContent+" — фильтрация подключится к Navigator API.")}));
+if(tg?.initDataUnsafe?.user){const u=tg.initDataUnsafe.user;$("avatar").textContent=(u.first_name||"O").slice(0,1).toUpperCase()}
 </script>
-</body>
-</html>
+</body></html>
