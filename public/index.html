@@ -2268,9 +2268,10 @@ document.addEventListener("click",event=>{
   const actions=document.createElement("div");actions.className="post-actions";
   const like=document.createElement("button");like.type="button";like.dataset.action="like";like.textContent=(post.liked?"♥ ":"♡ ")+(post.likes||0)+" · Реакция";like.setAttribute("aria-pressed",String(Boolean(post.liked)));if(post.liked)like.style.color="#e36c91";
   const reply=document.createElement("button");reply.type="button";reply.dataset.action="reply";reply.textContent="↩ Ответить";
+  const showReplies=document.createElement("button");showReplies.type="button";showReplies.dataset.action="show-replies";showReplies.textContent="◌ Ответы";
   const share=document.createElement("button");share.type="button";share.dataset.action="share";share.textContent="↗ Поделиться";
   const report=document.createElement("button");report.type="button";report.dataset.action="report";report.textContent="⚑ Пожаловаться";
-  actions.append(like,reply,share,report);article.append(top,title,topic,body,actions);return article;
+  actions.append(like,reply,showReplies,share,report);article.append(top,title,topic,body,actions);return article;
  }
  async function loadFeed(){
   try{
@@ -2326,9 +2327,10 @@ document.addEventListener("click",event=>{
   }catch(error){note.className="auth-form-note error";note.textContent=error.message}
  },true);
  let replyToPostId=null;
+ let lastSearchQuery="";
  async function runSearch(){
   const input=$("orbisSearchInput"),results=$("orbisSearchResults");if(!input||!results)return;
-  const q=input.value.trim();if(q.length<2){results.textContent="Введи хотя бы 2 символа.";return}
+  const q=input.value.trim();lastSearchQuery=q;if(q.length<2){results.textContent="Введи хотя бы 2 символа.";return}
   results.textContent="Ищем...";
   try{
    const data=await api("/api/search",{method:"POST",body:JSON.stringify({q})});
@@ -2337,7 +2339,7 @@ document.addEventListener("click",event=>{
    if(!data.users.length){const empty=document.createElement("p");empty.textContent="Пользователи не найдены.";results.append(empty)}
    data.users.forEach(user=>{
     const row=document.createElement("div");row.className="post";row.style.margin="8px 0";
-    const name=document.createElement("b");name.textContent=user.name+" · @"+user.username;
+    const name=document.createElement("button");name.type="button";name.className="profile-result-link";name.dataset.action="open-profile";name.dataset.username=user.username;name.textContent=user.name+" · @"+user.username;
     const bio=document.createElement("p");bio.className="post-body";bio.textContent=user.bio||"Без описания";
     const follow=document.createElement("button");follow.className="secondary";follow.type="button";follow.dataset.action="follow";follow.dataset.username=user.username;follow.textContent=user.isFollowing?"Вы подписаны":"Подписаться";
     row.append(name,bio,follow);results.append(row);
@@ -2356,13 +2358,51 @@ document.addEventListener("click",event=>{
    try{await api("/api/auth/logout",{method:"POST",body:"{}"});window.orbisUser=null;const shell=$("orbisAppShell"),gateway=$("authGateway"),landing=$("orbisLanding");if(shell)shell.hidden=true;if(gateway)gateway.hidden=false;if(landing)landing.hidden=true;document.body.classList.add("orbis-auth-open");document.querySelector('[data-auth-mode="login"]')?.click();window.notify?.("Ты вышел из ORBIS.")}catch(error){window.notify?.(error.message)}finally{target.disabled=false}return;
   }
   if(target.dataset.action==="like"){
-   event.preventDefault();event.stopImmediatePropagation();
    const article=target.closest("[data-post-id]");if(!article)return;
+   event.preventDefault();event.stopImmediatePropagation();
    target.disabled=true;
    try{const data=await api("/api/posts/"+encodeURIComponent(article.dataset.postId)+"/like",{method:"POST",body:"{}"});target.setAttribute("aria-pressed",String(data.liked));target.textContent=(data.liked?"♥ ":"♡ ")+data.likes+" · Реакция";target.style.color=data.liked?"#e36c91":""}
    catch(error){window.notify?.(error.message)}finally{target.disabled=false}
    return;
   }
+  if(target.dataset.action==="show-replies"){
+   event.preventDefault();event.stopImmediatePropagation();
+   const article=target.closest("[data-post-id]");if(!article)return;
+   const existing=article.querySelector(".post-replies");
+   if(existing){existing.hidden=!existing.hidden;target.textContent=existing.hidden?"◌ Ответы":"⌄ Скрыть ответы";return}
+   target.disabled=true;
+   try{
+    const data=await api("/api/posts/"+encodeURIComponent(article.dataset.postId)+"/replies");
+    const wrap=document.createElement("div");wrap.className="post-replies";wrap.style.cssText="margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#ffffff08";
+    const heading=document.createElement("b");heading.textContent="Ответы публикациями";heading.style.cssText="display:block;margin-bottom:10px";
+    wrap.append(heading);
+    if(!data.replies.length){const empty=document.createElement("p");empty.className="post-meta";empty.textContent="Ответов пока нет. Ты можешь начать обсуждение отдельной публикацией.";wrap.append(empty)}
+    else data.replies.forEach(item=>wrap.append(card(item)));
+    article.append(wrap);target.textContent="⌄ Скрыть ответы";
+   }catch(error){window.notify?.(error.message)}finally{target.disabled=false}
+   return;
+  }
+  if(target.dataset.action==="open-profile"){
+   event.preventDefault();event.stopImmediatePropagation();
+   const username=target.dataset.username,results=$("orbisSearchResults");
+   target.disabled=true;
+   try{
+    const data=await api("/api/profile/"+encodeURIComponent(username));
+    results.replaceChildren();
+    const back=document.createElement("button");back.type="button";back.className="secondary";back.dataset.action="back-search";back.textContent="← Назад к поиску";
+    const heading=document.createElement("div");heading.className="post";heading.style.marginTop="12px";
+    const name=document.createElement("h3");name.textContent=data.user.name+" · @"+data.user.username;
+    const bio=document.createElement("p");bio.className="post-body";bio.textContent=data.user.bio||"Пользователь пока не добавил описание.";
+    const stats=document.createElement("p");stats.className="post-meta";stats.textContent="Подписчики: "+data.followers+" · Подписки: "+data.following;
+    const follow=document.createElement("button");follow.type="button";follow.className="secondary";follow.dataset.action="follow";follow.dataset.username=data.user.username;follow.textContent=data.isFollowing?"Вы подписаны":"Подписаться";
+    heading.append(name,bio,stats,follow);results.append(back,heading);
+    const postsTitle=document.createElement("h3");postsTitle.textContent="Публикации";results.append(postsTitle);
+    if(!data.posts.length){const empty=document.createElement("p");empty.textContent="Публикаций пока нет.";results.append(empty)}
+    else data.posts.forEach(item=>results.append(card(item)));
+   }catch(error){window.notify?.(error.message)}finally{target.disabled=false}
+   return;
+  }
+  if(target.dataset.action==="back-search"){runSearch();return}
   if(target.dataset.action==="reply"){
    event.preventDefault();event.stopImmediatePropagation();
    const article=target.closest("[data-post-id]");if(!article)return;
