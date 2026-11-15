@@ -1495,6 +1495,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 @media(max-width:760px){.auth-minimal{padding:74px 16px 52px;overflow:auto}.auth-minimal-layout{display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:calc(100svh - 130px);width:min(440px,100%)}.auth-orb-stage{min-height:230px;width:100%;margin-top:-8px}.auth-orb-halo{width:220px}.auth-orb-ring{width:230px!important;height:95px!important}.auth-orb-ring.ring-b{width:270px!important;height:120px!important}.auth-orb-ring.ring-c{width:210px!important;height:170px!important}.auth-orb-sphere{width:82px}.auth-orb-sphere span{font-size:34px}.auth-orb-word{top:calc(50% + 69px);font-size:21px}.auth-orb-caption{top:calc(50% + 99px);font-size:7px}.auth-orb-spark.spark-a{left:18%;top:17%}.auth-orb-spark.spark-b{right:17%;bottom:14%}.auth-card-wrap{width:100%;max-width:430px}.auth-card-compact{padding:23px 21px 19px}.auth-card-compact .auth-card-top{margin-bottom:17px}.auth-card-compact .auth-tabs{margin:16px 0}.auth-minimal .auth-copyright{bottom:9px}.auth-back-landing{top:14px;left:14px}}
 @media(max-width:380px){.auth-orb-stage{min-height:190px}.auth-card-compact{padding:20px 17px}.auth-minimal{padding-inline:12px}}
 @media(prefers-reduced-motion:reduce){.auth-orb-halo,.auth-orb-ring,.auth-orb-sphere{animation:none!important}}
+
+/* Working profile editor */
+.profile-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px}.profile-edit-grid label{display:grid;gap:7px;color:#777391;font-size:11px;font-weight:750}.profile-edit-grid input,.profile-edit-grid textarea{width:100%;border:1px solid #e9e5f8;background:#faf9ff;border-radius:13px;padding:12px 13px;color:#282342;outline:none}.profile-edit-grid input:focus,.profile-edit-grid textarea:focus{border-color:#a18cff;box-shadow:0 0 0 3px #8c79f21b}.profile-edit-grid textarea{min-height:82px;resize:vertical}.profile-edit-grid .profile-bio-label{grid-column:1/-1}.profile-edit-grid .primary{justify-self:start}.profile-edit-grid .profile-only-note{grid-column:1/-1;margin:0;color:#9995ad;font-size:10px}@media(max-width:650px){.profile-edit-grid{grid-template-columns:1fr;padding:15px}.profile-edit-grid .profile-bio-label,.profile-edit-grid .profile-only-note{grid-column:auto}}
 </style>
 </head>
 <body>
@@ -1621,6 +1624,8 @@ $("cancel").addEventListener("click",()=>modal.classList.remove("open"));
 modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
 
 // Local-first publishing: posts are stored in this browser and survive refreshes.
+const ORBIS_PROFILE_KEY="orbis-profile-v1";
+function getOrbisProfile(){try{return JSON.parse(localStorage.getItem(ORBIS_PROFILE_KEY)||"{}")}catch(e){return{}}}
 const ORBIS_POSTS_KEY="orbis-local-posts-v1";
 function readLocalPosts(){try{const value=JSON.parse(localStorage.getItem(ORBIS_POSTS_KEY)||"[]");return Array.isArray(value)?value:[]}catch(e){return[]}}
 function makePostCard(data){
@@ -1656,7 +1661,7 @@ restoreLocalPosts();
 $("publish").addEventListener("click",()=>{
  const title=$("postTitle").value.trim(),topic=$("postTopic").value.trim(),body=$("postBody").value.trim();
  if(!title||!topic||!body){notify("Добавь название, тему и текст публикации.");return}
- const post={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title,topic,body,author:"Гость ORBIS",username:"guest",date:new Date().toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})};
+ const profile=getOrbisProfile();const post={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title,topic,body,author:profile.name||"Гость ORBIS",username:profile.username||"guest",date:new Date().toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})};
  const saved=readLocalPosts();saved.unshift(post);
  try{localStorage.setItem(ORBIS_POSTS_KEY,JSON.stringify(saved.slice(0,100)))}catch(e){notify("Память браузера заполнена. Удали часть старых данных.");return}
  $("feed").prepend(makePostCard(post));["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
@@ -1689,7 +1694,22 @@ function setOrbisScreen(view){
    window.scrollTo({top:0,behavior:"smooth"});
   }));
  }else if(view==="Профиль"){
-  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница в ORBIS.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large">O</div><div class="profile-name-block"><h3>Твоё имя</h3><span>@username</span></div></div><div class="profile-only-note">Здесь будет отображаться твоё имя пользователя.</div></div>';
+  const profile=(()=>{try{return JSON.parse(localStorage.getItem("orbis-profile-v1")||"{}")}catch(e){return{}}})();
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Настрой свою личную страницу.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Гость ORBIS</h3><span id="profileHandlePreview">@guest</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username"></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave">Сохранить профиль</button><p class="profile-only-note" id="profileSaveNote">Профиль сохраняется только в этом браузере.</p></div></div>';
+  const nameInput=$("profileNameInput"),handleInput=$("profileHandleInput"),bioInput=$("profileBioInput");
+  nameInput.value=profile.name||"Гость ORBIS";handleInput.value=profile.username||"guest";bioInput.value=profile.bio||"";
+  $("profileNamePreview").textContent=nameInput.value;$("profileHandlePreview").textContent="@"+handleInput.value;$("profileAvatarPreview").textContent=nameInput.value.slice(0,1).toUpperCase();
+  $("profileSave").addEventListener("click",()=>{
+   const name=nameInput.value.trim(),username=handleInput.value.trim().replace(/^@/,""),bio=bioInput.value.trim();
+   if(name.length<2||name.length>32){notify("Имя должно содержать от 2 до 32 символов.");return}
+   if(!/^[a-zA-Z0-9_.]{3,24}$/.test(username)){notify("Username: 3–24 символа, латиница, цифры, точка или _.");return}
+   const next={name,username,bio};
+   try{localStorage.setItem("orbis-profile-v1",JSON.stringify(next))}catch(e){notify("Не удалось сохранить профиль в браузере.");return}
+   $("profileNamePreview").textContent=name;$("profileHandlePreview").textContent="@"+username;$("profileAvatarPreview").textContent=name.slice(0,1).toUpperCase();
+   const note=$("profileSaveNote");note.textContent="Изменения сохранены на этом устройстве.";
+   if($("avatar"))$("avatar").textContent=name.slice(0,1).toUpperCase();
+   notify("Профиль сохранён.");
+  });
  }
 }
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setOrbisScreen(b.dataset.view)));
