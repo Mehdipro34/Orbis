@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#090b18">
 <meta name="description" content="ORBIS — социальное пространство для публикаций, поиска идей и личных профилей.">
 <title>ORBIS — пространство идей</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 /* Cinematic nebula layer + gentle pointer depth (disabled on touch/reduced motion). */
@@ -1903,7 +1902,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <button class="intro-skip" id="introSkip" type="button">Продолжить в ORBIS →</button>
 </div>
 <section class="orbis-landing" id="orbisLanding">
-<header class="landing-nav"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><nav><a href="#about">О проекте</a><a href="#features">Возможности</a><a href="#creator">Создатель</a></nav><div><button class="land-login" data-open-auth="login">Войти через Telegram</button></div></header>
+<header class="landing-nav"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><nav><a href="#about">О проекте</a><a href="#features">Возможности</a><a href="#creator">Создатель</a></nav><div><button class="land-login" data-open-auth="login">Войти</button></div></header>
 <main class="land-main" id="home"><section class="land-hero land-hero-centered">
  <div class="center-stage">
   <div class="center-status"><i></i> НОВОЕ ПРОСТРАНСТВО УЖЕ ОТКРЫТО</div>
@@ -1919,8 +1918,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="center-copy">
    <div class="center-eyebrow">ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</div>
    <h1>Твой мир.<br><em>Твой ORBIS.</em></h1>
-   <p>Социальная сеть для мыслей, открытий и публикаций. Вход и регистрация — только через Telegram.</p>
-   <div class="center-actions"><button class="center-primary" data-open-auth="login">Продолжить через Telegram <span>↗</span></button><a class="center-secondary" href="#about">О проекте</a></div>
+   <p>Социальная сеть для мыслей, открытий и публикаций. Регистрация и вход — по электронной почте и паролю.</p>
+   <div class="center-actions"><button class="center-primary" data-open-auth="login">Создать аккаунт <span>↗</span></button><a class="center-secondary" href="#about">О проекте</a></div>
    <div class="center-proof"><span><i>✳</i> Лента</span><b></b><span><i>⌁</i> Navigator</span><b></b><span><i>◎</i> Профиль</span></div>
   </div>
   <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
@@ -1957,15 +1956,15 @@ document.addEventListener("DOMContentLoaded",()=>{
    <div class="auth-heading"><div class="auth-eyebrow">ТВОЁ ПРОСТРАНСТВО</div><h2 id="authTitle">С возвращением</h2><p id="authSubtitle">Войди и продолжай.</p></div>
    <div class="auth-tabs" role="tablist" aria-label="Тип доступа"><button class="active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Вход</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Регистрация</button><span class="auth-tab-glider"></span></div>
    <form id="orbisAuthForm" novalidate>
-    <label class="auth-field"><span>ИМЯ ПОЛЬЗОВАТЕЛЯ</span><span class="auth-input-wrap"><i>@</i><input id="authUsername" type="text" autocomplete="username" placeholder="Твой username" minlength="3" maxlength="24" required></span></label>
-    <label class="auth-field auth-email-field" id="authEmailField" hidden><span>ПОЧТА · НЕОБЯЗАТЕЛЬНО</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com"></span></label>
+    <label class="auth-field auth-username-field" id="authUsernameField" hidden><span>ИМЯ ПОЛЬЗОВАТЕЛЯ</span><span class="auth-input-wrap"><i>@</i><input id="authUsername" type="text" autocomplete="username" placeholder="Твой username" minlength="3" maxlength="24"></span></label>
+    <label class="auth-field auth-email-field" id="authEmailField"><span>ЭЛЕКТРОННАЯ ПОЧТА</span><span class="auth-input-wrap"><i>✉</i><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com" required></span></label>
     <label class="auth-field"><span>ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authPassword" type="password" autocomplete="current-password" placeholder="Твой пароль" minlength="8" required><button class="auth-eye" id="authEye" type="button" aria-label="Показать пароль">◉</button></span></label>
     <label class="auth-field auth-confirm-field" id="authConfirmField" hidden><span>ПОВТОРИ ПАРОЛЬ</span><span class="auth-input-wrap"><i>⌑</i><input id="authConfirm" type="password" autocomplete="new-password" placeholder="Ещё раз пароль"></span></label>
     <div class="auth-form-note" id="authFormNote" aria-live="polite"> </div>
     <button class="auth-submit" type="submit"><span id="authSubmitText">Войти</span><b>↗</b></button>
    </form>
    
-   <div class="auth-legal">Твой аккаунт ORBIS связан с Telegram. Пароль и отдельная почта не нужны.</div>
+   <div class="auth-legal">Аккаунт ORBIS защищён паролем. Для регистрации потребуется подтвердить электронную почту.</div>
   </div></div>
  </div>
  <div class="auth-copyright">© 2026 ORBIS</div>
@@ -2230,12 +2229,12 @@ document.addEventListener("click",event=>{
 (function(){
  const intro=document.getElementById("orbisIntro"),gateway=document.getElementById("authGateway"),shell=document.getElementById("orbisAppShell");
  const skip=document.getElementById("introSkip");
- const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs"),username=document.getElementById("authUsername"),emailField=document.getElementById("authEmailField"),email=document.getElementById("authEmail");
+ const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs"),username=document.getElementById("authUsername"),usernameField=document.getElementById("authUsernameField"),emailField=document.getElementById("authEmailField"),email=document.getElementById("authEmail");
  let mode="login";
  function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}const landing=document.getElementById("orbisLanding");if(!window.orbisUser&&shell?.hidden){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open")}}
  function enterApp(){if(gateway)gateway.hidden=true;const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(shell)shell.hidden=false;document.body.classList.remove("orbis-auth-open","orbis-demo-open");document.body.classList.add("orbis-app-open");window.scrollTo({top:0,behavior:"auto"});window.dispatchEvent(new Event("orbis:login"))} window.orbisEnterApp=enterApp;
  const landing=document.getElementById("orbisLanding");
- function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>username&&username.focus({preventScroll:true}),220);window.scrollTo({top:0,behavior:"smooth"})}
+ function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>{const target=mode==="signup"?username:email;target&&target.focus({preventScroll:true})},220);window.scrollTo({top:0,behavior:"smooth"})}
  document.querySelectorAll("[data-open-auth]").forEach(button=>button.addEventListener("click",()=>openAuth(button.dataset.openAuth)));
  const back=document.getElementById("authBackLanding");if(back)back.addEventListener("click",()=>{if(gateway)gateway.hidden=true;if(landing)landing.hidden=false;document.body.classList.remove("orbis-auth-open");window.scrollTo({top:0,behavior:"smooth"})});
  // Installation remains available through the browser's native install menu.
@@ -2410,17 +2409,49 @@ document.addEventListener("click",event=>{
   if(event.target.id!=="orbisAuthForm")return;
   event.preventDefault();event.stopImmediatePropagation();
   const note=$("authFormNote"),mode=document.querySelector("[data-auth-mode].active")?.dataset.authMode||"login";
-  const payload={username:$("authUsername").value.trim(),password:$("authPassword").value,email:$("authEmail").value.trim()};
-  if(!/^[a-zA-Z0-9_.]{3,24}$/.test(payload.username)){note.textContent="Username: 3–24 символа, латиница, цифры, точка или _.";return}
-  if(payload.password.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";return}
-  if(mode==="signup"&&payload.password!==$("authConfirm").value){note.textContent="Пароли не совпадают.";return}
-  note.className="auth-form-note";note.textContent="Подключаем аккаунт...";
+  const email=$("authEmail").value.trim().toLowerCase();
+  const password=$("authPassword").value;
+  const username=$("authUsername").value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){note.textContent="Введи корректную электронную почту.";return}
+  if(password.length<8){note.textContent="Пароль должен содержать минимум 8 символов.";return}
+  if(mode==="signup"&&!/^[a-zA-Z0-9_.]{3,24}$/.test(username)){note.textContent="Username: 3–24 символа, латиница, цифры, точка или _.";return}
+  if(mode==="signup"&&password!==$("authConfirm").value){note.textContent="Пароли не совпадают.";return}
+  const submit=event.target.querySelector(".auth-submit");if(submit)submit.disabled=true;
+  note.className="auth-form-note";note.textContent=mode==="signup"?"Создаём аккаунт...":"Выполняем вход...";
   try{
-   const data=await api(mode==="signup"?"/api/auth/register":"/api/auth/login",{method:"POST",body:JSON.stringify(payload)});
-   window.orbisUser=data.user;syncUserUI(data.user);note.textContent="Готово. Добро пожаловать в ORBIS.";
+   await window.orbisSupabaseReady;
+   let result;
+   if(mode==="signup"){
+    result=await window.orbisSupabase.auth.signUp({
+     email,password,
+     options:{
+      emailRedirectTo:location.origin+location.pathname,
+      data:{username,display_name:username}
+     }
+    });
+    if(result.error)throw result.error;
+    if(!result.data.session){
+     note.textContent="Почти готово! Проверь почту и подтверди адрес. После подтверждения вернись на ORBIS и войди.";
+     note.className="auth-form-note success";
+     if(submit)submit.disabled=false;
+     return;
+    }
+   }else{
+    result=await window.orbisSupabase.auth.signInWithPassword({email,password});
+    if(result.error)throw result.error;
+   }
+   const data=await api("/api/auth/me");
+   window.orbisUser=data.user;syncUserUI(data.user);
+   note.textContent="Добро пожаловать в ORBIS!";
    window.orbisEnterApp?.();
-   loadFeed();
-  }catch(error){note.className="auth-form-note error";note.textContent=error.message}
+   await loadFeed();
+  }catch(error){
+   const message=String(error?.message||"Не удалось выполнить вход.");
+   note.className="auth-form-note error";
+   if(/already registered|already exists/i.test(message))note.textContent="Этот адрес уже зарегистрирован. Переключись на «Вход».";
+   else if(/username/i.test(message)&&/duplicate|unique|taken/i.test(message))note.textContent="Этот username уже занят. Выбери другой.";
+   else note.textContent=message;
+  }finally{if(submit)submit.disabled=false}
  },true);
  let replyToPostId=null;
  let lastSearchQuery="";
@@ -2750,129 +2781,65 @@ document.addEventListener("click",event=>{
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="orbis-supabase-auth-ui">
-#orbisAuthForm,.auth-tabs,.auth-legal{display:none!important}
-#orbisTelegramLogin{width:100%;min-height:54px;border:0;border-radius:15px;color:#fff;font-weight:850;font-size:14px;background:linear-gradient(105deg,#705cf0,#a06fe9 65%,#f08d92);box-shadow:0 9px 22px #8068e844;cursor:pointer}
-#orbisTelegramLogin:disabled{opacity:.6;cursor:wait}
-#orbisTelegramHelp{margin-top:12px;color:#aeb8d4;font-size:11px;line-height:1.6;text-align:center}
+#orbisAuthForm{display:grid;gap:12px}
+.auth-tabs{display:flex}
+.auth-legal{display:block}
 </style>
 <script>
 (function(){
  const SUPABASE_URL="https://wdwvcvpgovvkoodozbxf.supabase.co";
  const SUPABASE_KEY="sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx";
- const EDGE_AUTH=SUPABASE_URL+"/functions/v1/orbis-telegram-auth";
  const EDGE_API=SUPABASE_URL+"/functions/v1/orbis-api";
  const nativeFetch=window.fetch.bind(window);
- let client=null, session=null;
- const OIDC_PENDING_KEY="orbis.telegram.oidc.pending.v1";
- function randomBase64Url(bytes=32){
-   const data=new Uint8Array(bytes);crypto.getRandomValues(data);
-   return btoa(String.fromCharCode(...data)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
- }
- async function sha256Base64Url(value){
-   const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
-   return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
- }
- async function beginBrowserTelegramLogin(){
-   const configResponse=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({action:"oidc_config"})});
-   const config=await configResponse.json();
-   if(!configResponse.ok)throw new Error(config.error||"Не удалось подготовить вход через Telegram.");
-   const redirect=new URL(config.redirect_uri);
-   if(redirect.origin!==location.origin)throw new Error("Адрес возврата Telegram должен совпадать с адресом сайта ORBIS.");
-   const state=randomBase64Url(32),nonce=randomBase64Url(32),verifier=randomBase64Url(64);
-   sessionStorage.setItem(OIDC_PENDING_KEY,JSON.stringify({state,nonce,verifier,createdAt:Date.now()}));
-   const challenge=await sha256Base64Url(verifier);
-   const authUrl=new URL("https://oauth.telegram.org/auth");
-   authUrl.search=new URLSearchParams({
-     client_id:String(config.client_id),
-     redirect_uri:config.redirect_uri,
-     response_type:"code",
-     scope:"openid profile",
-     state,
-     nonce,
-     code_challenge:challenge,
-     code_challenge_method:"S256"
-   }).toString();
-   location.assign(authUrl.toString());
- }
- async function finishBrowserTelegramLogin(){
-   const params=new URLSearchParams(location.search);
-   const code=params.get("code"),returnedState=params.get("state"),oauthError=params.get("error");
-   if(!code&&!oauthError)return false;
-   const pendingRaw=sessionStorage.getItem(OIDC_PENDING_KEY);
-   sessionStorage.removeItem(OIDC_PENDING_KEY);
-   history.replaceState({},document.title,location.pathname+location.hash);
-   if(oauthError)throw new Error("Вход через Telegram отменён или не выполнен.");
-   let pending;
-   try{pending=JSON.parse(pendingRaw||"null")}catch{pending=null}
-   if(!pending||!returnedState||returnedState!==pending.state||Date.now()-pending.createdAt>10*60*1000)throw new Error("Проверка безопасности входа не пройдена. Нажми кнопку входа ещё раз.");
-   const response=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({action:"oidc_exchange",code,codeVerifier:pending.verifier,nonce:pending.nonce})});
-   const data=await response.json();
-   if(!response.ok)throw new Error(data.error||"Telegram не подтвердил вход.");
-   const {error}=await client.auth.setSession({access_token:data.session.access_token,refresh_token:data.session.refresh_token});
-   if(error)throw error;
-   session=data.session;window.orbisUser=data.user;
-   if(typeof window.orbisEnterApp==="function")window.orbisEnterApp();
-   window.dispatchEvent(new Event("orbis:login"));
-   const note=document.getElementById("authFormNote");if(note)note.textContent="Добро пожаловать в ORBIS!";
-   return true;
- }
+ let client=null,session=null;
  window.orbisSupabaseReady=(async()=>{
-   if(!window.supabase?.createClient)throw new Error("Не удалось загрузить Supabase SDK.");
-   client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-   const result=await client.auth.getSession();session=result.data.session;
-   client.auth.onAuthStateChange((_event,next)=>{session=next});
-   window.orbisSupabase=client;
-   return client;
+  if(!window.supabase?.createClient)throw new Error("Не удалось загрузить Supabase SDK.");
+  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"implicit"}
+  });
+  const current=await client.auth.getSession();session=current.data.session;
+  client.auth.onAuthStateChange((_event,next)=>{session=next});
+  window.orbisSupabase=client;
+  return client;
  })();
  window.fetch=async function(input,init){
-   const raw=typeof input==="string"?input:(input&&input.url)||"";
-   let parsed;try{parsed=new URL(raw,location.href)}catch{return nativeFetch(input,init)}
-   if(!parsed.pathname.startsWith("/api/")||parsed.pathname==="/api/news"||parsed.pathname==="/api/news/sources")return nativeFetch(input,init);
-
-   try{
-     await window.orbisSupabaseReady;
-     const current=await client.auth.getSession();session=current.data.session;
-     const headers=new Headers(init?.headers||((input instanceof Request)?input.headers:undefined));
-     headers.set("apikey",SUPABASE_KEY);
-     if(session?.access_token)headers.set("Authorization","Bearer "+session.access_token);
-     else headers.delete("Authorization");
-     let body=init?.body;
-     if(input instanceof Request&&!init)body=input.body;
-     const target=EDGE_API+parsed.pathname+parsed.search;
-     return await nativeFetch(target,{...init,method:init?.method||((input instanceof Request)?input.method:"GET"),headers,body,credentials:"omit"});
-   }catch(e){return new Response(JSON.stringify({error:e.message||"Ошибка соединения с ORBIS."}),{status:503,headers:{"content-type":"application/json"}})}
+  const raw=typeof input==="string"?input:(input&&input.url)||"";
+  let parsed;try{parsed=new URL(raw,location.href)}catch{return nativeFetch(input,init)}
+  if(!parsed.pathname.startsWith("/api/")||parsed.pathname==="/api/news"||parsed.pathname==="/api/news/sources")return nativeFetch(input,init);
+  try{
+   await window.orbisSupabaseReady;
+   const current=await client.auth.getSession();session=current.data.session;
+   const headers=new Headers(init?.headers||((input instanceof Request)?input.headers:undefined));
+   headers.set("apikey",SUPABASE_KEY);
+   if(session?.access_token)headers.set("Authorization","Bearer "+session.access_token);
+   else headers.delete("Authorization");
+   let body=init?.body;if(input instanceof Request&&!init)body=input.body;
+   return await nativeFetch(EDGE_API+parsed.pathname+parsed.search,{
+    ...init,method:init?.method||((input instanceof Request)?input.method:"GET"),
+    headers,body,credentials:"omit"
+   });
+  }catch(error){
+   return new Response(JSON.stringify({error:error.message||"Ошибка соединения с ORBIS."}),{
+    status:503,headers:{"content-type":"application/json"}
+   });
+  }
  };
  document.addEventListener("DOMContentLoaded",async()=>{
-   const form=document.getElementById("orbisAuthForm"),tabs=document.querySelector(".auth-tabs"),legal=document.querySelector(".auth-legal"),note=document.getElementById("authFormNote");
-   if(!form)return;
-   try{await window.orbisSupabaseReady;await finishBrowserTelegramLogin()}catch(error){if(note)note.textContent=error.message}
-   form.hidden=true;if(tabs)tabs.hidden=true;if(legal)legal.textContent="Вход и регистрация доступны только через Telegram.";
-   const button=document.createElement("button");button.type="button";button.id="orbisTelegramLogin";button.textContent="✈ Продолжить через Telegram";
-   const help=document.createElement("div");help.id="orbisTelegramHelp";help.textContent="В браузере подтверди вход через Telegram. Внутри Telegram Mini App вход подтвердится автоматически.";
-   form.parentNode.insertBefore(button,form);form.parentNode.insertBefore(help,form);
-   button.addEventListener("click",async()=>{
-     button.disabled=true;button.textContent="Проверяем Telegram...";
-     try{
-       await window.orbisSupabaseReady;
-       const tg=window.Telegram?.WebApp;
-       const initData=tg?.initData||"";
-       if(!initData){
-         await beginBrowserTelegramLogin();
-         return;
-       }
-       tg.ready();tg.expand();
-       const response=await nativeFetch(EDGE_AUTH,{method:"POST",headers:{"content-type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({initData})});
-       const data=await response.json();
-       if(!response.ok)throw new Error(data.error||"Не удалось войти через Telegram.");
-       const {error}=await client.auth.setSession({access_token:data.session.access_token,refresh_token:data.session.refresh_token});
-       if(error)throw error;
-       session=data.session;window.orbisUser=data.user;
-       if(typeof window.orbisEnterApp==="function")window.orbisEnterApp();
-       window.dispatchEvent(new Event("orbis:login"));
-       if(note)note.textContent="Добро пожаловать в ORBIS!";
-     }catch(e){if(note)note.textContent=e.message;help.textContent=e.message}
-     finally{button.disabled=false;button.textContent="✈ Продолжить через Telegram"}
-   });
+  const form=document.getElementById("orbisAuthForm");
+  const note=document.getElementById("authFormNote");
+  if(!form)return;
+  try{
+   await window.orbisSupabaseReady;
+   const current=await client.auth.getSession();
+   if(current.data.session){
+    const data=await api("/api/auth/me");
+    window.orbisUser=data.user;
+    syncUserUI(data.user);
+    window.orbisEnterApp?.();
+   }
+  }catch(error){
+   if(note&&error?.status!==401)note.textContent=error.message||"Не удалось восстановить вход.";
+  }
  });
 })();
 </script>
