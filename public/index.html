@@ -1619,7 +1619,50 @@ function openComposer(){$("dialogTitle").textContent="Новая публика�
 
 $("cancel").addEventListener("click",()=>modal.classList.remove("open"));
 modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
-$("publish").addEventListener("click",()=>{if(!$("postTitle").value.trim()||!$("postTopic").value.trim()||!$("postBody").value.trim()){notify("Добавь название, тему и текст публикации.");return}notify("Форма заполнена. Сохранение появится после подключения Posts API.")});
+
+// Local-first publishing: posts are stored in this browser and survive refreshes.
+const ORBIS_POSTS_KEY="orbis-local-posts-v1";
+function readLocalPosts(){try{const value=JSON.parse(localStorage.getItem(ORBIS_POSTS_KEY)||"[]");return Array.isArray(value)?value:[]}catch(e){return[]}}
+function makePostCard(data){
+ const article=document.createElement("article");article.className="post local-post";article.dataset.localPostId=data.id;
+ const top=document.createElement("div");top.className="post-top";
+ const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent=(data.author||"O").slice(0,1).toUpperCase();
+ const identity=document.createElement("div");const author=document.createElement("div");author.className="author";author.textContent=data.author||"Гость ORBIS";
+ const handle=document.createElement("span");handle.className="handle";handle.textContent="@"+(data.username||"guest");
+ author.appendChild(handle);const meta=document.createElement("div");meta.className="post-meta";meta.textContent=data.date||"Только что";
+ identity.append(author,meta);top.append(avatar,identity);
+ const title=document.createElement("div");title.className="post-title";title.textContent=data.title;
+ const topic=document.createElement("span");topic.className="topic";topic.textContent=(data.topic||"Идеи").toLocaleUpperCase("ru");
+ const body=document.createElement("div");body.className="post-body";body.textContent=data.body;
+ const actions=document.createElement("div");actions.className="post-actions";
+ const like=document.createElement("button");like.type="button";like.textContent="♡ Реакция";
+ const share=document.createElement("button");share.type="button";share.textContent="↗ Поделиться";
+ actions.append(like,share);article.append(top,title,topic,body,actions);return article;
+}
+function restoreLocalPosts(){readLocalPosts().forEach(post=>$("feed").prepend(makePostCard(post)))}
+function applyCurrentFilter(){
+ const active=document.querySelector("#topicFilter button.active");
+ const chosen=(active?.textContent||"Все темы").trim().toLocaleLowerCase("ru");
+ document.querySelectorAll("#feed .post").forEach(post=>{
+  const topic=(post.querySelector(".topic")?.textContent||"").toLocaleLowerCase("ru");
+  post.hidden=chosen!=="все темы"&&!topic.includes(chosen);
+ });
+ const visible=[...document.querySelectorAll("#feed .post")].some(post=>!post.hidden);
+ let empty=$("orbisEmptyFeed");
+ if(!empty){empty=document.createElement("div");empty.id="orbisEmptyFeed";empty.className="post";empty.textContent="В этой теме пока нет публикаций.";empty.style.cssText="color:#8582a2;text-align:center";$("feed").appendChild(empty)}
+ empty.hidden=visible;
+}
+restoreLocalPosts();
+$("publish").addEventListener("click",()=>{
+ const title=$("postTitle").value.trim(),topic=$("postTopic").value.trim(),body=$("postBody").value.trim();
+ if(!title||!topic||!body){notify("Добавь название, тему и текст публикации.");return}
+ const post={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title,topic,body,author:"Гость ORBIS",username:"guest",date:new Date().toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})};
+ const saved=readLocalPosts();saved.unshift(post);
+ try{localStorage.setItem(ORBIS_POSTS_KEY,JSON.stringify(saved.slice(0,100)))}catch(e){notify("Память браузера заполнена. Удали часть старых данных.");return}
+ $("feed").prepend(makePostCard(post));["postTitle","postTopic","postBody"].forEach(id=>$(id).value="");
+ modal.classList.remove("open");document.querySelectorAll("#topicFilter button").forEach(b=>b.classList.toggle("active",b.textContent.trim()==="Все темы"));
+ applyCurrentFilter();notify("Публикация добавлена в твою ленту.");
+});
 const orbisScreen=$("orbisScreen");
 const homeScreenNodes=[...document.querySelector("main").children].filter(el=>el.id!=="topbar"&&el!==orbisScreen);
 const orbisTopics=[
