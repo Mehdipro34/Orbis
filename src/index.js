@@ -104,10 +104,10 @@ async function postView(env, post, user) {
 }
 
 const NEWS_SOURCES = {
-  "bbc-ru": { name: "BBC News · Русский", url: "https://feeds.bbci.co.uk/russian/rss.xml", language: "Русский", credit: "BBC News" },
-  "oxu-az": { name: "Oxu.az", url: "https://oxu.az/feed", language: "Азербайджанский", credit: "Oxu.az" },
-  "trend-en": { name: "Trend News Agency", url: "https://en.trend.az/feeds/index.rss", language: "English", credit: "© Trend News Agency 2026", noCache: true, teaserLimit: 140 },
-  "aljazeera-en": { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", language: "English", credit: "Al Jazeera" }
+  "bbc-ru": { name: "BBC News · Русский", url: "https://feeds.bbci.co.uk/russian/rss.xml", language: "Русский", credit: "BBC News", allowedHosts: ["bbc.com", "bbc.co.uk"] },
+  "oxu-az": { name: "Oxu.az", url: "https://oxu.az/feed", language: "Азербайджанский", credit: "Oxu.az", allowedHosts: ["oxu.az"] },
+  "trend-en": { name: "Trend News Agency", url: "https://en.trend.az/feeds/index.rss", language: "English", credit: "© Trend News Agency 2026", noCache: true, teaserLimit: 140, allowedHosts: ["trend.az"] },
+  "aljazeera-en": { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", language: "English", credit: "Al Jazeera", allowedHosts: ["aljazeera.com"] }
 };
 function decodeXml(value) {
   return String(value || "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (_, code) => {
@@ -128,7 +128,7 @@ function parseNewsXml(xml, source, limit = 30) {
     if (!link) { const lm = block.match(/<link\b[^>]*href=["\']([^"\']+)["\'][^>]*\/?\s*>/i); if (lm) link = decodeXml(lm[1]); }
     const description = xmlTag(block, ["description", "summary", "content:encoded", "content"]);
     const dateText = xmlTag(block, ["pubDate", "published", "updated", "dc:date"]);
-    let safeUrl = ""; try { const parsed = new URL(link); if (parsed.protocol === "https:" && parsed.hostname.includes(".")) safeUrl = parsed.href; } catch {}
+    let safeUrl = ""; try { const parsed = new URL(link); const hostAllowed = !source.allowedHosts || source.allowedHosts.some(host => parsed.hostname === host || parsed.hostname.endsWith("." + host)); if (parsed.protocol === "https:" && hostAllowed) safeUrl = parsed.href; } catch {}
     if (!title || !safeUrl) continue;
     entries.push({ title: title.slice(0,220), summary: description.slice(0,source.teaserLimit || 260), url: safeUrl, publishedAt: dateText && !Number.isNaN(Date.parse(dateText)) ? new Date(dateText).toISOString() : null, source: source.name, credit: source.credit });
   }
@@ -244,6 +244,7 @@ async function api(request, env, url) {
     return json({ replies: await Promise.all(replies.map(post => postView(env, post, user))) });
   }
   if (request.method === "POST" && path === "/api/search") {
+    if (!await rateLimit(request, env, "search", 40, 60)) return json({ error: "Слишком много поисковых запросов. Попробуй через минуту." }, 429);
     const body = await request.json();
     const q = String(body.q || "").trim().toLocaleLowerCase("ru").slice(0, 80);
     if (q.length < 2) return json({ users: [], posts: [] });
@@ -365,6 +366,7 @@ async function api(request, env, url) {
     return json({ sources: Object.entries(NEWS_SOURCES).map(([id, source]) => ({ id, name: source.name, language: source.language, credit: source.credit })) });
   }
   if (request.method === "GET" && path === "/api/news") {
+    if (!await rateLimit(request, env, "news", 20, 60)) return json({ error: "Слишком много запросов к новостям. Попробуй через минуту." }, 429);
     const id = String(url.searchParams.get("source") || "bbc-ru");
     const source = NEWS_SOURCES[id];
     if (!source) return json({ error: "Неизвестный новостной источник." }, 404);
