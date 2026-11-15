@@ -1918,8 +1918,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="center-copy">
    <div class="center-eyebrow">ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</div>
    <h1>Твой мир.<br><em>Твой ORBIS.</em></h1>
-   <p>Социальная сеть для мыслей, открытий и публикаций. Регистрация и вход — по электронной почте и паролю.</p>
-   <div class="center-actions"><button class="center-primary" data-open-auth="login">Создать аккаунт <span>↗</span></button><a class="center-secondary" href="#about">О проекте</a></div>
+   <p>Социальное пространство для мыслей, открытий и публикаций. Открывай и пользуйся сразу — без регистрации.</p>
+   <div class="center-actions"><button class="center-primary" data-open-auth="login">Открыть ORBIS <span>↗</span></button><a class="center-secondary" href="#about">О проекте</a></div>
    <div class="center-proof"><span><i>✳</i> Лента</span><b></b><span><i>⌁</i> Navigator</span><b></b><span><i>◎</i> Профиль</span></div>
   </div>
   <div class="center-bottom-note">SCROLL TO DISCOVER <span>↓</span></div>
@@ -1939,12 +1939,12 @@ document.addEventListener("DOMContentLoaded",()=>{
  <div class="faq-heading"><small class="land-kicker">ВОПРОСЫ И ОТВЕТЫ</small><h2>Знакомство с <em>ORBIS.</em></h2><p>Коротко о том, что представляет собой проект сегодня.</p></div>
  <div class="faq-list">
   <details><summary>Что такое ORBIS?<span>＋</span></summary><p>Это цифровое пространство для публикаций, тематического поиска и личных профилей. Главная идея — оставить три понятных направления: Лента, Навигатор и Профиль.</p></details>
-  <details><summary>Как войти в ORBIS?<span>＋</span></summary><p>Вход и создание аккаунта работают по электронной почте и паролю. Supabase защищает учётные данные и сохраняет сессию между посещениями.</p></details>
+  <details><summary>Как войти в ORBIS?<span>＋</span></summary><p>ORBIS открывается сразу в гостевом режиме. Регистрация не требуется. Supabase защищает учётные данные и сохраняет сессию между посещениями.</p></details>
   <details><summary>Где хранятся данные?<span>＋</span></summary><p>Профили, публикации, реакции, подписки, закладки и истории хранятся в Supabase PostgreSQL. Фото и видео загружаются во внутреннее хранилище ORBIS и отображаются в ленте вместе с публикацией.</p></details>
   <details><summary>Можно ли открыть ORBIS на телефоне?<span>＋</span></summary><p>Да, текущую веб-страницу можно открыть в мобильном браузере. Отдельное приложение пока не выпущено.</p></details>
  </div>
 </section>
-<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере и устанавливай на главный экран через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS <b>↗</b></button><small id="downloadNote">Регистрация и вход — по электронной почте и паролю.</small></div></section></main>
+<section class="land-download" id="download"><div><small class="land-kicker">ORBIS — ВСЕГДА РЯДОМ</small><h2>Твоё пространство<br><em>в одном касании.</em></h2><p>Открывай ORBIS в браузере и устанавливай на главный экран через меню браузера.</p></div><div><button id="downloadCTA" class="download-login" data-open-auth="login">Открыть ORBIS <b>↗</b></button><small id="downloadNote">Открывай ORBIS без регистрации.</small></div></section></main>
 <footer class="land-footer"><a class="landing-logo" href="#home"><b>✳</b> ORBIS</a><span>ИДЕИ · ЛЮДИ · НОВЫЕ ГОРИЗОНТЫ</span><span>© 2026 ORBIS · Мехти Мурадлы</span></footer></section>
 <section class="auth-gateway auth-minimal" id="authGateway" hidden aria-label="Вход в ORBIS">
  <button class="auth-back-landing" id="authBackLanding" type="button" aria-label="Назад">←</button>
@@ -1970,7 +1970,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     <button class="auth-submit" type="submit"><span id="authSubmitText">Войти</span><b>↗</b></button>
    </form>
    
-   <div class="auth-legal">Аккаунт ORBIS защищён паролем. Для регистрации потребуется подтвердить электронную почту.</div>
+   <div class="auth-legal">ORBIS теперь запускается в гостевом режиме — без почты и пароля.</div>
   </div></div>
  </div>
  <div class="auth-copyright">© 2026 ORBIS</div>
@@ -2069,7 +2069,7 @@ function setOrbisScreen(view){
   orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SAVED IDEAS</span><h2>Закладки</h2><p>Публикации, которые ты сохранил, всегда под рукой.</p></div><div id="orbisBookmarksList" aria-live="polite"><div class="post">Загружаем сохранённые публикации…</div></div>';
   api("/api/bookmarks").then(data=>{const list=$("orbisBookmarksList");if(!list)return;list.replaceChildren();if(!data.posts.length){const empty=document.createElement("div");empty.className="post";empty.textContent="Здесь пока пусто. Сохраняй интересные публикации из ленты.";list.append(empty)}else data.posts.forEach(item=>list.append(card(item))) }).catch(error=>{const list=$("orbisBookmarksList");if(list){list.textContent=error.message}});
  }else if(view==="Профиль"){
-  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button">Выйти из аккаунта</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
+  orbisScreen.innerHTML='<div class="screen-heading"><span class="screen-eyebrow">YOUR SPACE IN ORBIS</span><h2>Профиль</h2><p>Твоя личная страница и публикации.</p></div><div class="profile-screen-card"><div class="profile-cover"><div class="profile-cover-orbit"></div><span>ORBIS MEMBER</span></div><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarPreview">O</div><div class="profile-name-block"><h3 id="profileNamePreview">Загружаем профиль…</h3><span id="profileHandlePreview">@username</span></div></div><div class="profile-edit-grid"><label>Имя<input id="profileNameInput" maxlength="32" placeholder="Как тебя называть?"></label><label>Username<input id="profileHandleInput" maxlength="24" placeholder="username" readonly></label><label class="profile-bio-label">О себе<textarea id="profileBioInput" maxlength="180" placeholder="Коротко расскажи о себе"></textarea></label><button class="primary" id="profileSave" type="button">Сохранить профиль</button><button class="secondary profile-logout" id="profileLogout" type="button" hidden>Выйти из гостевого режима</button><p class="profile-only-note" id="profileSaveNote">Изменения сохраняются в аккаунте ORBIS.</p></div><div class="profile-publications" style="margin-top:22px"><h3>Мои публикации</h3></div></div>';
  } 
 }
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setOrbisScreen(b.dataset.view)));
@@ -2236,7 +2236,7 @@ document.addEventListener("click",event=>{
  const skip=document.getElementById("introSkip");
  const tabs=document.querySelectorAll("[data-auth-mode]"),title=document.getElementById("authTitle"),subtitle=document.getElementById("authSubtitle"),confirmField=document.getElementById("authConfirmField"),confirmInput=document.getElementById("authConfirm"),password=document.getElementById("authPassword"),submitText=document.getElementById("authSubmitText"),note=document.getElementById("authFormNote"),tabWrap=document.querySelector(".auth-tabs"),username=document.getElementById("authUsername"),usernameField=document.getElementById("authUsernameField"),emailField=document.getElementById("authEmailField"),email=document.getElementById("authEmail");
  let mode="login";
- function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}const landing=document.getElementById("orbisLanding");if(!window.orbisUser&&shell?.hidden){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open")}}
+ function showAccess(){if(intro){intro.classList.add("hide");setTimeout(()=>intro.remove(),650)}const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(gateway)gateway.hidden=true;}
  function enterApp(){if(gateway)gateway.hidden=true;const landing=document.getElementById("orbisLanding");if(landing)landing.hidden=true;if(shell)shell.hidden=false;document.body.classList.remove("orbis-auth-open","orbis-demo-open");document.body.classList.add("orbis-app-open");window.scrollTo({top:0,behavior:"auto"});window.dispatchEvent(new Event("orbis:login"))} window.orbisEnterApp=enterApp;
  const landing=document.getElementById("orbisLanding");
  function openAuth(nextMode){if(landing)landing.hidden=true;if(gateway)gateway.hidden=false;document.body.classList.add("orbis-auth-open");if(nextMode){const target=document.querySelector('[data-auth-mode="'+nextMode+'"]');if(target)target.click()}setTimeout(()=>{const target=mode==="signup"?username:email;target&&target.focus({preventScroll:true})},220);window.scrollTo({top:0,behavior:"smooth"})}
@@ -2904,15 +2904,24 @@ document.addEventListener("click",event=>{
   }catch(error){if(note)note.textContent=error.message||"Не удалось подключить авторизацию.";return}
   try{
    await window.orbisSupabaseReady;
-   const current=await client.auth.getSession();
-   if(current.data.session){
-    const data=await api("/api/auth/me");
-    window.orbisUser=data.user;
-    syncUserUI(data.user);
-    window.orbisEnterApp?.();
+   let current=await client.auth.getSession();
+   if(!current.data.session){
+    const guest=await client.auth.signInAnonymously({options:{data:{display_name:"Гость"}}});
+    if(guest.error)throw guest.error;
+    current=await client.auth.getSession();
    }
+   const data=await api("/api/auth/me");
+   window.orbisUser=data.user;
+   syncUserUI(data.user);
+   window.orbisEnterApp?.();
+   await loadFeed();
+   await loadCurrentProfile();
   }catch(error){
-   if(note&&error?.status!==401)note.textContent=error.message||"Не удалось восстановить вход.";
+   console.error("ORBIS guest start:",error);
+   const message=String(error?.message||"Не удалось открыть ORBIS.");
+   if(note){note.className="auth-form-note error";note.textContent=/anonymous|anonymous sign|disabled/i.test(message)?"Гостевой вход не включён в настройках Supabase. Включи Authentication → Sign In / Providers → Anonymous Sign-Ins.":message}
+   const landing=document.getElementById("orbisLanding");
+   if(landing){landing.hidden=false;const status=document.createElement("div");status.className="guest-start-error";status.textContent=/anonymous|anonymous sign|disabled/i.test(message)?"Чтобы открыть ORBIS без регистрации, включи Anonymous Sign-Ins в Supabase.": "ORBIS пока не смог подключиться. Проверь соединение и попробуй обновить страницу.";landing.querySelector(".land-main")?.prepend(status)}
   }
  });
 })();
