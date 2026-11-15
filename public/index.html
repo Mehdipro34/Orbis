@@ -6,7 +6,35 @@
 <meta name="theme-color" content="#f7f8fc">
 <meta name="description" content="ORBIS — пространство идей, историй и открытий.">
 <title>ORBIS — твой мир идей</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js">
+/* Cinematic nebula layer + gentle pointer depth (disabled on touch/reduced motion). */
+(function(){
+  const nebula=document.createElement("div");nebula.id="orbNebula";nebula.setAttribute("aria-hidden","true");
+  nebula.innerHTML="<i></i><i></i><i></i>";document.body.prepend(nebula);
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fine=window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if(reduce||!fine)return;
+  const cards=document.querySelectorAll(".post,.side-card,.stories,.composer");
+  cards.forEach(card=>{
+    let frame=0;
+    card.addEventListener("pointermove",event=>{
+      if(frame)return;
+      frame=requestAnimationFrame(()=>{
+        const rect=card.getBoundingClientRect();
+        const x=(event.clientX-rect.left)/rect.width-.5;
+        const y=(event.clientY-rect.top)/rect.height-.5;
+        card.style.transform="perspective(900px) rotateX("+(-y*1.7)+"deg) rotateY("+(x*1.7)+"deg) translateY(-2px)";
+        frame=0;
+      });
+    });
+    card.addEventListener("pointerleave",()=>{
+      if(frame)cancelAnimationFrame(frame);frame=0;
+      card.style.transform="";
+    });
+  });
+})();
+
+</script>
 <style>
 :root{color-scheme:light;--bg:#f6f7fb;--paper:#fff;--ink:#20243a;--muted:#858ba2;--line:#e9ebf3;--violet:#6958e8;--violet2:#8b7cf6;--coral:#ff8c79;--mint:#5bc9b3;--shadow:0 14px 40px #34365c0c}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0%,#eeeaff 0,transparent 34%),radial-gradient(ellipse at 0% 35%,#fff0ed 0,transparent 28%),var(--bg);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea{font:inherit}button{cursor:pointer}.shell{max-width:1390px;margin:auto;min-height:100dvh;display:grid;grid-template-columns:245px minmax(0,700px) 300px;gap:28px;padding:26px 28px}.sidebar{position:sticky;top:24px;height:calc(100dvh - 48px);display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:12px;padding:3px 9px 36px;font-size:23px;font-weight:950;letter-spacing:3px}.brandmark{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;color:white;font-size:22px;background:linear-gradient(145deg,#8879ff,#6554df 60%,#ff9c91);box-shadow:0 9px 22px #7565e83b}.nav{display:grid;gap:7px}.nav button{border:0;background:transparent;color:#777e96;text-align:left;padding:13px 15px;border-radius:15px;display:flex;align-items:center;gap:14px;font-weight:680;transition:.2s}.nav button:hover{background:#fff;color:var(--violet);transform:translateX(2px)}.nav button.active{background:#eeecff;color:var(--violet);box-shadow:inset 3px 0 var(--violet)}.nav-icon{font-size:20px;width:24px;text-align:center}.nav .create{margin-top:17px;justify-content:center;color:white;background:linear-gradient(110deg,#7969f2,#5e50dc);box-shadow:0 12px 24px #7565e83b}.nav .create:hover{color:white;transform:translateY(-2px);background:linear-gradient(110deg,#8879ff,#6657e6)}.sidebar-foot{margin-top:auto;padding:15px 10px;color:#a1a5b7;font-size:11px}.sidebar-foot b{color:#6f7290}
@@ -434,6 +462,39 @@ body:after{animation:ambientDrift 18s ease-in-out infinite alternate,nebulaPulse
 @media(prefers-reduced-motion:reduce){
  body:after,.brandmark,.brand-word,.hero,.hero-visual,.hero-planet,.hero-orbit,.hero-spark,.story-ring,.avatar,.post,.side-card,.stories,.composer,.topic-filter button.active,.nav .create,.primary,.intro-chip,.mobile-nav button.active,#orbisProgress{animation:none!important}
 }
+
+
+/* ORBIS NEBULA EXPERIENCE — cinematic polish */
+:root{--orb-glow:rgba(132,108,255,.22)}
+html{scroll-behavior:smooth}
+body{isolation:isolate}
+#orbNebula{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:.72}
+#orbNebula i{position:absolute;display:block;border-radius:50%;filter:blur(2px);mix-blend-mode:multiply;will-change:transform}
+#orbNebula i:nth-child(1){width:360px;height:360px;left:-150px;top:22%;background:radial-gradient(circle,#ffb8d555,transparent 68%);animation:nebulaOne 22s ease-in-out infinite alternate}
+#orbNebula i:nth-child(2){width:480px;height:480px;right:-210px;top:4%;background:radial-gradient(circle,#a99aff66,transparent 68%);animation:nebulaTwo 26s ease-in-out infinite alternate}
+#orbNebula i:nth-child(3){width:390px;height:390px;right:18%;bottom:-240px;background:radial-gradient(circle,#72e6d044,transparent 68%);animation:nebulaThree 24s ease-in-out infinite alternate}
+@keyframes nebulaOne{to{transform:translate(100px,-65px) scale(1.2)}}
+@keyframes nebulaTwo{to{transform:translate(-90px,110px) scale(.82)}}
+@keyframes nebulaThree{to{transform:translate(-70px,-95px) scale(1.18)}}
+.hero{transform:translateZ(0);transition:filter .35s,box-shadow .35s}
+.hero:hover{filter:saturate(1.12);box-shadow:0 28px 65px #7965ef55}
+.hero-planet{position:relative}
+.hero-planet:after{content:"";position:absolute;inset:-13px;border:1px solid #ffffff80;border-radius:38px;transform:rotate(28deg);animation:planetAura 5s ease-in-out infinite}
+@keyframes planetAura{0%,100%{transform:rotate(28deg) scale(.96);opacity:.45}50%{transform:rotate(48deg) scale(1.1);opacity:1}}
+.post,.side-card,.stories,.composer{transform-style:preserve-3d;will-change:transform}
+.post:after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(115deg,transparent 20%,#ffffff80 48%,transparent 72%);transform:translateX(-130%);opacity:0}
+.post:hover:after{opacity:.5;animation:cardSweep .9s ease}
+@keyframes cardSweep{to{transform:translateX(130%)}}
+.topic-filter button,.tiny,.post-actions button,.mobile-nav button{position:relative;overflow:hidden}
+.topic-filter button:active,.tiny:active,.post-actions button:active,.mobile-nav button:active{transform:scale(.94)}
+.story:nth-child(2n) .story-ring{animation:storyBob 4.4s ease-in-out infinite}
+.story:nth-child(3n) .story-ring{animation:storyBob 5.2s ease-in-out infinite reverse}
+@keyframes storyBob{0%,100%{translate:0 0}50%{translate:0 -3px}}
+#orbisProgress{height:3px;box-shadow:0 0 12px #8b75ff99}
+.dialog{animation:dialogBloom .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes dialogBloom{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:650px){#orbNebula{opacity:.42}.post:hover:after{animation:none}}
+@media(prefers-reduced-motion:reduce){#orbNebula i,.hero-planet:after,.story:nth-child(n) .story-ring{animation:none!important}.post:after{display:none}}
 
 </style>
 </head>
