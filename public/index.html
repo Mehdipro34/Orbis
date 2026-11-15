@@ -3288,5 +3288,29 @@ if("serviceWorker" in navigator){
   if(button){button.style.pointerEvents="auto";button.addEventListener("click",continueToOrbis,true);}
 })();
 </script>
+<style id="orbis-social-ui">
+.orbis-feature-form{display:grid;grid-template-columns:1fr auto;gap:10px;padding:16px;margin:14px 0;border:1px solid #ffffff1c;border-radius:18px;background:#111a2d}
+.orbis-feature-form input,.orbis-feature-form textarea{min-width:0;width:100%;border:1px solid #354361;border-radius:12px;padding:12px;background:#0c1426;color:#fff}
+.orbis-feature-form textarea{grid-column:1/-1;min-height:70px}
+.orbis-feature-form p{grid-column:1/-1;color:#aab6d0}
+.orbis-feature-columns{display:grid;grid-template-columns:1fr 1.4fr;gap:14px}
+.orbis-feature-columns>section,#orbisChatPanel{min-width:0;padding:14px;border:1px solid #ffffff18;border-radius:16px;background:#10192b}
+.orbis-conversation-item,.orbis-notification,.orbis-clan-card{display:grid;gap:6px;padding:14px;margin:8px 0;border:1px solid #ffffff18;border-radius:14px;background:#17223a;color:#e8e5ff;text-align:left}
+.orbis-conversation-item{width:100%;cursor:pointer}
+.orbis-conversation-item small,.orbis-conversation-item span,.orbis-clan-card small{color:#aab6d0;font-size:11px}
+.orbis-chat-messages{display:flex;flex-direction:column;gap:9px;min-height:250px;max-height:450px;overflow:auto;padding:12px}
+.orbis-message{align-self:flex-start;max-width:85%;padding:10px;border-radius:12px;background:#202c46;color:#fff}
+.orbis-message.own{align-self:flex-end;background:#51458f}
+.orbis-message p{margin:4px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.orbis-message small,.orbis-message time{display:block;font-size:10px;color:#c0b8eb}
+.orbis-chat-send{display:flex;gap:8px}
+.orbis-chat-send textarea{flex:1;min-width:0;background:#0c1426;color:#fff;border:1px solid #354361;border-radius:10px;padding:10px}
+.orbis-notification.unread{border-color:#a795ff77}
+.orbis-clan-card p{margin:0;color:#c0c8dc;font-size:12px}
+.mobile-nav{overflow-x:auto;justify-content:flex-start;gap:4px;scrollbar-width:none}
+.mobile-nav button{flex:0 0 auto;min-width:42px;padding-inline:9px}
+@media(max-width:760px){.orbis-feature-columns{grid-template-columns:1fr}.orbis-feature-form{grid-template-columns:1fr}.orbis-feature-form textarea,.orbis-feature-form p{grid-column:1}}
+</style>
+<script src="/orbis-social.js" defer></script>
 </body>
 </html>
