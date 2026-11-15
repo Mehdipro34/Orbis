@@ -1,142 +1,147 @@
-# ORBIS — Architecture and Product Requirements
+# ORBIS — product and architecture specification
 
-Status: working architecture draft. This document records the owner's stated requirements; items marked OPEN require confirmation before implementation.
+Status: implementation specification; deployment and scale claims remain unverified.
 
-## 1. Product shape
+## Product definition
 
-- ORBIS is a social network, not merely a Telegram bot.
-- Initial client: Telegram Mini App and a separately accessible website.
-- Future clients: Android and iOS applications using the same backend and account system.
-- A person must be able to create and use an ORBIS account without having or installing Telegram.
-- Telegram is an internal storage/archival transport for ORBIS data and media; it is not the required user login provider.
-- A user should not have to manually fill out technical storage details in the app. ORBIS assigns IDs and storage locations automatically.
+ORBIS is a deliberately focused social network. Its primary experience is a continuously refreshed post feed, a Stories stream containing only recent Stories, and a topic-based Navigator. Do not add a general Search section.
 
-## 2. Account and profile
+Clients:
+- Responsive website.
+- Optional Telegram Mini App.
+- Later Android and iOS clients using the same APIs and account model.
 
-- ORBIS-owned accounts with unique usernames.
-- Username availability checked by the backend at registration and rechecked atomically when claimed.
-- Profile data includes an internal user ID, display name, username, profile fields, avatar/media references, and timestamps.
-- Authentication must be independent of Telegram.
-- Passwords must never be stored in plaintext; use a purpose-built authentication service or a secure password-hashing implementation.
-- Account recovery method is OPEN: email, phone/SMS, or both.
-- Exact required profile fields and verification policy are OPEN.
+Telegram is an internal archive/storage layer only. People can use ORBIS without having Telegram installed.
 
-## 3. Onboarding / access gate
+## Core experience
 
-The owner described an entry condition involving:
-- sharing an invitation link with at least 15 people; and
-- watching advertisements and/or completing other entry steps.
+### 1. Main post feed
+- One central feed, continuously refreshed.
+- Feed can mix recent and older eligible posts; it must not be limited to only the newest items.
+- The feed service chooses and orders posts server-side; the client receives cursor-based pages.
+- A post card displays, in order: author/profile label, post title, topic, post body, then actions.
+- Owner-authored posts show the owner as **Admin**.
+- The feed must not pretend demo/sample posts are real user posts.
 
-OPEN: confirm whether all 15 invitees must register, merely receive the link, or whether this is a referral target; confirm how ad views are counted and whether this is an access requirement, a reward mechanic, or optional promotion.
+### 2. Stories
+- A separate Stories stream.
+- Show only currently recent/active Stories; expired Stories are excluded.
+- Target platform-wide intake ceiling: up to 100,000 new Stories per day.
+- Per-account target: at most one Story publication per day.
+- Expiration and daily quota must be enforced server-side, not only in the browser.
 
-Implementation must not trust client-side counters. Referral attribution and ad completion must be verified server-side through supported provider callbacks. Do not promise ad availability or count views without a provider integration. Provide an accessible alternative if a user cannot complete the gate, subject to the owner's product decision. Do not require users to spam contacts.
+### 3. Navigator
+- A distinct topic discovery area, divided into topic-specific streams.
+- Each topic stream has its own independently deployable Navigator service boundary.
+- Topic streams refresh continuously and may include editorial/news items where the source and attribution are clear.
+- No general-purpose Search feature.
+- Navigator components must be independently deployable and independently observable; do not claim that a separate deployment automatically guarantees separate physical capacity.
 
-## 4. Independent backend components
+### 4. Minimal profile
+Only show:
+- Display name
+- Chosen unique username
+- Short description
+- Owner's posts
+The profile is intentionally minimal. Do not add follower counts, profile galleries, biography sections, or other fields without approval.
 
-The architecture should separate responsibilities into independently deployable services/workers, with independent scaling and fault boundaries. Initial logical components:
+### 5. Registration
+- ORBIS accounts, independent of Telegram and Google sign-in.
+- User enters a Gmail address as plain account information; no email is sent and no verification is performed in the agreed first version.
+- User chooses password, display name, and unique username.
+- Username uniqueness must be enforced atomically by the backend.
+- Never store plaintext passwords. Use a modern password hashing scheme and secure session handling.
+- Because the email is unverified, do not present it as proof of ownership or promise email-based account recovery.
 
-- API Gateway / request router
-- Auth and session service
-- User profile service
-- Username availability / reservation service
-- Posts service
-- Reels service
-- Stories service
-- Posts Navigator
-- Reels Navigator
-- Stories Navigator
-- Hashtag Names service
-- Hashtag Feed service
-- Interests service
-- Search service
-- Notifications service
-- Moderation service
-- Storage Manager
-- Health / monitoring / failover coordinator
+### 6. Publishing limits and capacity targets
+- Per account: maximum one post per day and one Story per day.
+- Platform-wide target: up to 100,000 posts per day and up to 100,000 Stories per day.
+- These are product targets, not verified capacity guarantees. Enforce quotas centrally and load-test before claiming support.
+- Older posts remain eligible for the main feed; Stories are time-limited/recent only.
 
-Each Navigator is a separate component with its own deployment boundary. Components communicate through authenticated APIs and/or queues. A failure in one component should not take down unrelated features where practical.
+## Service boundaries
 
-"Separate component" does not automatically mean a separate paid physical server. Start with independent deployable Workers where free-plan limits allow; validate quotas and failure behavior. Add additional providers/nodes only after measured need. Do not claim high availability or million-user capacity until load-tested.
+Initial independently deployable logical services:
+1. Edge/API Gateway
+2. Auth and sessions
+3. Username reservation
+4. Minimal Profile
+5. Posts write/API
+6. Posts Navigator/feed assembly
+7. Stories write/API
+8. Stories Navigator
+9. Topic Registry / Hashtag Names
+10. Topic Feed / Topic Navigator (one independently deployable instance per topic group as traffic requires)
+11. Interests / topic preferences
+12. Notifications
+13. Moderation and abuse controls
+14. Telegram Storage Manager
+15. Referrals / access rules (only after exact rules are approved)
+16. Monitoring, health checks and failover coordination
 
-## 5. Telegram storage design
+The user previously emphasized separate Navigator services. Preserve independent deployment boundaries for each Navigator/topic stream. Do not invent a fixed number of physical servers: Workers are deployments, not dedicated machines, and free-tier quotas may be shared at account level.
 
-Telegram private channels are intended as an internal archive for user data and media, with separated logical storage groups such as:
+## Storage
 
-- profile assets
-- posts
-- reels
-- stories
-- general media
-- archives / backups
+Telegram private channels are the intended archive for post and Story payloads/media. Storage Manager assigns storage shards and records references.
 
-Storage Manager assigns a storage shard/channel and records the Telegram chat/message/file references in a metadata index. Do not create one channel per user by default; use sharding to avoid unmanageable channel counts.
+A queryable metadata index is still required for:
+- account IDs and username uniqueness
+- post/story IDs, author IDs, timestamps and expiry
+- topic assignments and feed cursors
+- Telegram channel/message/file references
+- moderation state and quota counters
 
-Important constraints:
-- Telegram channels are not a relational database and do not provide efficient arbitrary queries.
-- Keep a metadata index for user IDs, post IDs, ownership, timestamps, tags, storage shard and Telegram message/file references.
-- Never expose bot tokens or private channel identifiers to clients.
-- Telegram bot API limits, file handling limits, channel permissions, retention and backup behavior must be tested.
-- Telegram must not be the only copy of critical account credentials or security state.
-- The app must continue to identify stored records even if a storage bot/channel is temporarily unavailable.
+Telegram channels are not a database and cannot efficiently replace an index. Keep credentials, password hashes, sessions and security-critical state in a proper database/security store, not as publicly readable channel messages. Never expose bot tokens or channel identifiers to clients.
 
-## 6. Data and storage model
+## Explicitly excluded for now
+- General Search.
+- Reels/short-video section (not part of the clarified core scope).
+- Complex public profiles and follower-centric profile UI.
+- Mandatory Telegram login.
+- Email confirmation or sending registration emails.
+- Any claim of guaranteed 100,000 concurrent users or million-user scale before testing.
 
-Core records (logical schema):
-- User: user_id, username_normalized, display_name, password_hash or external-auth reference, profile fields, created_at, status.
-- Session: session_id, user_id, expiry, revocation state.
-- Post: post_id, author_id, type, text/caption, created_at, visibility, media references, tags.
-- MediaObject: media_id, owner_id, media_type, size, checksum, telegram_storage_shard, telegram_chat_id, telegram_message_id/file reference, created_at.
-- Referral: referral_code, inviter_user_id, invitee_user_id, status, timestamps.
-- AdCompletion: provider, provider_event_id, user_id, status, verified_at (only if a legitimate ad provider supports verifiable callbacks).
-- Navigator indexes: references to eligible content, ranking metadata and cursors.
+## Scale and reliability plan
 
-## 7. Web, Mini App and future mobile apps
+- Stateless request handlers where possible.
+- Cursor pagination; bounded response sizes.
+- Queue-based asynchronous media/archive work.
+- Caching for hot topic/feed metadata.
+- Sharded Telegram archives with retry and dead-letter handling.
+- Idempotent writes and server-side per-user/day quotas.
+- Independent health checks and circuit breakers between services.
+- Load tests for realistic request mix, media sizes, feed refresh rates and failure scenarios.
+- Publish measured throughput/latency and provider quotas; do not equate daily item volume with concurrent users.
 
-- Website and Telegram Mini App should use the same ORBIS account/backend APIs.
-- Telegram Mini App is an optional client, not an identity dependency.
-- A public website entry/login route is required.
-- Future Android/iOS clients should reuse the same APIs and account IDs.
-- Do not assume a static HTML mockup is a working app.
-
-## 8. Infrastructure constraints
-
-- Strong preference for zero mandatory budget: no required paid hosting, database, API, or subscription.
-- Domain and advertising may be acceptable future costs.
-- Use free tiers only where their limits are documented and suitable.
-- Clearly identify free-tier quotas, request limits, storage limits, egress limits, and terms that may change.
-- No claim of supporting 1,000,000 users, 100,000 daily items per media type, or large concurrency until measured and independently validated.
-- Build a small working vertical slice first, then scale by measured bottlenecks.
-
-## 9. Current known repository state
+## Current repository state (verified from files)
 
 - Repository: https://github.com/Mehdipro34/Orbis
-- Cloudflare Worker: orbissocial
-- Existing files: wrangler.toml, src/index.js, public/index.html, README.md
-- Existing Worker is a basic health/webhook foundation.
-- Existing HTML is a visual prototype only.
-- Real account registration, username reservation, persistent posts, real photo/video upload, metadata indexing, Telegram archive integration, referral verification, ad verification, and independent Navigator services are not yet implemented.
-- Existing webhook setup previously returned Unauthorized and is not confirmed operational.
-- Existing secrets must remain private and must never be requested in chat.
+- Cloudflare Worker name: orbissocial
+- `src/index.js`: health endpoint, protected setup route and minimal Telegram webhook only.
+- `public/index.html`: visual prototype; no persistent post creation, Stories, real Navigator or real account system.
+- `wrangler.toml`: static assets + Worker configuration.
+- No verified working Telegram webhook, persistent metadata index, Telegram archive pipeline, account registration, or load-tested services.
 
-## 10. Build order
+## Build sequence
 
-1. Confirm product rules for referral gate, ads, and account recovery.
-2. Finalize service boundaries and data contracts.
-3. Build auth + username reservation + profile vertical slice.
-4. Build metadata index and Telegram Storage Manager with a test channel.
-5. Build Posts service and Posts Navigator end-to-end.
-6. Add Reels and Stories services and their separate Navigators.
-7. Add hashtags, interests, search, moderation and notifications.
-8. Add referral/ad verification only after provider and exact rules are confirmed.
-9. Connect website and Telegram Mini App; later mobile clients.
-10. Load-test, document free-tier ceilings, and only then add more nodes/providers.
+1. Replace the prototype navigation/design with the clarified three-part experience: Posts, Stories, Navigator; remove Search.
+2. Define and create the metadata database schema and migrations.
+3. Implement authentication, atomic username reservation and minimal profiles.
+4. Implement Posts write path, one-post-per-day enforcement, Telegram archival and metadata indexing.
+5. Implement main feed assembly with cursor pagination and recent/older mixing.
+6. Implement Stories write path, one-Story-per-day enforcement, expiry and recent-only stream.
+7. Implement topic registry and independent topic Navigator deployments.
+8. Add moderation, notifications, monitoring, referral/ad rules only after their exact business rules and providers are confirmed.
+9. Connect website and optional Telegram Mini App; later mobile clients.
+10. Load-test and report measured limits before increasing launch audience.
 
-## 11. Open decisions
+## Decisions retained from the owner
 
-- Does "invite 15 people" mean 15 link shares, 15 sign-ups, or 15 verified active users?
-- Are ads mandatory to unlock initial access, or are they an optional reward/monetization mechanic?
-- Which ad provider is acceptable and available in the target regions?
-- Account recovery: email, phone/SMS, or both?
-- Is email verification required?
-- Which exact profile fields are mandatory?
-- Are Telegram storage channels already created for specific categories, and what categories do they represent?
+- Zero mandatory budget is a strong requirement; warn before any paid dependency.
+- Telegram is internal storage, not user authentication.
+- Gmail is collected as text only in the initial registration flow; no email is sent.
+- No general Search.
+- Keep profile minimal.
+- Separate backend deployment boundary for every Navigator.
+- Maximum one post and one Story per account per day; target maximum 100,000 platform-wide per format per day.
