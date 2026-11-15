@@ -1,34 +1,47 @@
 # ORBIS
 
-Telegram-first social network prototype built with Cloudflare Workers.
+A focused social-network project built around three core areas: a continuously refreshed post feed, recent-only Stories, and a topic-based Navigator.
+
+## Product rules
+
+- ORBIS accounts do not require Telegram or Google login.
+- Gmail is collected as plain text in the initial registration flow; no confirmation email is sent.
+- Profiles stay minimal: display name, unique username, short description.
+- Main feed mixes eligible new and older posts and refreshes continuously.
+- Stories are a separate recent-only stream.
+- One post and one Story per account per day.
+- Target platform intake: up to 100,000 posts and 100,000 Stories per day. This is a target, not a load-tested guarantee.
+- Navigator is divided into topic streams with independent service boundaries.
+- General Search is excluded.
 
 ## Repository structure
 
-- `public/index.html` — first responsive Telegram Mini App interface.
-- `src/index.js` — Cloudflare Worker and Telegram webhook foundation.
+- `public/index.html` — responsive ORBIS interface.
+- `src/index.js` — Cloudflare Worker API and Telegram webhook foundation.
 - `wrangler.toml` — Worker and static asset configuration.
+- `docs/ARCHITECTURE.md` — current product and technical specification.
 
-## Cloudflare Worker
+## Current implementation status
 
-Required secrets in Worker settings:
+The interface now reflects the clarified product direction: main feed, fresh Stories, topic Navigator, minimal profile preview, and no Search section.
 
-- `BOT_TOKEN`
-- `WEBHOOK_SECRET`
+The UI is still a front-end foundation. Registration, username reservation, persistent posts, Stories, Navigator APIs, Telegram archive integration, moderation and production monitoring are not implemented yet. Sample feed cards are explicitly marked as examples.
 
-Never commit secrets to GitHub or share them in chat.
+## Infrastructure notes
 
-Static assets are served from `public/` by Cloudflare Workers Static Assets. The Worker retains API routes such as `/health`, `/setup`, and `/telegram`.
+- GitHub stores source code.
+- Cloudflare Workers serves the website and API.
+- Telegram private channels are intended as internal archive storage, not as a user login method.
+- A metadata database/index is required; Telegram channels alone are not a queryable database.
+- Keep bot tokens, webhook secrets and database credentials in Cloudflare secrets. Never commit or send them in chat.
+- Free-tier quotas must be measured. Do not infer concurrency or million-user capacity from the number of Worker deployments.
 
-## Current prototype status
+## Next engineering milestones
 
-The first UI includes a responsive feed layout, navigation, category filters, a post composer preview, and Telegram Web App initialization.
-
-The interface is currently a visual prototype. Posts are not yet saved, photo uploads are not active, and real Telegram user authentication, database/storage, moderation, and a production feed have not yet been implemented.
-
-## Next implementation stages
-
-1. Verify deployment and Telegram webhook.
-2. Validate Telegram Mini App init data on the server.
-3. Add persistent post storage and feed API.
-4. Add image upload/archive workflow.
-5. Connect the bot menu button to the Mini App URL.
+1. Add a metadata database and migrations.
+2. Implement secure account creation, login and atomic username uniqueness.
+3. Implement Posts API, daily quota and Telegram archive pipeline.
+4. Implement cursor-based main feed assembly.
+5. Implement Stories API, expiry and daily quota.
+6. Implement independent topic Navigator services.
+7. Add monitoring, moderation and load tests.
