@@ -1,15 +1,17 @@
 {
-  "id":"/",
-  "name":"ORBIS — One thought. One world.",
-  "short_name":"ORBIS",
-  "description":"Одна тема каждый день. Короткие мысли, идеи и люди со всего мира.",
-  "start_url":"/",
-  "scope":"/",
-  "display":"standalone",
-  "display_override":["standalone","minimal-ui"],
-  "orientation":"portrait",
-  "background_color":"#07090e",
-  "theme_color":"#07090e",
-  "categories":["social","education","lifestyle"],
-  "icons":[{"src":"/orbis-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "id": "/",
+  "name": "ORBIS — Your world. Your voice.",
+  "short_name": "ORBIS",
+  "description": "An international social network for ideas, posts, photos and people.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#080b12",
+  "theme_color": "#080b12",
+  "categories": ["social", "communication"],
+  "icons": [
+    { "src": "/orbis-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
 }
