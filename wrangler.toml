@@ -8,6 +8,8 @@ binding = "ASSETS"
 
 [vars]
 APP_NAME = "ORBIS"
+SUPABASE_URL = "https://wdwvcvpgovvkoodozbxf.supabase.co"
+SUPABASE_PUBLISHABLE_KEY = "sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx"
 
 [[kv_namespaces]]
 binding = "ORBIS_KV"
