@@ -55,7 +55,7 @@ async function guestHmacKey(secret:string){
   return await crypto.subtle.importKey("raw",encoder.encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign","verify"]);
 }
 async function issueGuestToken(uid:string,secret:string){
-  const payload=bytesToBase64Url(encoder.encode(JSON.stringify({sub:uid,exp:Date.now()+365*24*60*60*1000})));
+  const payload=bytesToBase64Url(encoder.encode(JSON.stringify({sub:uid,exp:Date.now()+30*24*60*60*1000})));
   const signature=new Uint8Array(await crypto.subtle.sign("HMAC",await guestHmacKey(secret),encoder.encode(payload)));
   return payload+"."+bytesToBase64Url(signature);
 }
@@ -120,7 +120,7 @@ Deno.serve(async (req: Request) => {
     if(!uid)return out({error:"Гостевой профиль не найден."},401);
     const {data:p,error}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
     if(error)return out({error:"Не удалось загрузить гостевой профиль."},500);
-    return p?out({authenticated:true,user:{id:uid,...safeProfile(p)}}):out({error:"Гостевой профиль не найден."},404);
+    return p?out({authenticated:true,authMode:p.auth_public_key?"key":"legacy",user:{id:uid,...safeProfile(p)}}):out({error:"Гостевой профиль не найден."},404);
   }
   if (req.method==="POST" && path==="/api/media") { try { form=await req.formData(); } catch { return out({error:"Invalid form data"},400); } }
   else if (["POST","PUT","PATCH"].includes(req.method)) { try { body = await req.json(); } catch { return out({error:"Invalid JSON"},400); } }
@@ -133,6 +133,76 @@ Deno.serve(async (req: Request) => {
     if(error)return out({available:false,error:"Не удалось проверить username. Попробуй ещё раз."},503);
     return out({available:!data});
   }
+  if(req.method==="POST" && path==="/api/guest/register"){
+    const deviceId=String(body.deviceId||"").trim().toLowerCase();
+    const username=String(body.username||"").trim().toLowerCase();
+    const bio=String(body.bio||"").trim();
+    const jwk=body.publicKey||{};
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(deviceId))return out({error:"Некорректный идентификатор устройства."},400);
+    if(!/^[a-z0-9_.]{3,24}$/.test(username))return out({error:"Никнейм: 3–24 символа, латиница, цифры, точка или _."},400);
+    if(bio.length>180)return out({error:"Описание профиля должно быть не длиннее 180 символов."},400);
+    if(jwk.kty!=="EC"||jwk.crv!=="P-256"||typeof jwk.x!=="string"||typeof jwk.y!=="string"||!/^[A-Za-z0-9_-]{40,50}$/.test(jwk.x)||!/^[A-Za-z0-9_-]{40,50}$/.test(jwk.y))return out({error:"Некорректный публичный ключ устройства."},400);
+    const ip=(req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||req.headers.get("x-forwarded-for")||"").split(",")[0].trim();
+    if(ip&&await isRateLimited(admin,"register-ip:"+ip,"secure_register_ip",12,3600))return out({error:"Слишком много регистраций. Попробуй позже."},429);
+    if(await isRateLimited(admin,deviceId,"secure_register_device",5,3600))return out({error:"Слишком много попыток регистрации на устройстве."},429);
+    const {data:existing,error:existingError}=await admin.from("profiles").select("id").eq("id",deviceId).maybeSingle();
+    if(existingError)return out({error:"Не удалось проверить устройство."},503);
+    if(existing)return out({error:"Профиль на устройстве уже существует. Войди или восстанови доступ."},409);
+    const publicKey={kty:"EC",crv:"P-256",x:jwk.x,y:jwk.y,ext:true,key_ops:["verify"]};
+    const {data:user,error}=await admin.from("profiles").insert({id:deviceId,username,display_name:username,bio,auth_public_key:publicKey})
+      .select("id,username,display_name,bio,avatar_url,public_number,created_at").single();
+    if(error)return out({error:error.code==="23505"?"Этот никнейм уже занят.":"Не удалось создать профиль."},409);
+    const challenge=bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+    const expiresAt=new Date(Date.now()+5*60*1000).toISOString();
+    const {data:row,error:challengeError}=await admin.from("orbis_auth_challenges").insert({user_id:deviceId,challenge,expires_at:expiresAt}).select("id").single();
+    if(challengeError){await admin.from("profiles").delete().eq("id",deviceId);return out({error:"Не удалось подготовить безопасный вход."},500);}
+    return out({ok:true,challengeId:row.id,challenge,user:{id:user.id,...safeProfile(user)}},201);
+  }
+
+  if(req.method==="POST" && path==="/api/guest/challenge"){
+    const deviceId=String(body.deviceId||"").trim().toLowerCase();
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(deviceId))return out({error:"Некорректный идентификатор устройства."},400);
+    const ip=(req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||req.headers.get("x-forwarded-for")||"").split(",")[0].trim();
+    if(ip&&await isRateLimited(admin,"challenge-ip:"+ip,"secure_challenge_ip",40,3600))return out({error:"Слишком много запросов на вход."},429);
+    if(await isRateLimited(admin,deviceId,"secure_challenge_device",12,3600))return out({error:"Слишком много попыток входа для профиля."},429);
+    const {data:user,error}=await admin.from("profiles").select("auth_public_key").eq("id",deviceId).maybeSingle();
+    if(error)return out({error:"Не удалось проверить профиль."},503);
+    if(!user?.auth_public_key)return out({error:"Для профиля не настроен ключ восстановления."},404);
+    const challenge=bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+    const {data:row,error:insertError}=await admin.from("orbis_auth_challenges").insert({
+      user_id:deviceId,challenge,expires_at:new Date(Date.now()+5*60*1000).toISOString()
+    }).select("id").single();
+    if(insertError)return out({error:"Не удалось создать запрос входа."},500);
+    return out({ok:true,challengeId:row.id,challenge});
+  }
+
+  if(req.method==="POST" && path==="/api/guest/verify"){
+    const deviceId=String(body.deviceId||"").trim().toLowerCase();
+    const challengeId=String(body.challengeId||"").trim();
+    const signatureText=String(body.signature||"").trim();
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(deviceId)||!/^[0-9a-f-]{36}$/i.test(challengeId)||!/^[A-Za-z0-9_-]{80,100}$/.test(signatureText))return out({error:"Некорректное подтверждение входа."},400);
+    if(await isRateLimited(admin,deviceId,"secure_verify",12,300))return out({error:"Слишком много проверок подписи."},429);
+    const [{data:challenge,error:challengeError},{data:profile,error:profileError}]=await Promise.all([
+      admin.from("orbis_auth_challenges").select("id,challenge,expires_at,used_at").eq("id",challengeId).eq("user_id",deviceId).gt("expires_at",new Date().toISOString()).is("used_at",null).maybeSingle(),
+      admin.from("profiles").select("id,auth_public_key").eq("id",deviceId).maybeSingle()
+    ]);
+    if(challengeError||profileError)return out({error:"Не удалось проверить запрос входа."},503);
+    if(!challenge||!profile?.auth_public_key)return out({error:"Запрос входа истёк или уже использован. Начни заново."},401);
+    try{
+      const key=await crypto.subtle.importKey("jwk",profile.auth_public_key,{name:"ECDSA",namedCurve:"P-256"},false,["verify"]);
+      const valid=await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},key,base64UrlToBytes(signatureText),encoder.encode(challenge.challenge));
+      if(!valid)return out({error:"Подпись ключа не подтверждена."},401);
+    }catch{return out({error:"Не удалось проверить ключ восстановления."},400);}
+    const {data:consumed,error:consumeError}=await admin.from("orbis_auth_challenges").update({used_at:new Date().toISOString()})
+      .eq("id",challengeId).eq("user_id",deviceId).is("used_at",null).select("id").maybeSingle();
+    if(consumeError)return out({error:"Не удалось завершить вход."},503);
+    if(!consumed)return out({error:"Запрос уже использован. Начни вход заново."},409);
+    const {data:user,error:userError}=await admin.from("profiles").select("*").eq("id",deviceId).maybeSingle();
+    if(userError||!user)return out({error:"Профиль не найден."},404);
+    const signed=await issueGuestToken(deviceId,service);
+    return out({ok:true,token:signed,user:{id:deviceId,...safeProfile(user)}});
+  }
+
   if (req.method==="POST" && path==="/api/guest/session") {
     const deviceId=String(body.deviceId||"").trim().toLowerCase();
     if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(deviceId))
@@ -146,6 +216,7 @@ Deno.serve(async (req: Request) => {
     const {data:existing,error:loadError}=await admin.from("profiles").select("*").eq("id",deviceId).maybeSingle();
     if(loadError)return out({error:"Не удалось загрузить гостевой профиль."},500);
     let profile=existing;
+    if(!profile)return out({error:"Новые профили создаются через защищённую регистрацию ORBIS."},410);
     const aliasPool=["Nova","Visionary","Founder","Pioneer","Thinker","Creator","Builder","Strategist","Explorer","Atlas","Orbit","Spark","Vector","Voyager"];
     const makeAlias=()=>{const word=aliasPool[Math.floor(Math.random()*aliasPool.length)];const code=100+Math.floor(Math.random()*900);return {username:word.toLowerCase()+"_"+code,display_name:word+" #"+code};};
     if(!profile){
@@ -280,7 +351,31 @@ Deno.serve(async (req: Request) => {
   }
   
   if (req.method==="POST" && path==="/api/media") {
-    if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
+    if(req.method==="GET"&&path==="/api/public/posts"){
+    const ip=(req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||req.headers.get("x-forwarded-for")||"").split(",")[0].trim()||"unknown";
+    if(await isRateLimited(admin,"public-feed:"+ip,"public_feed",120,60))return out({error:"Слишком много запросов к ленте."},429);
+    const rawLimit=Number(u.searchParams.get("limit")||20),limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
+    const mode=String(u.searchParams.get("mode")||"for-you"),ranked=mode==="popular";
+    const cursorRaw=u.searchParams.get("cursor")||"";let cursor:any=null;
+    if(cursorRaw){try{cursor=JSON.parse(new TextDecoder().decode(base64UrlToBytes(cursorRaw)))}catch{return out({error:"Некорректный курсор ленты."},400)}
+      if(!cursor||typeof cursor.createdAt!=="string"||!Number.isFinite(Date.parse(cursor.createdAt))||typeof cursor.id!=="string"||! /^[0-9a-f-]{36}$/i.test(cursor.id)||(ranked&&!Number.isInteger(cursor.score)))return out({error:"Некорректный курсор ленты."},400)}
+    let q=admin.from("posts").select("id,title,topic,body,media,created_at,post_number,author_id,engagement_score,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
+      .eq("status","published").is("reply_to",null);
+    if(ranked)q=q.order("engagement_score",{ascending:false});
+    q=q.order("created_at",{ascending:false}).order("id",{ascending:false});
+    if(cursor){if(ranked)q=q.or("engagement_score.lt."+cursor.score+",and(engagement_score.eq."+cursor.score+",created_at.lt."+cursor.createdAt+"),and(engagement_score.eq."+cursor.score+",created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");else q=q.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")")}
+    const {data,error}=await q.limit(limit+1);
+    if(error)return out({error:"Не удалось загрузить ленту ORBIS."},503);
+    let rows=data||[];const hasMore=rows.length>limit;if(hasMore)rows=rows.slice(0,limit);
+    const ids=rows.map((p:any)=>p.id);
+    const {data:likes,error:likeError}=ids.length?await admin.from("post_like_counts").select("post_id,like_count").in("post_id",ids):{data:[],error:null};
+    if(likeError)return out({error:"Не удалось загрузить статистику публикаций."},503);
+    const likeMap=new Map((likes||[]).map((x:any)=>[x.post_id,Number(x.like_count)||0]));
+    const posts=rows.map((p:any)=>({id:p.id,postNumber:String(p.post_number),title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,authorNumber:p.profiles?.public_number==null?null:String(p.profiles.public_number),avatar_url:p.profiles?.avatar_url,createdAt:p.created_at,media:p.media||[],likes:likeMap.get(p.id)||0,liked:false,saved:false}));
+    const last=rows[rows.length-1],nextCursor=last?bytesToBase64Url(encoder.encode(JSON.stringify({createdAt:last.created_at,id:last.id,...(ranked?{score:Number(last.engagement_score)||0}:{})}))):null;
+    return out({posts,hasMore,nextCursor,public:true});
+  }
+  if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
     if(await isRateLimited(admin,uid,"media",10,60))return out({error:"Слишком много загрузок. Подожди минуту."},429);
     const files=(form?.getAll("files")||[]).filter((f:any)=>f && typeof f.size==="number") as File[];
     if (!files.length || files.length>4) return out({error:"Выбери от 1 до 4 файлов."},400);
@@ -302,6 +397,17 @@ Deno.serve(async (req: Request) => {
   if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
   const {data:me}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
   if (!me) return out({error:"Профиль ORBIS не найден. Обнови страницу, чтобы восстановить гостевую сессию."},401);
+  if(req.method==="POST"&&path==="/api/guest/link-key"){
+    const jwk=body.publicKey||{};
+    if(jwk.kty!=="EC"||jwk.crv!=="P-256"||typeof jwk.x!=="string"||typeof jwk.y!=="string"||!/^[A-Za-z0-9_-]{40,50}$/.test(jwk.x)||!/^[A-Za-z0-9_-]{40,50}$/.test(jwk.y))return out({error:"Некорректный публичный ключ устройства."},400);
+    if(me.auth_public_key)return out({error:"У профиля уже настроен защищённый ключ."},409);
+    const {data,error}=await admin.from("profiles").update({auth_public_key:{kty:"EC",crv:"P-256",x:jwk.x,y:jwk.y,ext:true,key_ops:["verify"]},updated_at:new Date().toISOString()})
+      .eq("id",uid).is("auth_public_key",null).select("id").maybeSingle();
+    if(error)return out({error:"Не удалось связать ключ с профилем."},500);
+    if(!data)return out({error:"Ключ уже был добавлен. Перезагрузи приложение."},409);
+    return out({ok:true,authMode:"key"});
+  }
+
 
   if (req.method === "GET" && path === "/api/news/reactions") {
     const keys = [...new Set((u.searchParams.get("keys") || "").split(",").filter((x:string) => /^[0-9a-f]{64}$/.test(x)))].slice(0, 40);
@@ -334,17 +440,6 @@ Deno.serve(async (req: Request) => {
     return out({ ok: true, key, liked: Boolean(body.liked), likes: count || 0 });
   }
 
-  if (
-    path === "/api/posts" || /^\/api\/posts\//.test(path) ||
-    path === "/api/stories" || path === "/api/media" ||
-    path === "/api/conversations" || /^\/api\/conversations\//.test(path) ||
-    path === "/api/clans" || /^\/api\/clans\//.test(path) ||
-    path === "/api/profile" || /^\/api\/profile\//.test(path) ||
-    path === "/api/bookmarks" || path === "/api/notifications" || path === "/api/notifications/read" ||
-    /^\/api\/users\//.test(path) || path === "/api/username-available"
-  ) {
-    return out({ error: "ORBIS теперь работает как новостная платформа: профили, публикации, комментарии и сообщения пользователей отключены." }, 410);
-  }
 
   if (req.method==="GET" && path==="/api/posts") {
     if(await isRateLimited(admin,uid,"feed_read",120,60))return out({error:"Слишком много запросов к ленте. Подожди немного."},429);
@@ -355,7 +450,7 @@ Deno.serve(async (req: Request) => {
       try{cursor=JSON.parse(new TextDecoder().decode(base64UrlToBytes(cursorRaw)))}catch{return out({error:"Некорректный курсор ленты."},400)}
       if(!cursor||typeof cursor.createdAt!=="string"||!Number.isFinite(Date.parse(cursor.createdAt))||typeof cursor.id!=="string"||! /^[0-9a-f-]{36}$/i.test(cursor.id))return out({error:"Некорректный курсор ленты."},400);
     }
-    const mode=String(u.searchParams.get("mode")||"for-you"),ranked=mode==="for-you";
+    const mode=String(u.searchParams.get("mode")||"for-you"),ranked=mode==="for-you"||mode==="popular";
     if(cursor&&ranked&&!Number.isInteger(cursor.score))return out({error:"Некорректный курсор рекомендаций."},400);
     let q=admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
       .eq("status","published").is("reply_to",null);
@@ -423,6 +518,98 @@ Deno.serve(async (req: Request) => {
     if(error)return out({error:error.message},400);
     return out({ok:true,post:{...post,postNumber:String(post.post_number),username:me.username,author:me.display_name,authorNumber:me.public_number==null?null:String(me.public_number),createdAt:post.created_at,replyTo:post.reply_to,media:post.media||[],poll:options.length?{options,counts:options.map(()=>0),total:0,myVote:null,endsAt:pollEndsAt}:null,likes:0,liked:false,saved:false}},201);
   }
+  const postComments=path.match(/^\/api\/posts\/([0-9a-f-]{36})\/comments$/i);
+  if(postComments&&req.method==="GET"){
+    const postId=postComments[1],rawLimit=Number(u.searchParams.get("limit")||20);
+    const limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
+    const {data:post}=await admin.from("posts").select("id").eq("id",postId).eq("status","published").maybeSingle();
+    if(!post)return out({error:"Публикация не найдена."},404);
+    const {data:rows,error}=await admin.from("post_comments")
+      .select("id,post_id,author_id,body,created_at,parent_id,profiles!post_comments_author_id_fkey(username,display_name,avatar_url)")
+      .eq("post_id",postId).eq("status","published").is("parent_id",null)
+      .order("created_at",{ascending:false}).order("id",{ascending:false}).limit(limit);
+    if(error)return out({error:"Не удалось загрузить комментарии."},400);
+    const ids=(rows||[]).map((x:any)=>x.id);
+    const {data:replyRows}=ids.length?await admin.from("post_comments").select("parent_id").eq("status","published").in("parent_id",ids):{data:[]};
+    const replyCounts=new Map<string,number>();
+    for(const row of replyRows||[])replyCounts.set(row.parent_id,(replyCounts.get(row.parent_id)||0)+1);
+    return out({comments:(rows||[]).map((x:any)=>({id:x.id,postId:x.post_id,parentId:null,body:x.body,createdAt:x.created_at,
+      author:{username:x.profiles?.username||"member",displayName:x.profiles?.display_name||"ORBIS member",avatarUrl:x.profiles?.avatar_url||null},
+      own:x.author_id===uid,repliesCount:replyCounts.get(x.id)||0}))});
+  }
+  if(postComments&&req.method==="POST"){
+    if(await isRateLimited(admin,uid,"comment_create",30,60))return out({error:"Слишком много комментариев. Подожди немного."},429);
+    const postId=postComments[1],text=String(body.body||"").trim(),parentId=String(body.parentId||"").trim()||null;
+    if(!text||text.length>1000)return out({error:"Комментарий должен содержать от 1 до 1000 символов."},400);
+    const moderation=basicTextGuard(text);if(moderation)return out({error:moderation},422);
+    const {data:post}=await admin.from("posts").select("id,author_id").eq("id",postId).eq("status","published").maybeSingle();
+    if(!post)return out({error:"Публикация не найдена."},404);
+    let parent:any=null;
+    if(parentId){
+      const {data:parentRow}=await admin.from("post_comments").select("id,author_id,parent_id").eq("id",parentId).eq("post_id",postId).eq("status","published").maybeSingle();
+      if(!parentRow||parentRow.parent_id)return out({error:"Ответить можно на комментарий первого уровня."},400);
+      parent=parentRow;
+    }
+    const {data:row,error}=await admin.from("post_comments").insert({post_id:postId,author_id:uid,body:text,parent_id:parentId})
+      .select("id,post_id,author_id,body,created_at,parent_id").single();
+    if(error)return out({error:"Не удалось сохранить комментарий."},400);
+    await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"comment_reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
+    return out({ok:true,comment:{id:row.id,postId:row.post_id,parentId:row.parent_id,body:row.body,createdAt:row.created_at,own:true,
+      author:{username:me.username,displayName:me.display_name,avatarUrl:me.avatar_url||null},repliesCount:0}},201);
+  }
+  const commentReplies=path.match(/^\/api\/comments\/([0-9a-f-]{36})\/replies$/i);
+  if(commentReplies&&req.method==="GET"){
+    const parentId=commentReplies[1];
+    const {data:parent}=await admin.from("post_comments").select("id,parent_id").eq("id",parentId).eq("status","published").maybeSingle();
+    if(!parent||parent.parent_id)return out({error:"Комментарий не найден."},404);
+    const {data:rows,error}=await admin.from("post_comments")
+      .select("id,post_id,author_id,body,created_at,parent_id,profiles!post_comments_author_id_fkey(username,display_name,avatar_url)")
+      .eq("parent_id",parentId).eq("status","published").order("created_at",{ascending:true}).order("id",{ascending:true}).limit(40);
+    if(error)return out({error:"Не удалось загрузить ответы."},400);
+    return out({replies:(rows||[]).map((x:any)=>({id:x.id,postId:x.post_id,parentId:x.parent_id,body:x.body,createdAt:x.created_at,
+      author:{username:x.profiles?.username||"member",displayName:x.profiles?.display_name||"ORBIS member",avatarUrl:x.profiles?.avatar_url||null},
+      own:x.author_id===uid,repliesCount:0}))});
+  }
+  const commentRoute=path.match(/^\/api\/comments\/([0-9a-f-]{36})$/i);
+  if(commentRoute&&req.method==="PUT"){
+    if(await isRateLimited(admin,uid,"comment_edit",20,60))return out({error:"Слишком много изменений комментариев."},429);
+    const text=String(body.body||"").trim();
+    if(!text||text.length>1000)return out({error:"Комментарий должен содержать от 1 до 1000 символов."},400);
+    const moderation=basicTextGuard(text);if(moderation)return out({error:moderation},422);
+    const {data:row,error}=await admin.from("post_comments").update({body:text}).eq("id",commentRoute[1])
+      .eq("author_id",uid).eq("status","published").select("id,post_id,body,created_at,parent_id").maybeSingle();
+    if(error)return out({error:"Не удалось изменить комментарий."},400);
+    if(!row)return out({error:"Комментарий не найден или уже недоступен."},404);
+    return out({ok:true,comment:{id:row.id,postId:row.post_id,parentId:row.parent_id,body:row.body,createdAt:row.created_at,own:true}});
+  }
+  if(commentRoute&&req.method==="DELETE"){
+    const {data:row,error}=await admin.from("post_comments").update({status:"removed"}).eq("id",commentRoute[1])
+      .eq("author_id",uid).eq("status","published").select("id").maybeSingle();
+    if(error)return out({error:"Не удалось удалить комментарий."},400);
+    return row?out({ok:true}):out({error:"Комментарий не найден или уже недоступен."},404);
+  }
+
+  const postItem=path.match(/^\/api\/posts\/([0-9a-f-]{36})$/i);
+  if(postItem&&req.method==="PUT"){
+    if(await isRateLimited(admin,uid,"post_edit",20,60))return out({error:"Слишком много изменений публикаций."},429);
+    const text=String(body.body||"").trim().slice(0,4000);
+    const title=String(body.title||"").trim().slice(0,120);
+    const topic=String(body.topic||"").trim().slice(0,48);
+    if(!text)return out({error:"Публикация не может быть пустой."},400);
+    const moderation=basicTextGuard(title+" "+text);if(moderation)return out({error:moderation},422);
+    const {data:updated,error}=await admin.from("posts").update({body:text,title:title||text.split("\n")[0].slice(0,80),topic:topic||"Без темы"})
+      .eq("id",postItem[1]).eq("author_id",uid).eq("status","published").select("*").maybeSingle();
+    if(error)return out({error:"Не удалось изменить публикацию."},400);
+    if(!updated)return out({error:"Публикация не найдена или не принадлежит тебе."},404);
+    return out({ok:true,post:{id:updated.id,title:updated.title,topic:updated.topic,body:updated.body,createdAt:updated.created_at,media:updated.media||[]}});
+  }
+  if(postItem&&req.method==="DELETE"){
+    const {data:removed,error}=await admin.from("posts").update({status:"removed"}).eq("id",postItem[1])
+      .eq("author_id",uid).eq("status","published").select("id").maybeSingle();
+    if(error)return out({error:"Не удалось удалить публикацию."},400);
+    return removed?out({ok:true}):out({error:"Публикация не найдена или не принадлежит тебе."},404);
+  }
+
   const like=path.match(/^\/api\/posts\/([0-9a-f-]+)\/like$/i);
   if(req.method==="POST"&&like){
     if(await isRateLimited(admin,uid,"like",90,60))return out({error:"Слишком много реакций. Подожди немного."},429);
@@ -461,7 +648,16 @@ Deno.serve(async (req: Request) => {
   if(req.method==="PUT"&&path==="/api/profile"){
     const name=String(body.name||"").trim(),bio=String(body.bio||"").trim();
     if(name.length<2||name.length>32||bio.length>180)return out({error:"Проверь имя и описание профиля."},400);
-    const {data,error}=await admin.from("profiles").update({display_name:name,bio,updated_at:new Date().toISOString()}).eq("id",uid).select("*").single();
+    const patch:any={display_name:name,bio,updated_at:new Date().toISOString()};
+    if(body.avatarUrl!==undefined){
+      const avatar=String(body.avatarUrl||"").trim();
+      if(avatar){
+        const base="https://wdwvcvpgovvkoodozbxf.supabase.co/storage/v1/object/public/orbis-media/";
+        if(!avatar.startsWith(base)||!avatar.slice(base.length).startsWith(uid+"/"))return out({error:"Аватар должен быть загружен в твой раздел ORBIS media."},400);
+      }
+      patch.avatar_url=avatar||null;
+    }
+    const {data,error}=await admin.from("profiles").update(patch).eq("id",uid).select("*").single();
     if(error)return out({error:error.message},400);return out({ok:true,user:{id:uid,...safeProfile(data)}});
   }
   if(req.method==="GET"&&path.startsWith("/api/profile/")){
