@@ -1,913 +1,155 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080b16">
-<meta name="description" content="ORBIS — новостная сеть: технологии, наука, кино, игры, бизнес и авто в одной персональной ленте.">
-<title>ORBIS — твоя орбита новостей</title>
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/orbis-icon.svg" type="image/svg+xml">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090e"><meta name="description" content="ORBIS — одна тема каждый день. Короткие мысли, живые идеи и люди со всего мира.">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="ORBIS">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/orbis-icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/orbis-icon.svg">
+<title>ORBIS — One thought. One world.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#070a13;--panel:#0d1322;--panel2:#111a2d;--line:#202c43;--ink:#f0f3ff;--muted:#8794ad;--purple:#a58bff;--cyan:#67e6db;--pink:#ff7cae;--gold:#f3ca83;--shadow:0 22px 70px #0007;--radius:22px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 12% -12%,#3e2b7650,transparent 35%),radial-gradient(ellipse at 105% 10%,#0c77704a,transparent 28%),var(--bg);color:var(--ink);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}::selection{background:#a58bff55}
-#stars{position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.55;background-image:radial-gradient(1px 1px at 8% 18%,#fff 98%,transparent),radial-gradient(1px 1px at 31% 68%,#8de8e0 98%,transparent),radial-gradient(1.5px 1.5px at 74% 24%,#c5b4ff 98%,transparent),radial-gradient(1px 1px at 90% 78%,#fff 98%,transparent),radial-gradient(1px 1px at 53% 12%,#fff 98%,transparent);background-size:360px 360px;animation:starDrift 75s linear infinite}
-@keyframes starDrift{to{background-position:360px 720px}}
-.ambient{position:fixed;width:440px;height:440px;border-radius:50%;filter:blur(105px);opacity:.14;pointer-events:none;z-index:-1;animation:floatGlow 17s ease-in-out infinite alternate}.ambient.a{background:#795cf6;left:-240px;top:22%}.ambient.b{background:#25cbb9;right:-250px;bottom:-180px;animation-delay:-8s}@keyframes floatGlow{to{transform:translate(90px,-70px) scale(1.2)}}
-.app{max-width:1480px;margin:auto;min-height:100vh;display:grid;grid-template-columns:252px minmax(0,780px) 280px;gap:24px;padding:22px 25px 34px}.sidebar{position:sticky;top:20px;height:calc(100vh - 40px);min-height:610px;display:flex;flex-direction:column;border:1px solid #ffffff0d;border-radius:26px;background:#0b1020c7;backdrop-filter:blur(20px);padding:18px 14px;box-shadow:0 20px 60px #0003}.brand{display:flex;align-items:center;gap:12px;padding:5px 10px 25px}.brand-orb{width:44px;height:44px;display:grid;place-items:center;border-radius:16px;background:radial-gradient(circle at 32% 24%,#c8b4ff,#806aff 48%,#27c9bd);box-shadow:0 0 34px #917bff66;position:relative;overflow:hidden}.brand-orb:after{content:"";position:absolute;inset:-20%;border:1px solid #ffffff9c;border-radius:50%;transform:rotate(-28deg) scaleX(1.5)}.brand-orb span{font-size:24px;color:#fff;font-weight:900;text-shadow:0 2px 8px #242044}.brand-name{font-size:19px;font-weight:950;letter-spacing:3px}.brand-tag{display:block;font-size:8px;letter-spacing:2px;color:#8994b1;margin-top:1px}.nav-label{padding:12px 12px 7px;color:#61708d;font-size:9px;font-weight:900;letter-spacing:2px}.nav-list{display:grid;gap:5px}.nav-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid transparent;background:transparent;color:#98a3bb;border-radius:14px;text-align:left;transition:.2s}.nav-item:hover{background:#ffffff0a;color:#fff;transform:translateX(2px)}.nav-item.active{background:linear-gradient(100deg,#8e79ff28,#5ad9cd0c);border-color:#a58bff39;color:#fff;box-shadow:inset 3px 0 #a58bff}.nav-icon{width:23px;text-align:center;font-size:17px;color:#ad9bff}.nav-item small{margin-left:auto;color:#65728e;font-size:9px}.side-bottom{margin-top:auto;border-top:1px solid #ffffff10;padding:15px 10px 5px}.sync-chip{display:flex;align-items:center;gap:8px;color:#a7b4c9;font-size:10px}.dot{width:7px;height:7px;border-radius:50%;background:#65dfbf;box-shadow:0 0 12px #65dfbf}.side-note{font-size:9px;color:#5e6b85;line-height:1.6;margin-top:10px}
-main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:3px 0 18px}.eyebrow{font-size:9px;letter-spacing:2.5px;color:var(--cyan);font-weight:900}.topbar h1{font-size:27px;line-height:1.1;letter-spacing:-1px;margin:4px 0 0}.top-actions{display:flex;gap:8px;align-items:center}.icon-btn,.refresh-btn{height:40px;border:1px solid #29364f;background:#11192b;color:#c6d0e7;border-radius:13px;padding:0 12px;transition:.2s}.icon-btn{width:40px;padding:0;font-size:16px}.refresh-btn{font-size:11px;font-weight:800;display:flex;align-items:center;gap:8px}.icon-btn:hover,.refresh-btn:hover{border-color:#9d8bff;color:#fff;background:#171e34}.refresh-btn.busy .refresh-icon{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-.hero{isolation:isolate;position:relative;overflow:hidden;border:1px solid #ffffff20;border-radius:27px;padding:24px 26px;margin-bottom:17px;background:linear-gradient(112deg,#251f4f 0%,#262b56 48%,#104b51 100%);box-shadow:0 24px 65px #0004}.hero:before{content:"";position:absolute;z-index:-1;width:270px;height:270px;right:4%;top:-185px;border:1px solid #ffffff38;border-radius:50%;box-shadow:0 0 0 24px #ffffff08,0 0 0 52px #ffffff06}.hero:after{content:"";position:absolute;z-index:-1;width:190px;height:190px;right:10%;bottom:-165px;border:1px solid #71e2d866;border-radius:50%;box-shadow:0 0 0 18px #ffffff08}.hero-top{display:flex;align-items:center;justify-content:space-between;gap:15px}.hero-kicker{font-size:9px;letter-spacing:2.3px;color:#a7f6ee;font-weight:900}.live-badge{font-size:9px;color:#baf9e8;border:1px solid #9bf0d94c;background:#a4f7e211;padding:6px 9px;border-radius:99px}.hero h2{font-size:clamp(23px,3vw,31px);line-height:1.12;letter-spacing:-1px;max-width:510px;margin:17px 0 8px}.hero p{font-size:12px;max-width:490px;color:#bac8e2;margin:0}.hero-bottom{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.hero-chip{padding:7px 10px;border-radius:99px;background:#ffffff10;border:1px solid #ffffff20;color:#d6e3f5;font-size:9px}.hero-chip b{color:#8df0dd}
-.interests-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 18px}.interest-chip{border:1px solid #29364f;background:#0d1526;border-radius:99px;padding:7px 11px;color:#9ca9c1;font-size:10px;transition:.2s}.interest-chip.active{color:#e7e3ff;border-color:#8f7cff88;background:#8b78ff19}.interest-chip:hover{border-color:#a58bff;color:#fff}
-.feed-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 12px}.feed-title{display:flex;align-items:baseline;gap:10px;min-width:0}.feed-title h2{font-size:16px;letter-spacing:-.3px;margin:0}.feed-title span{color:#6f7d97;font-size:9px}.feed-select{width:min(240px,45%);border:1px solid #2b3851;border-radius:12px;background:#0e1627;color:#aebad0;padding:9px 11px;font-size:10px;outline:none}.feed-select:focus{border-color:#917eff}
-.search-wrap{position:relative;margin-bottom:14px}.search-wrap input{width:100%;height:42px;padding:0 42px 0 40px;border:1px solid #202e45;border-radius:14px;background:#0c1322;color:#e9efff;outline:none;font-size:11px}.search-wrap input:focus{border-color:#8e7cff;box-shadow:0 0 0 3px #8e7cff16}.search-ico{position:absolute;left:14px;top:11px;color:#7787a4}.search-hint{position:absolute;right:13px;top:13px;color:#5c6c87;font-size:9px}
-.status-line{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#72819d;font-size:9px;margin:0 2px 12px}.status-left{display:flex;align-items:center;gap:8px}.status-light{width:6px;height:6px;border-radius:50%;background:#61d5bd;box-shadow:0 0 9px #61d5bd}.status-line button{border:0;background:transparent;color:#9c8dff;font-size:9px}
-.feed{display:grid;gap:12px}.news-card{position:relative;overflow:hidden;background:linear-gradient(135deg,#111a2d,#0e1728 75%);border:1px solid #27364f;border-radius:21px;padding:17px 18px 14px;box-shadow:0 12px 34px #0003;animation:cardIn .5s both;transition:transform .25s,border-color .25s,box-shadow .25s}.news-card:hover{transform:translateY(-3px);border-color:#786edb80;box-shadow:0 20px 48px #0005,0 0 24px #897cff0b}.news-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(#a58bff,#65e5d9);opacity:0;transition:.25s}.news-card:hover:before{opacity:1}@keyframes cardIn{from{opacity:0;transform:translateY(13px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}.news-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.source-meta{display:flex;align-items:center;gap:8px;min-width:0}.source-mark{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#8978ff33,#5be0d322);border:1px solid #ffffff16;color:#bcb2ff;font-weight:900;font-size:11px}.source-name{font-size:10px;color:#e5eaff;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.news-time{font-size:9px;color:#6e7d98;white-space:nowrap}.category-label{display:inline-flex;align-items:center;gap:5px;font-size:8px;font-weight:900;letter-spacing:1px;color:#a99cff;padding:5px 8px;border:1px solid #9d8cff2e;background:#8c7cff12;border-radius:99px;margin-top:13px}.news-title{font-size:18px;line-height:1.3;letter-spacing:-.45px;font-weight:850;margin:10px 0 7px;color:#f0f3ff}.news-summary{font-size:11px;line-height:1.7;color:#9aa9c3;margin:0 0 13px}.news-image{width:100%;max-height:250px;object-fit:cover;border-radius:14px;margin:4px 0 13px;border:1px solid #ffffff12;background:#121e32}.news-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:11px;border-top:1px solid #ffffff0d}.news-actions{display:flex;align-items:center;gap:6px}.news-action{border:1px solid transparent;border-radius:10px;background:transparent;color:#8795ad;padding:7px 9px;font-size:10px;transition:.2s;display:inline-flex;align-items:center;gap:6px}.news-action:hover{background:#ffffff09;border-color:#ffffff12;color:#e3eaff}.news-action.liked{color:#ff80ae;background:#ff70a711;border-color:#ff7cab3b}.news-action.saved{color:#7fe2d5;background:#61e4d20e;border-color:#61e4d233}.news-open{color:#a99bff;font-size:10px;font-weight:800;white-space:nowrap}.news-open:hover{color:#d5cbff}.like-burst{position:absolute;pointer-events:none;font-size:15px;animation:heartBurst .8s ease-out forwards;z-index:4}@keyframes heartBurst{0%{opacity:0;transform:translate(0,0) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.45) rotate(var(--rot))}}
-.ad-card{position:relative;overflow:hidden;border:1px solid #6e61a65c;border-radius:20px;padding:17px 18px;background:radial-gradient(circle at 90% 10%,#9b79ff2b,transparent 33%),linear-gradient(115deg,#201b43,#142b3a);animation:cardIn .55s both}.ad-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.ad-badge{font-size:8px;letter-spacing:1.5px;font-weight:950;color:#f4d59b;border:1px solid #f4d59b51;padding:5px 8px;border-radius:99px;background:#f4d59b10}.ad-sponsor{font-size:9px;color:#9aabc2}.ad-card h3{font-size:17px;line-height:1.3;margin:12px 0 6px}.ad-card p{font-size:10px;line-height:1.65;color:#aebad0;margin:0 0 12px}.ad-card img{width:100%;max-height:150px;object-fit:cover;border-radius:12px;margin:10px 0}.ad-cta{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:11px;background:linear-gradient(110deg,#a48cff,#58d9ca);color:#111627;font-size:10px;font-weight:950}
-.empty-state{padding:30px 18px;text-align:center;border:1px dashed #2b3851;border-radius:20px;color:#8795ae;background:#0d1525}.empty-state strong{display:block;color:#e4e8f7;font-size:15px;margin:8px 0}.empty-icon{font-size:28px;color:#a99bff}.skeleton{height:180px;border-radius:20px;background:linear-gradient(100deg,#111a2b 25%,#1b2940 45%,#111a2b 65%);background-size:200% 100%;animation:shimmer 1.5s infinite}@keyframes shimmer{to{background-position:-200% 0}}
-.rightbar{padding-top:83px;min-width:0}.right-card{border:1px solid #202e45;border-radius:19px;padding:15px;background:#0d1424d9;backdrop-filter:blur(18px);margin-bottom:12px}.right-card h3{font-size:12px;margin:0 0 12px}.trend-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #ffffff0c;cursor:pointer}.trend-icon{width:32px;height:32px;border-radius:11px;background:#8b7cff18;border:1px solid #a48fff2a;display:grid;place-items:center;color:#baadff;font-size:14px}.trend-copy{min-width:0}.trend-copy b{font-size:10px;display:block}.trend-copy small{font-size:8px;color:#71809b}.trend-arrow{margin-left:auto;color:#71809b}.right-hero{padding:15px;border:1px solid #786bd34c;border-radius:18px;background:linear-gradient(135deg,#211d47,#122e36);margin-bottom:12px}.right-hero small{font-size:8px;color:#91e8dd;letter-spacing:1.8px;font-weight:900}.right-hero b{display:block;font-size:14px;line-height:1.35;margin:8px 0}.right-hero p{color:#91a3c0;font-size:9px;margin:0;line-height:1.6}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{padding:10px;border-radius:12px;background:#ffffff06}.stat b{font-size:16px;display:block}.stat small{font-size:8px;color:#7988a4}
-.navigator-head{border:1px solid #2a3b53;border-radius:22px;padding:20px;background:linear-gradient(125deg,#1b1c43,#0c3c42);margin-bottom:17px}.navigator-head h2{font-size:22px;margin:7px 0}.navigator-head p{font-size:11px;color:#a7b6ce;margin:0;max-width:560px}.catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.catalog-card{position:relative;overflow:hidden;min-height:132px;text-align:left;border:1px solid #2b3851;border-radius:19px;background:linear-gradient(135deg,#141e33,#10192a);padding:16px;transition:.22s}.catalog-card:hover{transform:translateY(-3px);border-color:#9e8aff88;box-shadow:0 15px 36px #0004}.catalog-card:after{content:"";position:absolute;width:100px;height:100px;right:-35px;bottom:-45px;border:1px solid #a58bff44;border-radius:50%;box-shadow:0 0 0 14px #a58bff0b,0 0 0 28px #a58bff08}.catalog-icon{font-size:22px;color:#b6a5ff}.catalog-card b{display:block;margin:9px 0 3px;font-size:13px}.catalog-card span{display:block;font-size:9px;color:#8492ac;max-width:220px}.catalog-arrow{position:absolute;right:14px;top:13px;color:#a99aff}
-.source-list{display:grid;gap:7px;margin-top:15px}.source-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#0d1627;border:1px solid #24324a;border-radius:12px}.source-row span{font-size:10px;color:#c6d1e5}.source-row small{font-size:8px;color:#74849f}
-.saved-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;border:1px solid #29364e;border-radius:15px;background:#0d1526;margin-bottom:14px}.saved-tools p{font-size:10px;color:#8b9ab5;margin:0}.saved-tools button{border:1px solid #394864;border-radius:10px;background:#18243a;color:#d5dcf0;padding:8px 10px;font-size:9px}
-.dialog-backdrop{position:fixed;inset:0;z-index:30;display:none;place-items:center;background:#030610d9;backdrop-filter:blur(12px);padding:18px}.dialog-backdrop.open{display:grid;animation:fadeIn .2s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.dialog{width:min(570px,100%);max-height:min(86vh,720px);overflow:auto;border:1px solid #3b4561;border-radius:24px;padding:23px;background:linear-gradient(145deg,#131b2d,#0b1220);box-shadow:var(--shadow)}.dialog h2{font-size:22px;margin:0 0 6px}.dialog p{font-size:11px;color:#9ba9c2;margin:0 0 18px}.interest-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.interest-option{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #293851;border-radius:14px;background:#101a2d;color:#c6d1e5;text-align:left}.interest-option.selected{border-color:#a08aff;background:#8e7cff19;color:#fff}.interest-option i{font-style:normal;font-size:17px;color:#b6a5ff}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.primary-btn{border:0;border-radius:12px;padding:10px 15px;background:linear-gradient(110deg,#a48cff,#62ddd1);color:#101525;font-size:10px;font-weight:950}.secondary-btn{border:1px solid #34435e;border-radius:12px;padding:10px 14px;background:#111b2e;color:#c2cce0;font-size:10px}
-.toast{position:fixed;left:50%;bottom:25px;transform:translate(-50%,18px);opacity:0;pointer-events:none;z-index:50;border:1px solid #59607c;background:#141c30;color:#eaf0ff;border-radius:13px;padding:10px 14px;font-size:10px;box-shadow:var(--shadow);transition:.25s;max-width:calc(100% - 28px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
-.footer{padding:18px 4px;color:#55647f;font-size:8px;text-align:center}
+:root{color-scheme:dark;--bg:#07090e;--panel:#0d121b;--panel2:#111a26;--line:rgba(255,255,255,.085);--text:#f2f4f8;--muted:#8590a1;--soft:#bbc4d1;--mint:#75edc4;--violet:#9a8cff;--gold:#efcd89;--shadow:0 24px 70px #0007}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 45% -22%,#574d9c35,transparent 48%),radial-gradient(ellipse at 102% 65%,#1c8b6d15,transparent 37%),var(--bg);color:var(--text);font:14px/1.55 "DM Sans",system-ui,sans-serif;overflow-x:hidden}button,input,textarea,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--mint);outline-offset:3px}::selection{background:#75edc433}.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.09;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E")}.glow{position:fixed;width:420px;height:420px;border-radius:50%;filter:blur(125px);opacity:.1;z-index:0;pointer-events:none;animation:float 18s ease-in-out infinite alternate}.glow.a{background:#7661ff;top:-290px;left:26%}.glow.b{background:#31c79a;bottom:-310px;right:-180px;animation-delay:-9s}@keyframes float{to{transform:translate(75px,55px) scale(1.2)}}
+.app{position:relative;z-index:1;max-width:1440px;min-height:100vh;margin:auto;padding:23px 28px 38px;display:grid;grid-template-columns:238px minmax(0,760px) 270px;gap:27px}
+.sidebar{height:calc(100vh - 46px);min-height:620px;position:sticky;top:23px;display:flex;flex-direction:column;padding:18px 14px;background:#0c111bd9;border:1px solid var(--line);border-radius:26px;backdrop-filter:blur(22px);box-shadow:0 20px 60px #0004}
+.brand{display:flex;align-items:center;gap:11px;padding:3px 9px 25px}.logo{width:43px;height:43px;display:grid;place-items:center;border:1px solid #ffffff20;border-radius:15px;background:linear-gradient(145deg,#282341,#112d2b);box-shadow:0 0 30px #887aff29}.logo svg{width:30px;height:30px}.brand-name{font:800 19px/1 Manrope,sans-serif;letter-spacing:3.5px}.brand-tag{display:block;color:#707c8c;font-size:8px;letter-spacing:2px;margin-top:5px}
+.nav-label{padding:12px 12px 8px;color:#687486;font-size:9px;font-weight:900;letter-spacing:2px}.nav-list{display:grid;gap:5px}.nav-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid transparent;border-radius:13px;background:transparent;text-align:left;color:#9aa4b3;transition:.2s}.nav-item:hover{background:#ffffff08;color:white;transform:translateX(2px)}.nav-item.active{color:#fff;background:linear-gradient(105deg,#9a8cff24,#75edc40d);border-color:#9a8cff35;box-shadow:inset 2px 0 var(--violet)}.nav-ico{width:20px;color:#b3a7ff;font-size:16px;text-align:center}.sidebar-bottom{margin-top:auto;padding:15px 9px 2px;border-top:1px solid var(--line)}.identity{display:flex;align-items:center;gap:10px}.avatar{width:36px;height:36px;display:grid;place-items:center;flex:none;border-radius:12px;background:linear-gradient(145deg,#9585ff,#37c39f);color:#fff;font:800 13px Manrope}.identity strong{display:block;font-size:10px}.identity small{display:block;color:#7d899a;font-size:9px;margin-top:2px}.identity-note{margin-top:12px;color:#657182;font-size:8px;line-height:1.6}
+main{min-width:0}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:19px;min-height:48px}.eyebrow{color:var(--mint);font-size:9px;font-weight:900;letter-spacing:2.1px}.topbar h1{margin:4px 0 0;font:800 23px/1.15 Manrope,sans-serif;letter-spacing:-.8px}.top-actions{display:flex;align-items:center;gap:7px}.select-lang,.quiet-btn,.install-btn{height:38px;padding:0 11px;border:1px solid var(--line);border-radius:12px;background:#111824;color:#cbd3de;font-size:10px;font-weight:800}.select-lang{width:62px}.quiet-btn{width:38px;padding:0;font-size:15px}.install-btn{display:none;align-items:center;gap:6px;color:var(--mint);border-color:#75edc43b;background:#75edc40d}.install-btn.visible{display:flex}.select-lang:hover,.quiet-btn:hover,.install-btn:hover{border-color:#75edc477;color:#fff}
+.hero{position:relative;isolation:isolate;overflow:hidden;margin-bottom:17px;padding:26px 28px 22px;border-radius:27px;border:1px solid #bcb2ff2e;background:linear-gradient(112deg,#1b1a31 0%,#22213c 49%,#10312e 100%);box-shadow:0 24px 60px #0006}.hero:before{content:"";position:absolute;z-index:-1;right:-105px;top:-240px;width:350px;height:350px;border:1px solid #ffffff38;border-radius:50%;box-shadow:0 0 0 24px #ffffff08,0 0 0 52px #ffffff05,0 0 90px #9a8cff30;animation:orbit 30s linear infinite}.hero:after{content:"";position:absolute;z-index:-1;right:15%;bottom:-155px;width:180px;height:180px;border:1px solid #75edc45e;border-radius:50%;box-shadow:0 0 0 20px #ffffff08,0 0 0 42px #ffffff05}@keyframes orbit{to{transform:rotate(360deg)}}.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.hero-label{display:flex;align-items:center;gap:8px;color:#a8f6df;font-size:9px;font-weight:900;letter-spacing:2.1px}.spark{font-size:15px}.global-pill{display:flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid #9cf1d842;border-radius:99px;background:#9cf1d80d;color:#d2f7eb;font-size:8px}.global-pill i{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px var(--mint)}.hero h2{max-width:595px;margin:19px 0 9px;font:800 clamp(25px,3.1vw,34px)/1.17 Manrope,sans-serif;letter-spacing:-1.2px}.hero-desc{max-width:500px;margin:0;color:#bac4d4;font-size:11px;line-height:1.7}.hero-bottom{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:20px}.hero-stat{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #ffffff1d;border-radius:11px;background:#ffffff0a;color:#c5cede;font-size:9px}.hero-stat b{color:white;font-variant-numeric:tabular-nums}.cta{display:inline-flex;align-items:center;gap:9px;padding:10px 14px;border:0;border-radius:11px;background:linear-gradient(110deg,#a99bff,#75edc4);color:#0d1519;font-size:10px;font-weight:900;box-shadow:0 9px 25px #69d6b424;transition:.2s}.cta:hover{transform:translateY(-2px);box-shadow:0 14px 32px #69d6b44a}.cta:active{transform:scale(.97)}.cta:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 19px}.strip span{padding:6px 10px;border:1px solid var(--line);border-radius:99px;background:#ffffff04;color:#8d98a9;font-size:8px}.strip b{color:#c8d0db}
+.feed-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}.feed-head h2{margin:0;font:800 16px Manrope,sans-serif;letter-spacing:-.3px}.feed-count{margin-left:8px;color:#6e7a8b;font-size:9px}.tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:12px;background:#0b1019}.tab{padding:7px 9px;border:0;border-radius:9px;background:transparent;color:#7e8998;font-size:9px;font-weight:800}.tab.active{background:#24263a;color:#f0edff;box-shadow:inset 0 0 0 1px #a396ff2d}
+.search{position:relative;margin-bottom:12px}.search input{width:100%;height:40px;padding:0 40px;border:1px solid var(--line);border-radius:13px;background:#0c121c;color:var(--text);font-size:10px;outline:none}.search input:focus{border-color:#a396ff78;box-shadow:0 0 0 3px #9a8cff12}.search span{position:absolute;left:13px;top:9px;color:#7f8c9d;font-size:15px}.feed-status{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px;color:#778395;font-size:8px}.live{display:flex;align-items:center;gap:7px}.live i{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 9px #75edc4}.feed-status button{border:0;background:none;color:#a99bff;font-size:8px}
+.feed{display:grid;gap:11px}.post{position:relative;overflow:hidden;padding:16px 17px 13px;border:1px solid #ffffff12;border-radius:19px;background:linear-gradient(140deg,#131b28,#0c121c 82%);box-shadow:0 12px 35px #0004;animation:cardIn .4s both;transition:.22s}.post:hover{transform:translateY(-2px);border-color:#a294ff55;box-shadow:0 18px 43px #0006}.post.boosted{border-color:#efcd8966}.post.boosted:before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(#f4d891,#d19e4e)}@keyframes cardIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:translateY(0)}}.post-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.author{display:flex;align-items:center;gap:9px;min-width:0}.author-avatar{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:11px;background:linear-gradient(145deg,#9584ff,#38bd9d);color:white;font:800 11px Manrope}.author-meta{min-width:0}.author-meta b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}.author-meta small{display:block;color:#748193;font-size:8px;margin-top:2px}.post-time{color:#6e7a8a;font-size:8px;white-space:nowrap}.boost-tag{padding:4px 7px;border:1px solid #efcd8940;border-radius:99px;color:#efcd89;font-size:7px;letter-spacing:1px}.post-body{margin:13px 0 14px;color:#e4eaf1;font-size:13px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.post-foot{display:flex;align-items:center;justify-content:space-between;gap:7px;padding-top:10px;border-top:1px solid #ffffff10}.reactions{display:flex;gap:4px;flex-wrap:wrap}.reaction{display:inline-flex;align-items:center;gap:5px;padding:6px 7px;border:1px solid transparent;border-radius:9px;background:#ffffff05;color:#8f9bab;font-size:9px;transition:.18s}.reaction:hover{border-color:#ffffff20;background:#ffffff0b;color:white}.reaction.active{border-color:#75edc450;background:#75edc412;color:#a9f5dc}.reaction .num{font-variant-numeric:tabular-nums}.post-tools{display:flex;align-items:center;gap:3px}.tool{width:30px;height:29px;display:grid;place-items:center;border:1px solid transparent;border-radius:9px;background:transparent;color:#8591a1;font-size:13px}.tool:hover{border-color:var(--line);background:#ffffff08;color:white}.tool.saved{color:var(--mint)}.share{border:0;background:transparent;color:#929eae;font-size:8px;padding:6px}.share:hover{color:white}
+.empty{padding:30px 17px;border:1px dashed #ffffff27;border-radius:19px;background:#0d1420cc;text-align:center}.empty-icon{color:#b4aaff;font-size:27px}.empty strong{display:block;margin:8px 0 4px;font:800 14px Manrope,sans-serif}.empty p{max-width:310px;margin:0 auto 14px;color:#909cad;font-size:10px;line-height:1.7}.empty button{border:1px solid #75edc44a;border-radius:10px;padding:8px 11px;background:#75edc40d;color:var(--mint);font-size:9px;font-weight:800}.skeleton{height:150px;border-radius:18px;background:linear-gradient(100deg,#111a27 25%,#1b2940 45%,#111a27 65%);background-size:200% 100%;animation:shine 1.5s infinite}@keyframes shine{to{background-position:-200% 0}}
+.rightbar{padding-top:68px;min-width:0}.right-card{margin-bottom:12px;padding:15px;border:1px solid var(--line);border-radius:18px;background:#0d141edb;backdrop-filter:blur(18px)}.right-card h3{margin:0 0 11px;font:800 11px Manrope,sans-serif}.principle{position:relative;overflow:hidden;padding:17px;border:1px solid #9a8cff35;border-radius:18px;background:linear-gradient(145deg,#211d3b,#102b29);margin-bottom:12px}.principle small{color:#aaf3df;font-size:8px;font-weight:900;letter-spacing:1.7px}.principle b{display:block;margin:9px 0;font:800 13px/1.45 Manrope,sans-serif}.principle p{margin:0;color:#9ba9bb;font-size:9px;line-height:1.6}.principle:after{content:"";position:absolute;right:-42px;top:-60px;width:130px;height:130px;border:1px solid #ffffff2b;border-radius:50%;box-shadow:0 0 0 20px #ffffff08}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{padding:10px;border:1px solid #ffffff0d;border-radius:11px;background:#ffffff05}.metric b{display:block;font:800 17px Manrope,sans-serif}.metric small{color:#778394;font-size:8px}.step{display:flex;gap:9px;padding:9px 0;border-top:1px solid #ffffff0c}.step:first-of-type{border-top:0;padding-top:0}.step-ico{width:28px;height:28px;display:grid;place-items:center;flex:none;border:1px solid #a395ff36;border-radius:9px;background:#a395ff13;color:#bcb0ff;font-size:9px;font-weight:900}.step b{display:block;font-size:9px}.step small{display:block;color:#788597;font-size:8px;line-height:1.5;margin-top:3px}.partner{border-color:#75edc427;background:linear-gradient(145deg,#151d29,#102a27)}.partner .kicker{color:#93f0d1;font-size:8px;letter-spacing:1.5px;font-weight:900}.partner p,.note{margin:7px 0 0;color:#8795a7;font-size:8px;line-height:1.7}.footer{padding:20px 2px 0;text-align:center;color:#596575;font-size:8px}
+.overlay{position:fixed;inset:0;z-index:40;display:none;place-items:center;padding:16px;background:#03060bd9;backdrop-filter:blur(13px)}.overlay.open{display:grid;animation:fade .18s}@keyframes fade{from{opacity:0}to{opacity:1}}.modal{width:min(490px,100%);max-height:88vh;overflow:auto;padding:22px;border:1px solid #ffffff22;border-radius:23px;background:linear-gradient(145deg,#161e2b,#0b111a);box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.modal h2{margin:0;font:800 20px Manrope,sans-serif}.sub{margin:6px 0 17px;color:#8b98aa;font-size:10px;line-height:1.6}.close{width:31px;height:31px;border:1px solid var(--line);border-radius:9px;background:#ffffff07;color:#bec7d4}.compose{width:100%;min-height:135px;resize:vertical;padding:13px;border:1px solid #ffffff23;border-radius:14px;background:#090e16;color:#f3f5f8;font:500 13px/1.7 "DM Sans",sans-serif;outline:none}.compose:focus{border-color:#9a8cff90}.compose-meta{display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:#7e8a9b;font-size:9px}.char-count{font-variant-numeric:tabular-nums}.char-count.near{color:var(--gold)}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}.primary{border:0;border-radius:10px;padding:10px 14px;background:linear-gradient(110deg,#a89aff,#75edc4);color:#10161a;font-size:10px;font-weight:900}.primary:disabled{opacity:.4;cursor:not-allowed}.secondary{border:1px solid var(--line);border-radius:10px;padding:10px 13px;background:#ffffff07;color:#c2cbd8;font-size:10px}.setting-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}.setting-row b{display:block;font-size:10px}.setting-row small{display:block;color:#7d8a9b;font-size:8px;line-height:1.55;margin-top:3px}.setting-value{color:#bec8d6;font-size:9px;text-align:right}.rules{margin:0;padding-left:18px;color:#acb7c6;font-size:10px;line-height:2}
+.toast{position:fixed;z-index:70;left:50%;bottom:27px;max-width:calc(100% - 30px);transform:translate(-50%,16px);opacity:0;pointer-events:none;padding:10px 14px;border:1px solid #ffffff24;border-radius:12px;background:#192333;color:#f0f4fa;font-size:10px;text-align:center;box-shadow:var(--shadow);transition:.23s}.toast.show{opacity:1;transform:translate(-50%,0)}
+.welcome{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 40% 16%,#7563ed35,transparent 47%),radial-gradient(ellipse at 73% 84%,#36bc9230,transparent 38%),#07090e}.welcome.hidden{display:none}.welcome-card{width:min(480px,100%);padding:34px 26px;text-align:center;border:1px solid #ffffff20;border-radius:29px;background:#0d1420db;backdrop-filter:blur(22px);box-shadow:0 35px 110px #0009;animation:welcomeIn .6s ease both}@keyframes welcomeIn{from{opacity:0;transform:translateY(17px) scale(.985)}to{opacity:1;transform:none}}.welcome-logo{width:75px;height:75px;display:grid;place-items:center;margin:0 auto 20px;border:1px solid #ffffff20;border-radius:24px;background:linear-gradient(145deg,#2b2447,#10312d);box-shadow:0 0 44px #8f7dff2b}.welcome-logo svg{width:47px;height:47px}.welcome-brand{font:800 32px Manrope,sans-serif;letter-spacing:7px}.welcome-tag{margin:7px 0 21px;color:#7c899a;font-size:8px;letter-spacing:3px}.welcome-card h1{max-width:360px;margin:0 auto 10px;font:800 24px/1.28 Manrope,sans-serif;letter-spacing:-.7px}.welcome-card p{max-width:350px;margin:0 auto 22px;color:#96a3b4;font-size:10px;line-height:1.8}.welcome-button{width:100%;max-width:295px;padding:13px 16px;border:0;border-radius:13px;background:linear-gradient(110deg,#a99aff,#75edc4);color:#10171a;font-size:11px;font-weight:950;box-shadow:0 12px 35px #75edc425;transition:.2s}.welcome-button:hover{transform:translateY(-2px)}.welcome-button:disabled{opacity:.55;cursor:wait;transform:none}.welcome-foot{max-width:330px;margin:17px auto 0;color:#687688;font-size:8px;line-height:1.7}.welcome-error{display:none;margin:13px auto 0;color:#ff9cab;font-size:9px;line-height:1.6;max-width:320px}
 .mobile-nav{display:none}
-@media(max-width:1160px){.app{grid-template-columns:225px minmax(0,1fr);max-width:1030px}.rightbar{display:none}}
-@media(max-width:720px){.app{display:block;padding:12px 12px 90px}.sidebar{display:none}.topbar{padding:3px 1px 14px}.topbar h1{font-size:23px}.hero{padding:19px;border-radius:22px}.hero h2{font-size:24px;margin-top:14px}.hero p{font-size:10px}.feed-toolbar{align-items:flex-start}.feed-select{width:42%;font-size:9px}.news-card{padding:14px;border-radius:18px}.news-title{font-size:16px}.news-summary{font-size:10px}.catalog-grid{gap:8px}.catalog-card{min-height:128px;padding:13px}.mobile-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;display:flex;justify-content:space-around;gap:3px;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:#080e1beF;border-top:1px solid #25334b;backdrop-filter:blur(18px)}.mobile-nav button{flex:1;display:grid;gap:2px;place-items:center;border:0;background:transparent;color:#8190ab;font-size:8px;padding:4px 2px}.mobile-nav button span{font-size:17px}.mobile-nav button.active{color:#b6a5ff}.rightbar{display:none}.search-hint{display:none}}
-@media(max-width:390px){.top-actions{gap:5px}.refresh-btn{width:40px;justify-content:center;font-size:0;padding:0}.refresh-btn .refresh-icon{font-size:15px}.interest-grid{grid-template-columns:1fr}.news-time{font-size:8px}.news-action{padding:7px 6px}.catalog-grid{grid-template-columns:1fr 1fr}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-
-/* ORBIS V2 — richer editorial media and high-colour interface */
-:root{--bg:#060817;--panel:#10172d;--panel2:#151f3b;--line:#2a385b;--purple:#b49aff;--cyan:#5ff3e0;--pink:#ff75b5;--gold:#ffd078;--shadow:0 26px 90px #0009}
-body{background:radial-gradient(ellipse at 9% -8%,#6538c455,transparent 34%),radial-gradient(ellipse at 98% 15%,#00c7b64a,transparent 31%),radial-gradient(ellipse at 46% 110%,#3023a32b,transparent 40%),#060817}
-.hero{background:linear-gradient(115deg,#3b237a 0%,#48317f 38%,#075c68 100%);border-color:#b39aff66;box-shadow:0 20px 70px #4f33b844}
-.hero h2{background:linear-gradient(95deg,#fff,#c8fff7 80%);background-clip:text;-webkit-background-clip:text;color:transparent}
-.hero-chip{background:#ffffff17;border-color:#ffffff36}
-.news-card{background:linear-gradient(142deg,#141d38 0%,#0c1428 72%,#111b31 100%);border-color:#34466b;box-shadow:0 16px 40px #0005}
-.news-card:nth-child(4n+1){background:linear-gradient(145deg,#1a1a43,#10172d 68%,#102a39)}
-.news-card:nth-child(4n+2){background:linear-gradient(145deg,#182b40,#10172d 72%,#211838)}
-.news-card:nth-child(4n+3){background:linear-gradient(145deg,#2a1d42,#10172d 72%,#102a35)}
-.news-card:hover{border-color:#9d8cff;box-shadow:0 25px 65px #0007,0 0 24px #967bff20}
-.news-title{font-size:19px;line-height:1.34}
-.news-summary{font-size:12px;color:#adbad4}
-.news-image{display:block;width:100%;height:clamp(170px,27vw,310px);max-height:310px;object-fit:cover;border-radius:16px;margin:8px 0 14px;border:1px solid #a5c5ff25;box-shadow:0 15px 34px #0005}
-.news-media-frame{position:relative;overflow:hidden;border:1px solid #a48fff3e;border-radius:16px;margin:9px 0 14px;background:linear-gradient(135deg,#2b245b,#0d3744);min-height:80px}
-.news-media-frame img{display:block;width:100%;height:clamp(170px,28vw,320px);object-fit:cover}
-.news-media-frame video{display:block;width:100%;max-height:370px;background:#000}
-.news-media-frame .media-overlay{position:absolute;left:12px;bottom:12px;padding:7px 10px;border-radius:99px;background:#090e1bbf;color:#fff;font-size:9px;border:1px solid #ffffff3b;backdrop-filter:blur(8px)}
-.news-meta-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.news-meta-pill{font-size:8px;letter-spacing:.4px;padding:4px 7px;border-radius:99px;background:#a38cff18;border:1px solid #a38cff36;color:#cfc4ff}
-.news-meta-pill.country{background:#50dccc13;border-color:#50dccc32;color:#8ef5e5}
-.news-action[data-action="translate"]{color:#a8ddff;border-color:#4ca5dd28;background:#4da3db12}
-.news-action[data-action="translate"]:hover{color:#e3f5ff;background:#4da3db25}
-.news-action.translated{background:#62e6d51b;border-color:#62e6d546;color:#8df5e3}
-.feed-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:11px;margin:-4px 0 17px;border:1px solid #34466a;border-radius:17px;background:linear-gradient(115deg,#151b39d9,#102a36d9);box-shadow:0 12px 34px #0003}
-.feed-controls label{display:grid;gap:5px;min-width:0;color:#8c9bb9;font-size:8px;font-weight:850;letter-spacing:.7px}
-.feed-controls select{width:100%;min-width:0;border:1px solid #384b70;border-radius:11px;padding:9px 8px;background:#0b1428;color:#e5edff;font-size:10px;outline:none}
-.feed-controls select:focus{border-color:#b49aff;box-shadow:0 0 0 3px #b49aff20}
-.catalog-card{background:linear-gradient(135deg,#201c50,#112c43);border-color:#41547a;min-height:144px}
-.catalog-card:nth-child(3n+2){background:linear-gradient(135deg,#3b1d50,#152747)}
-.catalog-card:nth-child(3n+3){background:linear-gradient(135deg,#123f4b,#172447)}
-.navigator-head{background:radial-gradient(circle at 88% 10%,#5be4d944,transparent 33%),linear-gradient(120deg,#412579,#0b5661);border-color:#9884ff75}
-.right-hero{background:radial-gradient(circle at 100% 0%,#67eadc2b,transparent 50%),linear-gradient(135deg,#38206b,#0c4650);border-color:#8d7cff66}
-.right-card{background:linear-gradient(145deg,#121a32f0,#0c1628f0);border-color:#344363}
-.ad-card{background:radial-gradient(circle at 88% 4%,#f9cb7040,transparent 35%),linear-gradient(120deg,#3a245b,#16414b);border-color:#bc9aff72}
-.mobile-nav{border-top-color:#455779}
-.mobile-nav button{font-size:8px}
-.wiki-search-panel{padding:18px;border:1px solid #6d83b8;border-radius:22px;background:radial-gradient(circle at 92% 3%,#65dedc40,transparent 40%),linear-gradient(120deg,#231e55,#113d49);margin-bottom:15px}
-.wiki-search-panel h2{font-size:21px;margin:7px 0}
-.wiki-search-panel p{font-size:10px;color:#b6c6df;margin:0 0 13px}
-.wiki-search-row{display:flex;gap:8px}
-.wiki-search-row input{flex:1;min-width:0;border:1px solid #61769b;border-radius:12px;padding:11px 12px;background:#090f20;color:#fff;outline:none}
-.wiki-search-row button{border:0;border-radius:12px;padding:0 15px;background:linear-gradient(105deg,#b6a1ff,#5ce8dc);color:#11172a;font-weight:900}
-.wiki-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-.wiki-chips button{border:1px solid #9c8cff4e;border-radius:99px;background:#ffffff0d;color:#d9d5ff;padding:6px 10px;font-size:9px}
-.wiki-card{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;padding:14px;margin-bottom:10px;border:1px solid #405177;border-radius:18px;background:linear-gradient(130deg,#161d3c,#102133)}
-.wiki-card img{width:128px;height:120px;object-fit:cover;border-radius:12px;background:#1a2940}
-.wiki-card h3{font-size:14px;margin:2px 0 7px}
-.wiki-card p{font-size:10px;line-height:1.6;color:#a8b6d0;margin:0 0 10px}
-.wiki-card-actions{display:flex;gap:8px;flex-wrap:wrap}
-.wiki-card-actions a,.wiki-card-actions button{border:1px solid #495a7f;border-radius:9px;padding:7px 9px;background:#ffffff0b;color:#dcd7ff;font-size:9px}
-.source-row{cursor:pointer}
-.source-row:hover{border-color:#a58bff;color:#fff}
-@media(max-width:720px){.feed-controls{grid-template-columns:1fr 1fr}.feed-controls label:last-child{grid-column:1/-1}.news-title{font-size:16px}.news-image,.news-media-frame img{height:210px}.wiki-card{grid-template-columns:90px minmax(0,1fr);gap:10px;padding:11px}.wiki-card img{width:90px;height:100px}.wiki-search-row button{padding:0 10px}}
-@media(max-width:390px){.feed-controls{padding:8px;gap:6px}.feed-controls select{font-size:9px}.mobile-nav button{font-size:7px}.wiki-card{grid-template-columns:1fr}.wiki-card img{width:100%;height:150px}}
-
-.news-art-cover{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;min-height:160px;padding:18px;border-radius:16px;margin:8px 0 14px;background:radial-gradient(circle at 25% 25%,color-mix(in srgb,var(--topic-color) 75%,transparent),transparent 35%),radial-gradient(circle at 83% 20%,#ffffff2a,transparent 28%),linear-gradient(120deg,color-mix(in srgb,var(--topic-color) 36%,#11172f),#121a35 62%,#102e3b);border:1px solid color-mix(in srgb,var(--topic-color) 55%,transparent)}
-.news-art-cover:before,.news-art-cover:after{content:"";position:absolute;border:1px solid #ffffff35;border-radius:50%;width:170px;height:170px;right:20px;top:-90px;box-shadow:0 0 0 18px #ffffff09,0 0 0 38px #ffffff06}
-.news-art-cover:after{width:110px;height:110px;right:65px;top:-62px}
-.news-art-cover .art-icon{font-size:63px;line-height:1;color:#ffffffde;text-shadow:0 9px 24px #0008;z-index:1;animation:artFloat 5s ease-in-out infinite}
-.news-art-cover .art-label{z-index:1;font-size:8px;letter-spacing:2px;font-weight:950;color:#e8efff;padding:7px 10px;border:1px solid #ffffff35;background:#07102075;border-radius:99px;backdrop-filter:blur(8px)}
-@keyframes artFloat{50%{transform:translateY(-5px) rotate(-3deg)}}
-.lead-card{border-color:#5e6f9a;box-shadow:0 20px 56px #0006}
-.lead-card .news-title{font-size:22px}
-.more-feed-wrap{display:flex;justify-content:center;padding:10px 0 22px}
-.load-more-btn{border:1px solid #927dfb88;border-radius:14px;padding:12px 22px;background:linear-gradient(110deg,#9d86ff25,#58dfd325);color:#e5e4ff;font-weight:900;font-size:10px;transition:.2s}
-.load-more-btn:hover{transform:translateY(-2px);box-shadow:0 12px 25px #8d75ff24;border-color:#b3a2ff}
-.source-directory-tools{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:8px;margin-bottom:11px}
-.source-directory-tools input,.source-directory-tools select{width:100%;min-width:0;border:1px solid #384b70;border-radius:12px;padding:10px;background:#0b1428;color:#e5edff;font-size:10px;outline:none}
-.source-result-count{padding:7px 4px;color:#8798b7;font-size:9px}
-.source-directory-row{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:left}
-.source-directory-row span{font-weight:800;min-width:0}
-.source-directory-row small{text-align:right;max-width:48%;line-height:1.5}
-#installBtn{color:#90f0e3;border-color:#55cbbb66}
-.top-actions button[hidden]{display:none}
-#settingsDialog .dialog{background:radial-gradient(circle at 100% 0%,#4e439a3b,transparent 42%),linear-gradient(145deg,#151d38,#0b1220)}
-@media(max-width:720px){.source-directory-tools{grid-template-columns:1fr}.source-directory-row{align-items:flex-start}.source-directory-row small{max-width:52%}.lead-card .news-title{font-size:18px}.news-art-cover{min-height:135px}}
-
-.auto-translate-setting{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;padding:13px;border:1px solid #43567a;border-radius:14px;background:linear-gradient(115deg,#7d6be21d,#41d9c51a)}
-.auto-translate-setting span{display:grid;gap:4px}
-.auto-translate-setting b{font-size:11px;color:#f1f3ff}
-.auto-translate-setting small{max-width:390px;font-size:9px;color:#95a7c6;line-height:1.5}
-.auto-translate-setting input{appearance:none;width:40px;height:23px;flex:0 0 40px;border-radius:99px;border:1px solid #51648b;background:#293751;position:relative;cursor:pointer;transition:.22s}
-.auto-translate-setting input:before{content:"";position:absolute;width:17px;height:17px;left:2px;top:2px;border-radius:50%;background:#d5ddf0;transition:.22s}
-.auto-translate-setting input:checked{background:linear-gradient(100deg,#9a80ff,#58ded1);border-color:#8fdddc}
-.auto-translate-setting input:checked:before{left:19px;background:#081421}
+@media(max-width:1160px){.app{grid-template-columns:218px minmax(0,1fr);max-width:1060px}.rightbar{display:none}}
+@media(max-width:720px){.app{display:block;padding:12px 12px 91px}.sidebar{display:none}.topbar{margin-bottom:15px}.topbar h1{font-size:20px}.hero{padding:21px 18px 18px;border-radius:22px}.hero h2{font-size:25px}.hero-desc{font-size:10px}.hero-stat{font-size:8px;padding:7px 8px}.cta{font-size:9px;padding:9px 11px}.feed-head{align-items:flex-start;flex-direction:column}.tabs{width:100%}.tab{flex:1}.post{padding:14px;border-radius:17px}.post-body{font-size:12px}.mobile-nav{position:fixed;z-index:25;left:0;right:0;bottom:0;display:flex;gap:3px;padding:8px 7px calc(8px + env(safe-area-inset-bottom));border-top:1px solid #ffffff18;background:#080d16ed;backdrop-filter:blur(18px)}.mobile-nav button{flex:1;display:grid;place-items:center;gap:2px;padding:3px 1px;border:0;background:transparent;color:#8190a1;font-size:8px}.mobile-nav button span:first-child{font-size:17px}.mobile-nav button.active{color:var(--mint)}.footer{padding-bottom:8px}.welcome-card{padding:29px 20px}.welcome-card h1{font-size:22px}}
+@media(max-width:390px){.top-actions{gap:4px}.select-lang{width:55px;padding:0 6px}.quiet-btn{width:34px}.hero h2{font-size:23px}.post-tools{gap:0}.tool{width:27px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<div id="stars" aria-hidden="true"></div><div class="ambient a" aria-hidden="true"></div><div class="ambient b" aria-hidden="true"></div>
-<div class="app">
+<div class="grain"></div><div class="glow a"></div><div class="glow b"></div>
+<div class="app" id="app">
 <aside class="sidebar">
-  <div class="brand"><div class="brand-orb"><span>✳</span></div><div><div class="brand-name">ORBIS</div><span class="brand-tag">NEWS UNIVERSE</span></div></div>
-  <div class="nav-label">ТВОЯ ЛЕНТА</div>
-  <nav class="nav-list" id="mainNav">
-    <button class="nav-item active" data-view="for-you"><span class="nav-icon">✧</span>Для тебя</button>
-    <button class="nav-item" data-view="latest"><span class="nav-icon">◷</span>Последние новости</button>
-    <button class="nav-item" data-view="navigator"><span class="nav-icon">⌘</span>Навигатор</button>
-    <button class="nav-item" data-view="encyclopedia"><span class="nav-icon">📚</span>Энциклопедия</button>
-    <button class="nav-item" data-view="saved"><span class="nav-icon">▣</span>Сохранённое <small id="savedCount">0</small></button>
-  </nav>
-  <div class="nav-label">КАТАЛОГ ТЕМ</div>
-  <nav class="nav-list" id="categoryNav">
-    <button class="nav-item" data-category="technology"><span class="nav-icon">⌘</span>Технологии</button>
-    <button class="nav-item" data-category="science"><span class="nav-icon">✧</span>Наука</button>
-    <button class="nav-item" data-category="movies"><span class="nav-icon">▣</span>Кино</button>
-    <button class="nav-item" data-category="gaming"><span class="nav-icon">▰</span>Игры</button>
-    <button class="nav-item" data-category="business"><span class="nav-icon">↗</span>Бизнес</button>
-    <button class="nav-item" data-category="auto"><span class="nav-icon">⌁</span>Авто</button>
-    <button class="nav-item" data-category="world"><span class="nav-icon">◉</span>Мир</button>
-  </nav>
-  <div class="side-bottom"><div class="sync-chip"><span class="dot"></span><span id="sideSync">Система готова</span></div><div class="side-note">ORBIS собирает материалы из открытых RSS-лент и ведёт к оригинальным публикациям издателей.</div></div>
+ <div class="brand"><div class="logo"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="12" stroke="#A69AFF" stroke-width="2.2"/><ellipse cx="24" cy="24" rx="21" ry="8.5" transform="rotate(-28 24 24)" stroke="#75EDC4" stroke-width="1.9"/><circle cx="38" cy="15.8" r="3.1" fill="#EFCF91"/><circle cx="24" cy="24" r="3.4" fill="#F5F2FF"/></svg></div><div><div class="brand-name">ORBIS</div><span class="brand-tag">ONE THOUGHT. ONE WORLD.</span></div></div>
+ <div class="nav-label" data-t="space">ПРОСТРАНСТВО</div><nav class="nav-list">
+  <button class="nav-item active" data-view="home"><span class="nav-ico">◉</span><span data-t="today">Тема дня</span></button>
+  <button class="nav-item" data-view="top"><span class="nav-ico">↗</span><span data-t="trending">В тренде</span></button>
+  <button class="nav-item" data-view="saved"><span class="nav-ico">◇</span><span data-t="savedNav">Сохранённое</span></button>
+ </nav>
+ <div class="nav-label" data-t="account">АККАУНТ</div><nav class="nav-list">
+  <button class="nav-item" id="profileBtn"><span class="nav-ico">◎</span><span data-t="profile">Мой профиль</span></button>
+  <button class="nav-item" id="rulesBtn"><span class="nav-ico">✳</span><span data-t="rules">Правила ORBIS</span></button>
+  <button class="nav-item" id="settingsBtn"><span class="nav-ico">⚙</span><span data-t="settings">Настройки</span></button>
+ </nav>
+ <div class="sidebar-bottom"><div class="identity"><div class="avatar" id="sideAvatar">O</div><div><strong id="sideName">ORBIS member</strong><small id="sideHandle">@member</small></div></div><div class="identity-note" data-t="deviceNote">Ник привязан к браузеру. Не очищай данные сайта, чтобы сохранить доступ.</div></div>
 </aside>
-
 <main>
-  <header class="topbar">
-    <div><div class="eyebrow">YOUR PERSONAL NEWS GALAXY</div><h1 id="pageTitle">Твоя орбита</h1></div>
-    <div class="top-actions"><button class="icon-btn" id="interestsBtn" title="Настроить интересы" aria-label="Настроить интересы">✧</button><button class="icon-btn" id="settingsBtn" title="Настройки языка" aria-label="Настройки">⚙</button><button class="icon-btn" id="installBtn" title="Установить ORBIS" aria-label="Установить ORBIS">⇩</button><button class="refresh-btn" id="refreshBtn"><span class="refresh-icon">↻</span>Обновить</button></div>
-  </header>
-  <section class="hero" id="hero">
-    <div class="hero-top"><span class="hero-kicker">ORBIS · DAILY SIGNAL</span><span class="live-badge">● RSS LIVE · 10 MIN</span></div>
-    <h2>Мир меняется. Оставайся на своей орбите.</h2>
-    <p>Главные истории из технологий, науки, кино, игр, бизнеса и автомобильного мира — в одной чистой ленте, собранной под твои интересы.</p>
-    <div class="hero-bottom"><span class="hero-chip"><b id="sourceCount">568</b> RSS-лент</span><span class="hero-chip"><b>15</b> направлений</span><span class="hero-chip">30 стран · 25 языков</span></div>
-  </section>
-  <div class="interests-row" id="interestChips"></div>
-  <div class="feed-controls" id="feedControls">
-    <label><span>Страна / регион</span><select id="countrySelect" aria-label="Страна"><option value="all">🌐 Весь мир</option><option value="AZ">🇦🇿 Азербайджан</option><option value="GB">🇬🇧 Великобритания</option><option value="US">🇺🇸 США</option><option value="DE">🇩🇪 Германия</option><option value="FR">🇫🇷 Франция</option><option value="ES">🇪🇸 Испания</option><option value="TR">🇹🇷 Турция</option><option value="RU">🇷🇺 Россия</option><option value="JP">🇯🇵 Япония</option><option value="KR">🇰🇷 Южная Корея</option><option value="IN">🇮🇳 Индия</option><option value="CN">🇨🇳 Китай</option><option value="BR">🇧🇷 Бразилия</option><option value="CA">🇨🇦 Канада</option><option value="AU">🇦🇺 Австралия</option><option value="NL">🇳🇱 Нидерланды</option><option value="IT">🇮🇹 Италия</option><option value="UA">🇺🇦 Украина</option><option value="VN">🇻🇳 Вьетнам</option><option value="ID">🇮🇩 Индонезия</option></select></label>
-    <label><span>Язык новостей</span><select id="sourceLanguageSelect" aria-label="Язык новостей"><option value="all">Все языки</option><option value="ru">Русский</option><option value="az">Азербайджанский</option><option value="en">English</option><option value="tr">Türkçe</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="es">Español</option><option value="pt">Português</option><option value="ar">العربية</option><option value="fa">فارسی</option><option value="hi">हिन्दी</option><option value="ur">اردو</option><option value="zh">中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="vi">Tiếng Việt</option><option value="id">Bahasa Indonesia</option><option value="uk">Українська</option><option value="nl">Nederlands</option><option value="it">Italiano</option><option value="sw">Kiswahili</option></select></label>
-    <label><span>Перевод карточек</span><select id="translationLanguageSelect" aria-label="Язык перевода"><option value="ru">Русский</option><option value="az">Азербайджанский</option><option value="en">English</option><option value="tr">Türkçe</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="es">Español</option><option value="pt">Português</option><option value="ar">العربية</option><option value="fa">فارسی</option><option value="hi">हिन्दी</option><option value="ur">اردو</option><option value="zh">中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="vi">Tiếng Việt</option><option value="id">Bahasa Indonesia</option><option value="uk">Українська</option><option value="nl">Nederlands</option><option value="it">Italiano</option></select></label>
-  </div>
-  <div class="feed-toolbar"><div class="feed-title"><h2 id="feedHeading">Для тебя</h2><span id="feedSub">подборка по интересам</span></div><select class="feed-select" id="sortSelect" aria-label="Сортировка"><option value="recommended">Рекомендации</option><option value="recent">Сначала новые</option></select></div>
-  <div class="search-wrap"><span class="search-ico">⌕</span><input id="searchInput" type="search" placeholder="Найти новость, тему или источник…" autocomplete="off"><span class="search-hint">ПОИСК ПО ЛЕНТЕ</span></div>
-  <div class="status-line"><div class="status-left"><span class="status-light"></span><span id="statusText">Подключаем новостные источники…</span></div><button id="lastUpdate">Обновлено —</button></div>
-  <section class="feed" id="feed" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div></section>
-  <div class="footer">ORBIS NEWS UNIVERSE · Материалы принадлежат их издателям · Читай оригинал по ссылке</div>
+<header class="topbar"><div><div class="eyebrow">THE DAILY CONVERSATION</div><h1 data-t="mainTitle">Одна тема. Тысячи взглядов.</h1></div><div class="top-actions"><button class="install-btn" id="installBtn">＋ <span data-t="install">На экран</span></button><select class="select-lang" id="language"><option value="ru">RU</option><option value="az">AZ</option><option value="en">EN</option></select><button class="quiet-btn" id="refreshBtn" aria-label="Refresh">↻</button></div></header>
+<section class="hero">
+ <div class="hero-top"><div class="hero-label"><span class="spark">✦</span><span data-t="dailyQuestion">ВОПРОС ДНЯ</span></div><div class="global-pill"><i></i><span data-t="oneForAll">ОДИН ДЛЯ ВСЕХ</span></div></div>
+ <h2 id="topicTitle">Какую привычку стоит развивать уже сегодня, чтобы через год увидеть большой результат?</h2>
+ <p class="hero-desc" data-t="heroDesc">Один вопрос для всех. Одна короткая мысль от каждого. Посмотрим, что получится, когда разные взгляды встречаются в одном месте.</p>
+ <div class="hero-bottom"><div class="hero-stat">◷ <span data-t="newTopic">Новая тема через</span> <b id="countdown">00:00:00</b></div><div class="hero-stat">✳ <span data-t="onePost">1 публикация / 24 часа</span></div><button class="cta" id="answerBtn"><span data-t="answer">Ответить на тему</span> ↗</button></div>
+</section>
+<div class="strip"><span><b data-t="shortMeaning">Коротко и по делу</b></span><span data-t="noComments">Без комментариев и шума</span><span data-t="oneFeed">Одна общая лента</span></div>
+<div class="feed-head"><div><h2 id="feedTitle" data-t="community">Ответы сообщества</h2><span class="feed-count" id="feedCount">—</span></div><div class="tabs"><button class="tab active" data-sort="fresh" data-t="fresh">Свежие</button><button class="tab" data-sort="top" data-t="popular">Популярные</button><button class="tab" data-sort="mine" data-t="mine">Мои</button></div></div>
+<div class="search"><span>⌕</span><input id="search" type="search" maxlength="80" data-ph="searchPh" placeholder="Найти мысль или автора…"></div>
+<div class="feed-status"><div class="live"><i></i><span data-t="sharedFeed">Общая лента ORBIS</span></div><div><span id="updatedAt">—</span> · <button id="refreshLink" data-t="refresh">обновить</button></div></div>
+<section class="feed" id="feed"><div class="skeleton"></div><div class="skeleton"></div></section>
+<div class="footer">ORBIS © 2026 · <span data-t="footer">Меньше шума. Больше смысла.</span></div>
 </main>
-
 <aside class="rightbar">
-  <div class="right-hero"><small>THE ORBIS EDGE</small><b>Не бесконечный шум. Только то, что имеет значение.</b><p>Лайкай интересные истории — ORBIS постепенно меняет порядок рекомендаций.</p></div>
-  <section class="right-card"><h3>Твои направления</h3><div id="rightTopics"></div></section>
-  <section class="right-card"><h3>Твоя активность</h3><div class="stat-grid"><div class="stat"><b id="likesStat">0</b><small>лайков</small></div><div class="stat"><b id="savedStat">0</b><small>сохранено</small></div></div></section>
-  <section class="right-card"><h3>Как работает ORBIS</h3><p style="margin:0;color:#8291ad;font-size:9px;line-height:1.7">Открытые RSS-источники → тематические ленты → твои реакции → персональная сортировка. Закладки хранятся на твоём устройстве и доступны офлайн.</p></section>
+ <div class="principle"><small>ORBIS PRINCIPLE</small><b data-t="principleTitle">Место, где одна мысль может найти тысячи людей.</b><p data-t="principleDesc">Не нужно собирать подписчиков, снимать видео или спорить в комментариях. Просто ответь на вопрос дня.</p></div>
+ <div class="right-card"><h3 data-t="todayStats">Сегодня в цифрах</h3><div class="metrics"><div class="metric"><b id="todayCount">0</b><small data-t="todayAnswers">ответов сегодня</small></div><div class="metric"><b id="totalCount">0</b><small data-t="inFeed">в ленте</small></div></div></div>
+ <div class="right-card"><h3 data-t="how">Как это работает</h3><div class="step"><div class="step-ico">01</div><div><b data-t="step1">Одна общая тема</b><small data-t="step1d">Каждые сутки — новый вопрос для всех.</small></div></div><div class="step"><div class="step-ico">02</div><div><b data-t="step2">Одна твоя мысль</b><small data-t="step2d">До 140 символов — без длинных текстов.</small></div></div><div class="step"><div class="step-ico">03</div><div><b data-t="step3">Реакция вместо спора</b><small data-t="step3d">Отмечай идеи, которые зацепили.</small></div></div></div>
+ <div class="right-card partner"><div class="kicker">ORBIS PARTNERS</div><h3 data-t="partnerTitle">Хорошие идеи заслуживают внимания.</h3><p data-t="partnerDesc">Рекламные размещения появятся здесь после подключения реальных кампаний. Пока лента без искусственной рекламы.</p></div>
+ <div class="right-card"><p class="note" data-t="safety">Публикации видны всем участникам. Не размещай личные данные и уважай других.</p></div>
 </aside>
 </div>
+<nav class="mobile-nav"><button class="active" data-view="home"><span>◉</span><span data-t="today">Тема дня</span></button><button data-view="top"><span>↗</span><span data-t="trending">Топ</span></button><button data-view="saved"><span>◇</span><span data-t="savedNav">Сохранено</span></button><button id="mobileProfile"><span>◎</span><span data-t="profile">Профиль</span></button></nav>
 
-<nav class="mobile-nav" id="mobileNav">
-  <button class="active" data-view="for-you"><span>✧</span>Для тебя</button>
-  <button data-view="latest"><span>◷</span>Новое</button>
-  <button data-view="navigator"><span>⌘</span>Темы</button>
-  <button data-view="encyclopedia"><span>📚</span>Wiki</button>
-  <button data-view="saved"><span>▣</span>Кэш</button>
-</nav>
+<div class="overlay" id="composeDialog" role="dialog" aria-modal="true"><div class="modal"><div class="modal-head"><div><h2 data-t="yourThought">Твоя мысль</h2><p class="sub" data-t="composeSub">Ответ на тему дня ORBIS.</p></div><button class="close" data-close="composeDialog">×</button></div><textarea class="compose" id="postText" maxlength="140" data-ph="composePh" placeholder="Напиши то, что действительно думаешь…"></textarea><div class="compose-meta"><span data-t="max140">Максимум 140 символов</span><span class="char-count" id="charCount">0 / 140</span></div><div class="modal-actions"><button class="secondary" data-close="composeDialog" data-t="cancel">Отмена</button><button class="primary" id="publishBtn" disabled data-t="publish">Опубликовать ↗</button></div></div></div>
+<div class="overlay" id="profileDialog" role="dialog" aria-modal="true"><div class="modal"><div class="modal-head"><div><h2 data-t="profile">Мой профиль</h2><p class="sub" data-t="profileSub">Твой голос в общей ленте ORBIS.</p></div><button class="close" data-close="profileDialog">×</button></div><div class="identity" style="padding:14px;border:1px solid var(--line);border-radius:14px;background:#ffffff06"><div class="avatar" id="profileAvatar">O</div><div><strong id="profileName">ORBIS member</strong><small id="profileHandle">@member</small></div></div><div class="setting-row"><div><b data-t="profileStatus">Статус</b><small data-t="anonymousProfile">Анонимный профиль ORBIS</small></div><div class="setting-value" data-t="active">Активен</div></div><div class="setting-row"><div><b data-t="memberNumber">Номер участника</b><small data-t="publicNumber">Публичный номер ORBIS</small></div><div class="setting-value" id="memberNumber">—</div></div><div class="setting-row"><div><b data-t="storage">Хранение доступа</b><small data-t="storageDesc">В браузере этого устройства</small></div><div class="setting-value">This device</div></div><div class="modal-actions"><button class="secondary" data-close="profileDialog" data-t="close">Закрыть</button></div></div></div>
+<div class="overlay" id="settingsDialog" role="dialog" aria-modal="true"><div class="modal"><div class="modal-head"><div><h2 data-t="settings">Настройки</h2><p class="sub" data-t="settingsSub">Настрой ORBIS под себя.</p></div><button class="close" data-close="settingsDialog">×</button></div><div class="setting-row"><div><b data-t="language">Язык интерфейса</b><small data-t="languageDesc">Можно изменить в любой момент.</small></div><select class="select-lang" id="settingsLanguage"><option value="ru">RU</option><option value="az">AZ</option><option value="en">EN</option></select></div><div class="setting-row"><div><b data-t="frequency">Частота публикаций</b><small data-t="frequencyDesc">Ограничение проверяется сервером.</small></div><div class="setting-value">1 / 24h</div></div><div class="setting-row"><div><b data-t="privacy">Приватность</b><small data-t="privacyDesc">Публикации доступны всем участникам.</small></div><div class="setting-value" data-t="publicFeed">Общая лента</div></div><div class="setting-row"><div><b data-t="installApp">Установить ORBIS</b><small data-t="installDesc">Добавь приложение на главный экран.</small></div><button class="secondary" id="installSettings" data-t="install">На экран</button></div><div class="modal-actions"><button class="secondary" data-close="settingsDialog" data-t="close">Закрыть</button></div></div></div>
+<div class="overlay" id="rulesDialog" role="dialog" aria-modal="true"><div class="modal"><div class="modal-head"><div><h2 data-t="rules">Правила ORBIS</h2><p class="sub" data-t="rulesSub">Небольшие правила, чтобы здесь было приятно находиться.</p></div><button class="close" data-close="rulesDialog">×</button></div><ol class="rules"><li data-t="rule1">Одна публикация в сутки на участника.</li><li data-t="rule2">До 140 символов — одна чёткая мысль.</li><li data-t="rule3">Без оскорблений, спама и личных данных.</li><li data-t="rule4">Комментарии заменены реакциями.</li><li data-t="rule5">Не выдавай мнение за проверенный факт.</li><li data-t="rule6">Публикации видны всем участникам.</li></ol><div class="modal-actions"><button class="secondary" data-close="rulesDialog" data-t="close">Закрыть</button></div></div></div>
 
-<div class="dialog-backdrop" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
- <div class="dialog"><div class="eyebrow">ORBIS · PERSONAL SETTINGS</div><h2 id="settingsTitle">Настройки ORBIS</h2><p>Выбери язык, на который ORBIS будет переводить заголовки и описания новостей. Настройка сохраняется на этом устройстве.</p>
-  <label style="display:grid;gap:7px;color:#a8b7d0;font-size:10px;font-weight:850">Язык перевода
-   <select id="settingsTranslationSelect" style="width:100%;padding:11px;border:1px solid #45577b;border-radius:12px;background:#0b1428;color:#fff"></select>
-  </label>
-  <label class="auto-translate-setting"><span><b>Автоперевод ленты</b><small>Автоматически переводить первые 8 карточек каждой открытой ленты. Остальные можно перевести кнопкой в карточке.</small></span><input id="autoTranslateToggle" type="checkbox" checked></label>
-  <p style="margin-top:12px">Перевод выполняется при открытии ленты и сохраняется в локальном кэше. Оригинал издателя всегда остаётся доступен.</p>
-  <div class="dialog-actions"><button class="secondary-btn" id="cancelSettings">Закрыть</button><button class="primary-btn" id="saveSettings">Сохранить настройки</button></div>
- </div>
-</div>
-<div class="dialog-backdrop" id="interestDialog" role="dialog" aria-modal="true" aria-labelledby="interestTitle">
- <div class="dialog"><div class="eyebrow">ORBIS · PERSONAL SIGNAL</div><h2 id="interestTitle">Собери свою орбиту</h2><p>Выбери темы, которые тебе интересны. ORBIS будет поднимать их новости выше в ленте «Для тебя». Настройки сохраняются на устройстве.</p>
-  <div class="interest-grid" id="interestOptions"></div><div class="dialog-actions"><button class="secondary-btn" id="cancelInterests">Позже</button><button class="primary-btn" id="saveInterests">Сохранить интересы</button></div>
- </div>
-</div>
+<div class="welcome" id="welcome"><div class="welcome-card"><div class="welcome-logo"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="17" stroke="#A69AFF" stroke-width="2.5"/><ellipse cx="32" cy="32" rx="28" ry="11" transform="rotate(-28 32 32)" stroke="#75EDC4" stroke-width="2.2"/><circle cx="51" cy="20" r="4.2" fill="#EFCF91"/><circle cx="32" cy="32" r="4.4" fill="#F4F1FF"/></svg></div><div class="welcome-brand">ORBIS</div><div class="welcome-tag">ONE THOUGHT. ONE WORLD.</div><h1 data-t="welcomeTitle">Твой взгляд имеет значение.</h1><p data-t="welcomeText">Каждый день — одна тема для всего мира. Создай свой ник одним нажатием, поделись мыслью и увидь ответы других.</p><button class="welcome-button" id="joinBtn"><span data-t="createNick">Создать мой ник</span>　↗</button><div class="welcome-foot" data-t="welcomeFoot">Без почты и пароля. Ник будет автоматически создан и сохранён на этом устройстве.</div><div class="welcome-error" id="welcomeError"></div></div></div>
 <div class="toast" id="toast"></div>
-
 <script>
 (function(){
 "use strict";
-const SUPABASE_URL="https://wdwvcvpgovvkoodozbxf.supabase.co";
-const SUPABASE_KEY="sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx";
-const EDGE_API=SUPABASE_URL+"/functions/v1/orbis-api";
-const DEVICE_KEY="orbis_guest_device_v1",TOKEN_KEY="orbis_guest_token_v1";
-const INTEREST_KEY="orbis_news_interests_v1",WEIGHTS_KEY="orbis_news_weights_v1",LIKES_KEY="orbis_news_liked_v1",PENDING_KEY="orbis_news_pending_v1";
-const COUNTRY_KEY="orbis_news_country_v1",SOURCE_LANGUAGE_KEY="orbis_news_source_language_v1",TRANSLATION_LANGUAGE_KEY="orbis_news_translation_language_v1",TRANSLATION_CACHE_KEY="orbis_news_translation_cache_v1",AUTO_TRANSLATE_KEY="orbis_news_auto_translate_v1";
-const ADMOB_NEWS_UNIT_ID="ca-app-pub-9946397950500083/7255776003";
-const CATEGORIES=[{"id":"world","name":"Мир","icon":"🌍","description":"Международные события и репортажи","tone":"#67d9e8"},{"id":"politics","name":"Политика","icon":"🏛️","description":"Государства, выборы и общественная жизнь","tone":"#a78bfa"},{"id":"business","name":"Бизнес","icon":"📈","description":"Компании, экономика и рынки","tone":"#f4bd72"},{"id":"technology","name":"Технологии","icon":"⌘","description":"AI, гаджеты, интернет и стартапы","tone":"#65d7ff"},{"id":"science","name":"Наука","icon":"🔬","description":"Космос, исследования и открытия","tone":"#62dfbd"},{"id":"movies","name":"Кино и сериалы","icon":"🎬","description":"Фильмы, сериалы и индустрия развлечений","tone":"#ff8eb7"},{"id":"culture","name":"Культура","icon":"🎨","description":"Музыка, искусство, книги и идеи","tone":"#e6a3fa"},{"id":"gaming","name":"Игры","icon":"🎮","description":"Игры, разработчики и игровые платформы","tone":"#b4e47d"},{"id":"sports","name":"Спорт","icon":"🏟️","description":"Спортивные события и результаты","tone":"#ffae83"},{"id":"auto","name":"Авто","icon":"🚘","description":"Автомобили и мобильность","tone":"#7cc9ff"},{"id":"health","name":"Здоровье","icon":"🩺","description":"Медицина и благополучие","tone":"#80dfc6"},{"id":"education","name":"Образование","icon":"🎓","description":"Учёба, университеты и знания","tone":"#f7d87c"},{"id":"environment","name":"Экология","icon":"🌿","description":"Климат, природа и устойчивое развитие","tone":"#7fd89e"},{"id":"travel","name":"Путешествия","icon":"✈️","description":"Страны, города и путешествия","tone":"#89baff"},{"id":"food","name":"Еда","icon":"🍽️","description":"Кулинария, продукты и гастрономия","tone":"#f4a477"}];
-const SOURCES_FALLBACK=568;
-let state={
- view:"for-you",category:"",articles:[],visible:[],saved:[],interests:readJson(INTEREST_KEY,["technology","science","business","gaming","world"]),
- weights:readJson(WEIGHTS_KEY,{}),liked:readJson(LIKES_KEY,{}),pending:readJson(PENDING_KEY,{}),
- loading:false,sourceDirectory:[],ads:[],lastUpdated:null,sort:"recommended",search:"",sourceId:"",renderCount:24,
- country:readJson(COUNTRY_KEY,"all"),sourceLanguage:readJson(SOURCE_LANGUAGE_KEY,"all"),
- translationLang:readJson(TRANSLATION_LANGUAGE_KEY,"ru"),translations:readJson(TRANSLATION_CACHE_KEY,{}),autoTranslate:readJson(AUTO_TRANSLATE_KEY,true)
-
-};
+const API="https://wdwvcvpgovvkoodozbxf.supabase.co/functions/v1/orbis-api";
+const KEY="sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx";
+const STORE={device:"orbis.device.v1",token:"orbis.guest.token.v1",lang:"orbis.language.v1"};
 const $=id=>document.getElementById(id);
-const nativeFetch=window.fetch.bind(window);
-let guestToken=localStorage.getItem(TOKEN_KEY)||"",toastTimer=0,refreshTimer=null,dbPromise=null,feedLoadVersion=0,renderVersion=0,deferredInstallPrompt=null;
-
-function readJson(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||"null");return value===null?fallback:value}catch{return fallback}}
-function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(error){console.warn("ORBIS storage:",error)}}
-function toast(message){const node=$("toast");node.textContent=message;node.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove("show"),2600)}
-function category(id){return CATEGORIES.find(item=>item.id===id)||CATEGORIES[0]}
-function api(path,options){
- const headers=new Headers(options&&options.headers||{});headers.set("apikey",SUPABASE_KEY);
- if(guestToken)headers.set("Authorization","Bearer "+guestToken);
- if(options&&options.body&&!headers.has("content-type"))headers.set("content-type","application/json");
- return nativeFetch(EDGE_API+path,Object.assign({},options||{},{headers,credentials:"omit",cache:"no-store"})).then(async response=>{
-  let data={};try{data=await response.json()}catch{}
-  if(!response.ok)throw new Error(data.error||"Ошибка ORBIS API ("+response.status+")");
-  return data;
- });
+const text={
+ru:{space:"ПРОСТРАНСТВО",today:"Тема дня",trending:"В тренде",savedNav:"Сохранённое",account:"АККАУНТ",profile:"Мой профиль",rules:"Правила ORBIS",settings:"Настройки",deviceNote:"Ник привязан к этому браузеру. Не очищай данные сайта, чтобы сохранить доступ.",mainTitle:"Одна тема. Тысячи взглядов.",install:"На экран",dailyQuestion:"ВОПРОС ДНЯ",oneForAll:"ОДИН ДЛЯ ВСЕХ",heroDesc:"Один вопрос для всех. Одна короткая мысль от каждого. Посмотрим, что получится, когда разные взгляды встречаются в одном месте.",newTopic:"Новая тема через",onePost:"1 публикация / 24 часа",answer:"Ответить на тему",shortMeaning:"Коротко и по делу",noComments:"Без комментариев и шума",oneFeed:"Одна общая лента",community:"Ответы сообщества",fresh:"Свежие",popular:"Популярные",mine:"Мои",searchPh:"Найти мысль или автора…",sharedFeed:"Общая лента ORBIS",refresh:"обновить",principleTitle:"Место, где одна мысль может найти тысячи людей.",principleDesc:"Не нужно собирать подписчиков, снимать видео или спорить в комментариях. Просто ответь на вопрос дня.",todayStats:"Сегодня в цифрах",todayAnswers:"ответов сегодня",inFeed:"в ленте",how:"Как это работает",step1:"Одна общая тема",step1d:"Каждые сутки — новый вопрос для всех.",step2:"Одна твоя мысль",step2d:"До 140 символов — без длинных текстов.",step3:"Реакция вместо спора",step3d:"Отмечай идеи, которые зацепили.",partnerTitle:"Хорошие идеи заслуживают внимания.",partnerDesc:"Рекламные размещения появятся здесь после подключения реальных кампаний. Пока лента без искусственной рекламы.",safety:"Публикации видны всем участникам. Не размещай личные данные и уважай других.",footer:"Меньше шума. Больше смысла.",yourThought:"Твоя мысль",composeSub:"Ответ на тему дня ORBIS.",composePh:"Напиши то, что действительно думаешь…",max140:"Максимум 140 символов",cancel:"Отмена",publish:"Опубликовать ↗",profileSub:"Твой голос в общей ленте ORBIS.",profileStatus:"Статус",anonymousProfile:"Анонимный профиль ORBIS",active:"Активен",memberNumber:"Номер участника",publicNumber:"Публичный номер ORBIS",storage:"Хранение доступа",storageDesc:"В браузере этого устройства",close:"Закрыть",settingsSub:"Настрой ORBIS под себя.",language:"Язык интерфейса",languageDesc:"Можно изменить в любой момент.",frequency:"Частота публикаций",frequencyDesc:"Ограничение проверяется сервером.",privacy:"Приватность",privacyDesc:"Публикации доступны всем участникам.",publicFeed:"Общая лента",installApp:"Установить ORBIS",installDesc:"Добавь приложение на главный экран.",rulesSub:"Небольшие правила, чтобы здесь было приятно находиться.",rule1:"Одна публикация в сутки на участника.",rule2:"До 140 символов — одна чёткая мысль.",rule3:"Без оскорблений, спама и личных данных.",rule4:"Комментарии заменены реакциями.",rule5:"Не выдавай мнение за проверенный факт.",rule6:"Публикации видны всем участникам.",welcomeTitle:"Твой взгляд имеет значение.",welcomeText:"Каждый день — одна тема для всего мира. Создай свой ник одним нажатием, поделись мыслью и увидь ответы других.",createNick:"Создать мой ник",welcomeFoot:"Без почты и пароля. Ник будет автоматически создан и сохранён на этом устройстве.",loginLoading:"Создаём твой ник…",offline:"Нет соединения. Проверь интернет.",welcomeError:"Не удалось создать профиль. Попробуй позже.",emptyTitle:"Здесь начинается разговор.",emptyText:"Пока никто не ответил на тему дня. Оставь первую мысль и открой разговор для сообщества.",first:"Стать первым",noSavedTitle:"Пока нет сохранённых мыслей.",noSavedText:"Нажми на закладку под публикацией, чтобы вернуться к ней позже.",noMine:"Ты ещё не публиковал.",noSearch:"Ничего не найдено.",trySearch:"Попробуй изменить поисковый запрос.",loading:"Загружаем ленту…",postError:"Не удалось опубликовать.",dailyLimit:"Ты уже публиковал. Следующая публикация доступна",guard:"Этот текст не подходит для общей ленты.",postSuccess:"Твоя мысль уже в общей ленте ORBIS.",savedToast:"Сохранено",removedToast:"Убрано из сохранённого",copyToast:"Ссылка скопирована.",share:"Поделиться",justNow:"только что",minAgo:"мин. назад",hourAgo:"ч. назад",dayAgo:"дн. назад",deviceWarn:"Доступ привязан к этому браузеру. Очистка данных сайта может привести к потере гостевого аккаунта.",refreshDone:"Лента обновлена.",loginFirst:"Сначала создай свой ник ORBIS.",nickname:"Участник ORBIS"},
+en:{space:"YOUR SPACE",today:"Daily topic",trending:"Trending",savedNav:"Saved",account:"ACCOUNT",profile:"My profile",rules:"ORBIS rules",settings:"Settings",deviceNote:"Your nickname is tied to this browser. Keep site data to retain access.",mainTitle:"One topic. A thousand perspectives.",install:"Install",dailyQuestion:"DAILY QUESTION",oneForAll:"ONE FOR EVERYONE",heroDesc:"One question for everyone. One short thought from each member. See what happens when different perspectives meet.",newTopic:"Next topic in",onePost:"1 post / 24 hours",answer:"Answer the topic",shortMeaning:"Short and meaningful",noComments:"No comments. No noise.",oneFeed:"One shared feed",community:"Community responses",fresh:"Latest",popular:"Popular",mine:"Mine",searchPh:"Find a thought or creator…",sharedFeed:"Shared ORBIS feed",refresh:"refresh",principleTitle:"A place where one thought can reach thousands.",principleDesc:"No need to chase followers, make videos or argue in comments. Just answer the daily question.",todayStats:"Today in numbers",todayAnswers:"answers today",inFeed:"in this feed",how:"How it works",step1:"One shared topic",step1d:"A new question for everyone every day.",step2:"One thought from you",step2d:"Up to 140 characters. No long essays.",step3:"React, don't argue",step3d:"Recognise ideas that resonate.",partnerTitle:"Good ideas deserve attention.",partnerDesc:"Partner placements will appear when real campaigns are connected. No simulated ads in the feed.",safety:"Posts are visible to all members. Do not share personal information and respect others.",footer:"Less noise. More meaning.",yourThought:"Your thought",composeSub:"Your answer to the ORBIS daily topic.",composePh:"Write what you really think…",max140:"140 characters maximum",cancel:"Cancel",publish:"Publish ↗",profileSub:"Your voice in the shared ORBIS feed.",profileStatus:"Status",anonymousProfile:"Anonymous ORBIS profile",active:"Active",memberNumber:"Member number",publicNumber:"Your public ORBIS number",storage:"Access storage",storageDesc:"In this browser on this device",close:"Close",settingsSub:"Make ORBIS yours.",language:"Interface language",languageDesc:"Change it at any time.",frequency:"Posting frequency",frequencyDesc:"Enforced by the server.",privacy:"Privacy",privacyDesc:"Posts are visible to all members.",publicFeed:"Shared feed",installApp:"Install ORBIS",installDesc:"Add the app to your home screen.",rulesSub:"A few simple rules to keep this space useful.",rule1:"One post per member every 24 hours.",rule2:"Up to 140 characters — one clear thought.",rule3:"No insults, spam or personal information.",rule4:"Reactions replace comments.",rule5:"Do not present opinions as verified facts.",rule6:"Posts are visible to all members.",welcomeTitle:"Your perspective matters.",welcomeText:"One topic for the world, every day. Create your nickname with one tap, share a thought and discover everyone else's.",createNick:"Create my nickname",welcomeFoot:"No email or password required. Your nickname is generated automatically and saved on this device.",loginLoading:"Creating your nickname…",offline:"No connection. Check your internet.",welcomeError:"Could not create your profile. Please try again.",emptyTitle:"The conversation starts here.",emptyText:"No one has answered today's topic yet. Leave the first thought and open the conversation to the community.",first:"Be the first",noSavedTitle:"No saved thoughts yet.",noSavedText:"Tap the bookmark below a post to keep it here.",noMine:"You haven't posted yet.",noSearch:"Nothing found.",trySearch:"Try a different search.",loading:"Loading the feed…",postError:"Could not publish.",dailyLimit:"You already posted. Your next post is available",guard:"This text is not suitable for the shared feed.",postSuccess:"Your thought is now in the shared ORBIS feed.",savedToast:"Saved",removedToast:"Removed from saved",copyToast:"Link copied.",share:"Share",justNow:"just now",minAgo:"min ago",hourAgo:"hr ago",dayAgo:"days ago",deviceWarn:"Access is tied to this browser. Clearing site data may remove your guest account.",refreshDone:"Feed refreshed.",loginFirst:"Create your ORBIS nickname first.",nickname:"ORBIS member"},
+az:{space:"MƏKANIN",today:"Günün mövzusu",trending:"Trenddə",savedNav:"Yadda saxlanılanlar",account:"HESAB",profile:"Profilim",rules:"ORBIS qaydaları",settings:"Tənzimləmələr",deviceNote:"Ləqəbin bu brauzerə bağlıdır. Girişi qorumaq üçün sayt məlumatlarını silmə.",mainTitle:"Bir mövzu. Minlərlə baxış.",install:"Quraşdır",dailyQuestion:"GÜNÜN SUALI",oneForAll:"HAMı ÜÇÜN EYNİ",heroDesc:"Hamı üçün bir sual. Hər kəsdən bir qısa fikir. Müxtəlif baxışlar bir yerdə görüşəndə nə baş verdiyini gör.",newTopic:"Yeni mövzuya",onePost:"24 saatda 1 paylaşım",answer:"Mövzuya cavab ver",shortMeaning:"Qısa və mənalı",noComments:"Şərhsiz. Səs-küysüz.",oneFeed:"Bir ümumi lent",community:"İcmanın cavabları",fresh:"Yenilər",popular:"Populyar",mine:"Mənim",searchPh:"Fikir və ya müəllif axtar…",sharedFeed:"ORBIS ümumi lenti",refresh:"yenilə",principleTitle:"Bir fikrin minlərlə insana çata biləcəyi məkan.",principleDesc:"İzləyici toplamaq, video çəkmək və şərhlərdə mübahisə etmək lazım deyil. Günün sualına cavab ver.",todayStats:"Bu gün rəqəmlərlə",todayAnswers:"bu gün cavab",inFeed:"lentdə",how:"Necə işləyir",step1:"Bir ümumi mövzu",step1d:"Hər gün hamı üçün yeni sual.",step2:"Sənin bir fikrin",step2d:"140 simvola qədər — uzun yazılar yox.",step3:"Mübahisə yox, reaksiya",step3d:"Maraqlı fikirləri seç.",partnerTitle:"Yaxşı fikirlər diqqətə layiqdir.",partnerDesc:"Real reklam kampaniyaları qoşulduqdan sonra tərəfdaş yerləşdirmələri görünəcək. Hələlik saxta reklam yoxdur.",safety:"Paylaşımlar bütün iştirakçılara görünür. Şəxsi məlumat paylaşma və başqalarına hörmət et.",footer:"Az səs-küy. Daha çox məna.",yourThought:"Sənin fikrin",composeSub:"ORBIS gününə cavabın.",composePh:"Həqiqətən nə düşündüyünü yaz…",max140:"Maksimum 140 simvol",cancel:"Ləğv et",publish:"Paylaş ↗",profileSub:"ORBIS ümumi lentində sənin səsin.",profileStatus:"Status",anonymousProfile:"Anonim ORBIS profili",active:"Aktiv",memberNumber:"İştirakçı nömrəsi",publicNumber:"Sənin açıq ORBIS nömrən",storage:"Girişin saxlanması",storageDesc:"Bu cihazın brauzerində",close:"Bağla",settingsSub:"ORBIS-i özünə uyğunlaşdır.",language:"İnterfeys dili",languageDesc:"İstənilən vaxt dəyişə bilərsən.",frequency:"Paylaşım tezliyi",frequencyDesc:"Server tərəfindən yoxlanılır.",privacy:"Məxfilik",privacyDesc:"Paylaşımlar bütün iştirakçılara görünür.",publicFeed:"Ümumi lent",installApp:"ORBIS-i quraşdır",installDesc:"Tətbiqi əsas ekrana əlavə et.",rulesSub:"Bu məkanı faydalı saxlamaq üçün sadə qaydalar.",rule1:"Hər iştirakçı üçün 24 saatda bir paylaşım.",rule2:"140 simvola qədər — bir aydın fikir.",rule3:"Təhqir, spam və şəxsi məlumat yoxdur.",rule4:"Şərhləri reaksiyalar əvəz edir.",rule5:"Fikri təsdiqlənmiş fakt kimi təqdim etmə.",rule6:"Paylaşımlar bütün iştirakçılara açıqdır.",welcomeTitle:"Sənin baxışın önəmlidir.",welcomeText:"Hər gün bütün dünya üçün bir mövzu. Bir toxunuşla ləqəb yarat, fikrini paylaş və başqalarının cavablarını gör.",createNick:"Ləqəbimi yarat",welcomeFoot:"E-poçt və parol tələb olunmur. Ləqəb avtomatik yaradılaraq bu cihazda saxlanılır.",loginLoading:"Ləqəbin yaradılır…",offline:"İnternet bağlantısı yoxdur.",welcomeError:"Profil yaratmaq olmadı. Yenidən cəhd et.",emptyTitle:"Söhbət burada başlayır.",emptyText:"Hələ heç kim bugünkü mövzuya cavab verməyib. İlk fikri yaz.",first:"İlk sən ol",noSavedTitle:"Hələ yadda saxlanılan fikir yoxdur.",noSavedText:"Sonra qayıtmaq üçün paylaşımın altındakı nişana toxun.",noMine:"Hələ paylaşım etməmisən.",noSearch:"Heç nə tapılmadı.",trySearch:"Axtarış sözünü dəyiş.",loading:"Lent yüklənir…",postError:"Paylaşmaq mümkün olmadı.",dailyLimit:"Artıq paylaşmısan. Növbəti paylaşım üçün vaxt",guard:"Bu mətn ümumi lent üçün uyğun deyil.",postSuccess:"Fikrin artıq ORBIS ümumi lentindədir.",savedToast:"Yadda saxlanıldı",removedToast:"Yadda saxlanılanlardan silindi",copyToast:"Link köçürüldü.",share:"Paylaş",justNow:"indicə",minAgo:"dəq. əvvəl",hourAgo:"saat əvvəl",dayAgo:"gün əvvəl",deviceWarn:"Giriş bu brauzerə bağlıdır. Sayt məlumatlarının silinməsi qonaq hesabının itirilməsinə səbəb ola bilər.",refreshDone:"Lent yeniləndi.",loginFirst:"Əvvəlcə ORBIS ləqəbini yarat.",nickname:"ORBIS iştirakçısı"}
+};
+const topics={
+ru:["Какую привычку стоит развивать уже сегодня, чтобы через год увидеть большой результат?","Какой навык станет самым ценным в ближайшие пять лет?","Что важнее для старта: хорошая идея или умение доводить дело до конца?","Какую повседневную проблему ты бы решил первым делом?","Как отличить полезную возможность от красивого обещания?","Что сегодня мешает молодым людям начать свой проект?","Какая технология изменит обычную жизнь сильнее всего?","На что стоит потратить первый заработанный доход?","Что помогает не бросать долгосрочную цель?","Какой навык будет ценнее диплома в будущем?","Что делает онлайн-сообщество действительно полезным?","Какую одну вещь ты бы улучшил в своём городе?"],
+en:["What habit could make the biggest difference one year from now?","Which skill will be most valuable over the next five years?","What matters more at the start: a strong idea or consistent execution?","Which everyday problem would you solve first?","How do you tell a real opportunity from a shiny promise?","What stops young people from starting their own projects?","Which technology will change everyday life the most?","What is the smartest way to use your first earnings?","What helps you stay committed to a long-term goal?","Which skill could become more valuable than a diploma?","What makes an online community genuinely useful?","What is one thing you would improve in your city?"],
+az:["Bu gündən hansı vərdişə başlamaq bir ildən sonra böyük fərq yarada bilər?","Növbəti beş ildə ən dəyərli bacarıq hansı olacaq?","Başlanğıcda nə vacibdir: yaxşı ideya, yoxsa davamlı icra?","Gündəlik hansı problemi ilk həll edərdin?","Real fürsəti gözəl vəddən necə ayırmaq olar?","Gənclərə öz layihəsinə başlamağa nə mane olur?","Hansı texnologiya gündəlik həyatı daha çox dəyişəcək?","İlk qazandığın pulu necə istifadə etmək daha ağıllıdır?","Uzunmüddətli məqsəddən vaz keçməməyə nə kömək edir?","Gələcəkdə hansı bacarıq diplomdan daha dəyərli olacaq?","Onlayn icmanı həqiqətən faydalı edən nədir?","Şəhərində bir şeyi dəyişə bilsəydin, bu nə olardı?"]
+};
+let lang=localStorage.getItem(STORE.lang)||"ru";if(!text[lang])lang="ru";
+let token=localStorage.getItem(STORE.token)||"",deviceId=localStorage.getItem(STORE.device)||"",user=null,posts=[],view="home",sort="fresh",cooldown=null,installPrompt=null,timer=null,posting=false,loaded=false;
+const tr=k=>(text[lang]&&text[lang][k])||text.ru[k]||k;
+function applyLang(){document.documentElement.lang=lang;document.querySelectorAll("[data-t]").forEach(e=>{const k=e.dataset.t;if(tr(k))e.textContent=tr(k)});document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=tr(e.dataset.ph));$("language").value=lang;$("settingsLanguage").value=lang;renderTopic();if(loaded)renderFeed()}
+function setLang(v){lang=text[v]?v:"ru";localStorage.setItem(STORE.lang,lang);applyLang()}
+function bakuParts(date){const p=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Baku",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(date);const o={};p.forEach(x=>o[x.type]=x.value);return o}
+function bakuKey(date){const p=bakuParts(date);return p.year+"-"+p.month+"-"+p.day}
+function topicIndex(){const p=bakuParts(new Date());return Math.abs(Math.floor((Date.UTC(+p.year,+p.month-1,+p.day)-Date.UTC(2026,10,16))/86400000))%topics.ru.length}
+function renderTopic(){$("topicTitle").textContent=topics[lang][topicIndex()]||topics.ru[topicIndex()]}
+function midnightBaku(){const p=bakuParts(new Date());return Date.UTC(+p.year,+p.month-1,+p.day+1)-14400000}
+function countdown(){let m=Math.max(0,midnightBaku()-Date.now());const h=Math.floor(m/3600000);m%=3600000;const min=Math.floor(m/60000);const sec=Math.floor(m%60000/1000);$("countdown").textContent=[h,min,sec].map(n=>String(n).padStart(2,"0")).join(":")}
+function uuid(){return crypto.randomUUID?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==="x"?r:(r&3|8)).toString(16)})}
+function headers(){const h={"Content-Type":"application/json","apikey":KEY};if(token)h.Authorization="Bearer "+token;return h}
+async function api(path,method,body){let res;try{res=await fetch(API+path,{method:method||"GET",headers:headers(),body:body===undefined?undefined:JSON.stringify(body),cache:"no-store"})}catch(e){throw new Error(tr("offline"))}let data={};try{data=await res.json()}catch(e){}if(!res.ok){const err=new Error(data.error||tr("postError"));err.status=res.status;err.data=data;throw err}return data}
+function toast(message){const e=$("toast");e.textContent=message;e.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>e.classList.remove("show"),2600)}
+function setUser(p){user=p;const name=p.display_name||p.name||tr("nickname"),handle="@"+(p.username||"member"),num=p.public_number||p.publicNumber||"—";$("sideName").textContent=name;$("sideHandle").textContent=handle;$("sideAvatar").textContent=name.slice(0,1).toUpperCase();$("profileName").textContent=name;$("profileHandle").textContent=handle;$("profileAvatar").textContent=name.slice(0,1).toUpperCase();$("memberNumber").textContent=num==="—"?"ORBIS":"#"+num}
+async function makeIdentity(){const b=$("joinBtn"),err=$("welcomeError");b.disabled=true;b.textContent=tr("loginLoading");err.style.display="none";try{if(!deviceId){deviceId=uuid();localStorage.setItem(STORE.device,deviceId)}const d=await api("/api/guest/session","POST",{deviceId:deviceId});token=d.token;localStorage.setItem(STORE.token,token);setUser(d.user);$("welcome").classList.add("hidden");await loadFeed(true);poll()}catch(e){err.textContent=e.message||tr("welcomeError");err.style.display="block";b.disabled=false;b.textContent=tr("createNick")}}
+async function restore(){if(!token)return false;try{const d=await api("/api/guest/me");setUser(d.user);return true}catch(e){token="";localStorage.removeItem(STORE.token);return false}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function ago(date){const n=Math.max(0,Date.now()-new Date(date).getTime()),m=Math.floor(n/60000);if(m<1)return tr("justNow");if(m<60)return m+" "+tr("minAgo");const h=Math.floor(m/60);if(h<24)return h+" "+tr("hourAgo");return Math.floor(h/24)+" "+tr("dayAgo")}
+function total(p){const c=p.reaction_counts||{};return (c["🔥"]||0)+(c["💎"]||0)+(c["🚀"]||0)+(c["😂"]||0)}
+function listPosts(){let a=posts.slice();if(sort==="top")a.sort((x,y)=>total(y)-total(x)||new Date(y.created_at)-new Date(x.created_at));else a.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));if(sort==="mine")a=a.filter(p=>p.author_id===user.id);if(view==="saved")a=a.filter(p=>p.saved);const q=$("search").value.trim().toLowerCase();if(q)a=a.filter(p=>(p.body||"").toLowerCase().includes(q)||((p.author?.display_name||"").toLowerCase().includes(q))||((p.author?.username||"").toLowerCase().includes(q)));return a}
+function reaction(p,e){const c=(p.reaction_counts||{})[e]||0,active=p.my_reaction===e;return '<button class="reaction '+(active?"active":"")+'" data-action="react" data-id="'+p.id+'" data-emoji="'+e+'" aria-pressed="'+active+'"><span>'+e+'</span><span class="num">'+c+'</span></button>'}
+function postCard(p,i){const name=p.author?.display_name||"ORBIS member",handle=p.author?.username||"member",saved=!!p.saved,boosted=p.boosted_until&&new Date(p.boosted_until)>new Date();return '<article class="post '+(boosted?"boosted":"")+'" style="animation-delay:'+Math.min(i,8)*35+'ms" id="post-'+p.id+'"><div class="post-top"><div class="author"><div class="author-avatar">'+esc(name.slice(0,1).toUpperCase())+'</div><div class="author-meta"><b>'+esc(name)+'</b><small>@'+esc(handle)+'</small></div></div><div style="display:flex;align-items:center;gap:7px">'+(boosted?'<span class="boost-tag">TOP</span>':"")+'<span class="post-time">'+esc(ago(p.created_at))+'</span></div></div><div class="post-body">'+esc(p.body)+'</div><div class="post-foot"><div class="reactions">'+reaction(p,"🔥")+reaction(p,"💎")+reaction(p,"🚀")+reaction(p,"😂")+'</div><div class="post-tools"><button class="tool '+(saved?"saved":"")+'" data-action="save" data-id="'+p.id+'" title="Save">'+(saved?"◆":"◇")+'</button><button class="share" data-action="share" data-id="'+p.id+'">'+tr("share")+' ↗</button></div></div></article>'}
+function renderFeed(){const a=listPosts();$("feedCount").textContent=a.length;$("totalCount").textContent=posts.length;$("todayCount").textContent=posts.filter(p=>bakuKey(new Date(p.created_at))===bakuKey(new Date())).length;const root=$("feed");if(!a.length){let title=tr("emptyTitle"),desc=tr("emptyText"),button=tr("first");if(view==="saved"){title=tr("noSavedTitle");desc=tr("noSavedText");button=""}else if(sort==="mine"){title=tr("noMine");desc=tr("emptyText");button=tr("first")}else if($("search").value.trim()){title=tr("noSearch");desc=tr("trySearch");button=""}root.innerHTML='<div class="empty"><div class="empty-icon">✧</div><strong>'+esc(title)+'</strong><p>'+esc(desc)+'</p>'+(button?'<button id="emptyAction">'+esc(button)+' ↗</button>':"")+'</div>';const b=$("emptyAction");if(b)b.onclick=compose;return}root.innerHTML=a.map(postCard).join("")}
+async function loadFeed(skeleton){if(!token)return;if(skeleton)$("feed").innerHTML='<div class="skeleton"></div><div class="skeleton"></div>';try{const d=await api("/api/daily/feed?sort="+(sort==="top"?"top":"fresh"));posts=Array.isArray(d.posts)?d.posts:[];cooldown=d.nextPostAt||null;loaded=true;renderFeed();setCooldown();$("updatedAt").textContent=new Date().toLocaleTimeString(lang==="ru"?"ru-RU":lang==="az"?"az-AZ":"en-US",{hour:"2-digit",minute:"2-digit"})}catch(e){$("feed").innerHTML='<div class="empty"><div class="empty-icon">⌁</div><strong>'+esc(e.message)+'</strong><p>'+esc(tr("offline"))+'</p><button id="retry">↻ '+tr("refresh")+'</button></div>';const b=$("retry");if(b)b.onclick=()=>loadFeed(true)}}
+function poll(){clearInterval(timer);timer=setInterval(()=>loadFeed(false),25000)}
+function setCooldown(){const locked=cooldown&&new Date(cooldown)>new Date();$("answerBtn").disabled=!!locked;if(locked)$("answerBtn").title=tr("dailyLimit")+" "+new Date(cooldown).toLocaleTimeString();else $("answerBtn").title=""}
+function open(id){$(id).classList.add("open")}function close(id){$(id).classList.remove("open")}function compose(){if(!user){$("welcome").classList.remove("hidden");return}if(cooldown&&new Date(cooldown)>new Date()){toast(tr("dailyLimit")+" "+new Date(cooldown).toLocaleTimeString());return}$("postText").value="";$("charCount").textContent="0 / 140";$("publishBtn").disabled=true;open("composeDialog");setTimeout(()=>$("postText").focus(),70)}
+async function publish(){if(posting)return;const body=$("postText").value.trim();if(!body)return;posting=true;$("publishBtn").disabled=true;$("publishBtn").textContent="…";try{await api("/api/daily/post","POST",{body:body});cooldown=new Date(Date.now()+86400000).toISOString();close("composeDialog");showToast(tr("postSuccess"));await loadFeed(false)}catch(e){if(e.status===429&&e.data?.nextPostAt)cooldown=e.data.nextPostAt;toast(e.message||tr("postError"))}finally{posting=false;$("publishBtn").textContent=tr("publish");$("publishBtn").disabled=!$("postText").value.trim();setCooldown()}}
+async function react(id,emoji){try{await api("/api/daily/react","POST",{postId:id,reaction:emoji});await loadFeed(false)}catch(e){toast(e.message)}}
+async function save(id){try{const d=await api("/api/daily/bookmark","POST",{postId:id});toast(d.saved?tr("savedToast"):tr("removedToast"));await loadFeed(false)}catch(e){toast(e.message)}}
+async function share(id){const p=posts.find(x=>x.id===id);if(!p)return;const url=new URL(location.href);url.searchParams.set("post",id);const content=(p.author?.display_name||"ORBIS")+"\n"+p.body+"\n"+url.href;try{if(navigator.share)await navigator.share({title:"ORBIS",text:p.body,url:url.href});else{await navigator.clipboard.writeText(content);toast(tr("copyToast"))}}catch(e){if(e.name!=="AbortError")try{await navigator.clipboard.writeText(content);toast(tr("copyToast"))}catch(e2){toast(tr("copyToast"))}}}
+function setView(v){view=v;if(v==="top")sort="top";else if(v==="home")sort="fresh";document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));document.querySelectorAll("[data-sort]").forEach(b=>b.classList.toggle("active",b.dataset.sort===sort));renderFeed()}
+function setSort(s){sort=s;view=s==="top"?"top":s==="fresh"?"home":"home";document.querySelectorAll("[data-sort]").forEach(b=>b.classList.toggle("active",b.dataset.sort===s));document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));if(s!=="mine")loadFeed(false);else renderFeed()}
+function bind(){
+ $("joinBtn").onclick=makeIdentity;$("answerBtn").onclick=compose;$("publishBtn").onclick=publish;
+ $("postText").oninput=()=>{const n=$("postText").value.length;$("charCount").textContent=n+" / 140";$("charCount").classList.toggle("near",n>125);$("publishBtn").disabled=n===0||posting};
+ $("feed").addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!b)return;const id=b.dataset.id;if(b.dataset.action==="react")react(id,b.dataset.emoji);if(b.dataset.action==="save")save(id);if(b.dataset.action==="share")share(id)});
+ $("refreshBtn").onclick=()=>loadFeed(true);$("refreshLink").onclick=()=>{loadFeed(false);toast(tr("refreshDone"))};$("search").oninput=renderFeed;
+ document.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>setSort(b.dataset.sort));document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+ $("profileBtn").onclick=()=>open("profileDialog");$("mobileProfile").onclick=()=>open("profileDialog");$("rulesBtn").onclick=()=>open("rulesDialog");$("settingsBtn").onclick=()=>open("settingsDialog");
+ document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>close(b.dataset.close));document.querySelectorAll(".overlay").forEach(o=>o.onclick=e=>{if(e.target===o)close(o.id)});
+ $("language").onchange=e=>setLang(e.target.value);$("settingsLanguage").onchange=e=>{setLang(e.target.value);toast("✓")};
+ $("installBtn").onclick=install;$("installSettings").onclick=install;
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(o=>o.classList.remove("open"));if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("search").focus()}});
 }
-async function createGuestSession(){
- let id=localStorage.getItem(DEVICE_KEY)||"";
- if(!/^[0-9a-f-]{36}$/i.test(id)){id=crypto.randomUUID();localStorage.setItem(DEVICE_KEY,id)}
- const headers={"apikey":SUPABASE_KEY,"content-type":"application/json"};
- if(guestToken)headers.Authorization="Bearer "+guestToken;
- const response=await nativeFetch(EDGE_API+"/api/guest/session",{method:"POST",headers,body:JSON.stringify({deviceId:id}),credentials:"omit",cache:"no-store"});
- let data={};try{data=await response.json()}catch{}
- if(!response.ok||!data.token)throw new Error(data.error||"Не удалось открыть новостную ленту.");
- guestToken=data.token;localStorage.setItem(TOKEN_KEY,guestToken);
-}
-function openDb(){
- if(dbPromise)return dbPromise;
- dbPromise=new Promise((resolve,reject)=>{
-  if(!("indexedDB" in window)){reject(new Error("IndexedDB недоступен"));return}
-  const request=indexedDB.open("orbis-news-cache-v1",2);
-  request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("articles"))db.createObjectStore("articles",{keyPath:"key"});if(!db.objectStoreNames.contains("feed"))db.createObjectStore("feed",{keyPath:"key"})};
-  request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error||new Error("Не удалось открыть кэш"));
- });
- return dbPromise;
-}
-async function saveFeedCache(items){
- try{
-  const db=await openDb();
-  await new Promise((resolve,reject)=>{
-   const tx=db.transaction("feed","readwrite"),store=tx.objectStore("feed");
-   store.clear();items.slice(0,160).forEach(item=>store.put(item));
-   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
-  });
- }catch(error){console.warn("ORBIS feed cache:",error.message)}
-}
-async function readFeedCache(){
- try{
-  const db=await openDb();
-  return await new Promise((resolve,reject)=>{
-   const tx=db.transaction("feed","readonly"),request=tx.objectStore("feed").getAll();
-   request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error);
-  });
- }catch(error){return []}
-}
-async function cacheSavedArticle(article){
- const stored=Object.assign({},article,{savedAt:new Date().toISOString()});
- if(stored.image&&!stored.imageBlob&&navigator.onLine){
-  try{
-   const response=await nativeFetch(stored.image,{mode:"cors",credentials:"omit",signal:AbortSignal.timeout(4500)});
-   const blob=await response.blob();
-   if(response.ok&&blob.type.startsWith("image/")&&blob.size>0&&blob.size<=4*1024*1024)stored.imageBlob=blob;
-  }catch(error){console.debug("ORBIS image cache skipped:",error.message)}
- }
- await cachePut(stored);
-}
-
-async function cachePut(article){
- try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction("articles","readwrite");tx.objectStore("articles").put(article);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
- catch(error){const list=readJson("orbis-news-cache-fallback",[]).filter(item=>item.key!==article.key);list.unshift(article);writeJson("orbis-news-cache-fallback",list.slice(0,100))}
-}
-async function cacheDelete(key){
- try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction("articles","readwrite");tx.objectStore("articles").delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
- catch(error){writeJson("orbis-news-cache-fallback",readJson("orbis-news-cache-fallback",[]).filter(item=>item.key!==key))}
-}
-async function cacheAll(){
- try{const db=await openDb();return await new Promise((resolve,reject)=>{const tx=db.transaction("articles","readonly");const req=tx.objectStore("articles").getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error)})}
- catch(error){return readJson("orbis-news-cache-fallback",[])}
-}
-async function hashUrl(url){
- const bytes=new TextEncoder().encode(String(url).trim());
- const digest=await crypto.subtle.digest("SHA-256",bytes);
- return Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,"0")).join("");
-}
-async function normaliseItems(items){
- return Promise.all((items||[]).map(async item=>Object.assign({},item,{key:await hashUrl(item.url)})));
-}
-async function loadSources(){
- try{
-  const response=await nativeFetch("/api/news/sources",{cache:"no-store"});
-  const data=await response.json().catch(()=>({}));
-  if(!response.ok)throw new Error(data.error||"RSS catalog");
-  state.sourceDirectory=data.sources||[];
-  $("sourceCount").textContent=String(data.totalSources||state.sourceDirectory.length||SOURCES_FALLBACK);
-  if(Array.isArray(data.categories)&&data.categories.length)CATEGORIES.splice(0,CATEGORIES.length,...data.categories);
-  fillFilterOptions("countrySelect",data.countries||[],state.country,"all","🌐 Весь мир");
-  fillFilterOptions("sourceLanguageSelect",data.languages||[],state.sourceLanguage,"all","Все языки");
-  fillFilterOptions("translationLanguageSelect",data.translationLanguages||data.languages||[],state.translationLang,"ru","Русский");
-  fillFilterOptions("settingsTranslationSelect",data.translationLanguages||data.languages||[],state.translationLang,"ru","Русский");
-  $("autoTranslateToggle").checked=state.autoTranslate;
- }catch(error){
-  $("sourceCount").textContent=String(SOURCES_FALLBACK);
-  renderCategoryNav();
- }
- renderCategoryNav();
- updateStats();
-}
-function fillFilterOptions(id,items,selected,fallback,label){
- const select=$(id);if(!select)return;
- const rows=items.length?items:[{id:fallback,name:label}];
- select.replaceChildren();
- rows.forEach(item=>{
-  const option=document.createElement("option");option.value=item.id;
-  option.textContent=(item.flag?item.flag+" ":"")+item.name;
-  select.append(option);
- });
- select.value=[...select.options].some(option=>option.value===selected)?selected:fallback;
-}
-function renderCategoryNav(){
- const nav=$("categoryNav");if(!nav)return;nav.replaceChildren();
- CATEGORIES.forEach(item=>{
-  const button=document.createElement("button");button.type="button";button.className="nav-item";button.dataset.category=item.id;
-  const icon=document.createElement("span");icon.className="nav-icon";icon.textContent=item.icon;
-  button.append(icon,document.createTextNode(item.name));
-  nav.append(button);
- });
- setActiveNav();
-}
-function preferredCategories(){
- const prefs=state.interests.length?state.interests:CATEGORIES.map(item=>item.id);
- return prefs.slice().sort((a,b)=>(Number(state.weights[b])||0)-(Number(state.weights[a])||0));
-}
-async function fetchNewsForView(){
- const categoryId=state.view==="category"?state.category:"all";
- const params=new URLSearchParams({category:categoryId,country:state.country||"all",language:state.sourceLanguage||"all"});
- if(state.sourceId)params.set("source",state.sourceId);
- const response=await nativeFetch("/api/news?"+params.toString(),{cache:"no-store"});
- const data=await response.json().catch(()=>({}));
- if(!response.ok)throw new Error(data.error||"Не удалось собрать новостную ленту.");
- let merged=await normaliseItems(data.items||[]);
- if(state.view==="for-you"&&state.sort==="recommended"){
-  const weights=Object.assign({},state.weights);
-  merged.sort((a,b)=>{
-   const wa=(state.interests.includes(a.category)?6:0)+(Number(weights[a.category])||0)*2.3;
-   const wb=(state.interests.includes(b.category)?6:0)+(Number(weights[b.category])||0)*2.3;
-   return wb-wa || (Date.parse(b.publishedAt||0)||0)-(Date.parse(a.publishedAt||0)||0);
-  });
- }else merged.sort((a,b)=>(Date.parse(b.publishedAt||0)||0)-(Date.parse(a.publishedAt||0)||0));
- return {items:merged,failed:(data.failedSources||[]).length,failedSources:data.failedSources||[],sourceCount:data.sourceCount||0,workingSources:data.workingSources||0};
-}
-async function syncReactions(items){
- if(!items.length||!guestToken)return;
- const keys=[...new Set(items.map(item=>item.key).filter(Boolean))];
- try{
-  for(let offset=0;offset<keys.length;offset+=40){
-   const batch=keys.slice(offset,offset+40);
-   const data=await api("/api/news/reactions?keys="+encodeURIComponent(batch.join(",")));
-   (data.reactions||[]).forEach(reaction=>{
-    const local=state.liked[reaction.key];
-    if(!local||typeof local!=="object")state.liked[reaction.key]={liked:reaction.liked,likes:reaction.likes};
-    else state.liked[reaction.key]=Object.assign({},local,{likes:reaction.likes});
-   });
-  }
-  writeJson(LIKES_KEY,state.liked);
- }catch(error){console.warn("ORBIS reaction sync:",error.message)}
-}
-async function syncPending(){
- if(!guestToken||!navigator.onLine)return;
- const entries=Object.entries(state.pending);
- for(const [key,liked] of entries.slice(0,50)){
-  try{const result=await api("/api/news/reactions",{method:"POST",body:JSON.stringify({key,liked:Boolean(liked)})});state.liked[key]=Object.assign({},state.liked[key]||{},{liked:result.liked,likes:result.likes});delete state.pending[key]}
-  catch(error){break}
- }
- writeJson(PENDING_KEY,state.pending);writeJson(LIKES_KEY,state.liked);
-}
-async function loadSaved(){
- state.saved=await cacheAll();state.saved.sort((a,b)=>(Date.parse(b.savedAt||b.publishedAt||0)||0)-(Date.parse(a.savedAt||a.publishedAt||0)||0));
- $("savedCount").textContent=String(state.saved.length);$("savedStat").textContent=String(state.saved.length);
-}
-function scoreForCategory(id){return Number(state.weights[id])||0}
-function updateStats(){
- $("likesStat").textContent=String(Object.values(state.liked).filter(item=>item&&item.liked).length);
- $("savedStat").textContent=String(state.saved.length);
- const list=$("rightTopics");list.replaceChildren();
- preferredCategories().slice(0,4).forEach(id=>{
-  const item=category(id),row=document.createElement("div");row.className="trend-item";
-  const icon=document.createElement("span");icon.className="trend-icon";icon.textContent=item.icon;
-  const copy=document.createElement("div");copy.className="trend-copy";const title=document.createElement("b");title.textContent=item.name;const detail=document.createElement("small");detail.textContent="Вес интереса: "+(scoreForCategory(id)+1);copy.append(title,detail);
-  const arrow=document.createElement("span");arrow.className="trend-arrow";arrow.textContent="↗";row.append(icon,copy,arrow);row.addEventListener("click",()=>openView("category",id));list.append(row);
- });
-}
-function renderInterestChips(){
- const wrap=$("interestChips");wrap.replaceChildren();
- state.interests.forEach(id=>{
-  const item=category(id),button=document.createElement("button");button.type="button";button.className="interest-chip active";button.textContent=item.icon+" "+item.name;button.addEventListener("click",()=>openView("category",id));wrap.append(button);
- });
- const edit=document.createElement("button");edit.type="button";edit.className="interest-chip";edit.textContent="+ Настроить";edit.addEventListener("click",openInterestDialog);wrap.append(edit);
-}
-function setActiveNav(){
- document.querySelectorAll("[data-view]").forEach(button=>button.classList.toggle("active",button.dataset.view===state.view));
- document.querySelectorAll("[data-category]").forEach(button=>button.classList.toggle("active",state.view==="category"&&button.dataset.category===state.category));
-}
-function openView(view,cat,sourceId){
- state.view=view;state.sourceId=sourceId||"";state.renderCount=24;if(view==="category")state.category=cat||"world";
- $("countrySelect").value=state.country||"all";$("sourceLanguageSelect").value=state.sourceLanguage||"all";
- setActiveNav();$("searchInput").value="";state.search="";
- const names={ "for-you":"Твоя орбита","latest":"Последние новости","navigator":"Навигатор тем","encyclopedia":"Энциклопедия","saved":"Сохранённый кэш","category":category(state.category).name };
- $("pageTitle").textContent=names[view]||"ORBIS";$("feedHeading").textContent=names[view]||"ORBIS";
- $("feedSub").textContent=view==="for-you"?"все темы · персональная сортировка":view==="latest"?"мировая лента · сначала свежие":view==="saved"?"доступно на этом устройстве":view==="navigator"?"страны, темы и источники":view==="encyclopedia"?"поиск знаний по Википедии":view==="category"?"тематическая лента":"";
- $("hero").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
- $("interestChips").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
- $("feedControls").hidden=view==="saved"||view==="encyclopedia";
- $("sortSelect").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
- $("feedControls").hidden=view==="saved"||view==="navigator"||view==="encyclopedia";
- document.querySelector(".search-wrap").hidden=view==="encyclopedia"||view==="navigator";
- if(view==="navigator"){renderNavigator();return}
- if(view==="encyclopedia"){renderWikiPanel();return}
- if(view==="saved"){renderSaved();return}
- loadFeed();
-}
-async function loadFeed(){
- const version=++feedLoadVersion;
- state.loading=true;
- $("feed").replaceChildren();for(let i=0;i<3;i++){const sk=document.createElement("div");sk.className="skeleton";$("feed").append(sk)}
- $("statusText").textContent=navigator.onLine?"Собираем новости по темам…":"Офлайн · показываем сохранённые материалы";
- $("refreshBtn").classList.add("busy");
- try{
-  let result;
-  if(navigator.onLine){result=await fetchNewsForView();if(version!==feedLoadVersion)return;state.articles=result.items;await saveFeedCache(state.articles)}
-  else {state.articles=await readFeedCache();result={failed:0,sourceCount:0,workingSources:0};}
-  if(version!==feedLoadVersion)return;
-  await syncReactions(state.articles);
-  if(version!==feedLoadVersion)return;
-  applySearch();
-  state.lastUpdated=new Date();$("lastUpdate").textContent="Обновлено "+state.lastUpdated.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
-  const count=state.articles.length;
-  $("statusText").textContent=count?(navigator.onLine?(result.failed?"Источники доступны · часть RSS временно не ответила":"Источники синхронизированы · "+result.workingSources+" из "+result.sourceCount+" источников"):"Офлайн · показана последняя копия ленты"): "По выбранным темам пока нет доступных новостей";
-  $("sideSync").textContent=navigator.onLine?"Синхронизация активна":"Офлайн-режим";
-  await loadSaved();updateStats();
- }catch(error){
-  if(version!==feedLoadVersion)return;
-  console.warn("ORBIS news:",error.message);
-  const cachedFeed=await readFeedCache();
-  state.articles=cachedFeed.length?cachedFeed:state.saved.slice();applySearch();
-  $("statusText").textContent=state.articles.length?"Показана последняя сохранённая лента · подключение недоступно":"Нет подключения к новостным источникам";
-  if(!state.articles.length)renderError(error.message);
- }finally{
-  if(version===feedLoadVersion){state.loading=false;$("refreshBtn").classList.remove("busy")}
- }
-}
-function applySearch(){
- const query=state.search.trim().toLocaleLowerCase();
- state.visible=state.articles.filter(item=>{
-  if(!query)return true;
-  return [item.title,item.summary,item.source,item.credit,category(item.category).name].join(" ").toLocaleLowerCase().includes(query);
- });
- if(state.view==="saved")renderSaved();
- else renderArticles(state.visible);
-}
-function articleLiked(item){return Boolean(state.liked[item.key]&&state.liked[item.key].liked)}
-function articleLikes(item){return Number(state.liked[item.key]&&state.liked[item.key].likes)||0}
-function articleSaved(item){return state.saved.some(saved=>saved.key===item.key)}
-function countryFlag(code){
- const flags={AZ:"🇦🇿",GB:"🇬🇧",US:"🇺🇸",DE:"🇩🇪",FR:"🇫🇷",ES:"🇪🇸",TR:"🇹🇷",RU:"🇷🇺",JP:"🇯🇵",KR:"🇰🇷",IN:"🇮🇳",PK:"🇵🇰",CN:"🇨🇳",BR:"🇧🇷",VN:"🇻🇳",ID:"🇮🇩",UA:"🇺🇦",NL:"🇳🇱",IT:"🇮🇹",CA:"🇨🇦",AU:"🇦🇺",QA:"🇶🇦",KE:"🇰🇪",CH:"🇨🇭",SG:"🇸🇬",IE:"🇮🇪",BE:"🇧🇪",AT:"🇦🇹",PL:"🇵🇱",SE:"🇸🇪",NO:"🇳🇴",DK:"🇩🇰",FI:"🇫🇮",CZ:"🇨🇿",HU:"🇭🇺",RO:"🇷🇴",RS:"🇷🇸",PT:"🇵🇹"};
- return flags[code]||"🌐";
-}
-function makeNewsCard(item,index){
- const card=document.createElement("article");card.className="news-card";card.style.animationDelay=Math.min(index%12,11)*32+"ms";card.dataset.key=item.key;
- if(index===0)card.classList.add("lead-card");
- const top=document.createElement("div");top.className="news-top";
- const meta=document.createElement("div");meta.className="source-meta";
- const mark=document.createElement("span");mark.className="source-mark";mark.textContent=(item.credit||item.source||"N").slice(0,1).toUpperCase();
- const source=document.createElement("span");source.className="source-name";source.textContent=item.source||"Новостной источник";meta.append(mark,source);
- const date=document.createElement("time");date.className="news-time";
- if(item.publishedAt){date.dateTime=item.publishedAt;date.textContent=new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date(item.publishedAt))}
- else date.textContent="Свежая публикация";
- top.append(meta,date);
- const cat=document.createElement("span");cat.className="category-label";cat.textContent=category(item.category).icon+" "+category(item.category).name.toUpperCase();
- const pills=document.createElement("div");pills.className="news-meta-pills";
- const country=document.createElement("span");country.className="news-meta-pill country";country.textContent=countryFlag(item.country)+" "+(item.countryName||"Мир");pills.append(country);
- if(item.languageName){const lang=document.createElement("span");lang.className="news-meta-pill";lang.textContent=item.languageName;pills.append(lang)}
- const title=document.createElement("h3");title.className="news-title";title.textContent=item.title;
- const summary=document.createElement("p");summary.className="news-summary";summary.textContent=item.summary||"Открой оригинальную публикацию, чтобы прочитать подробности.";
- card.append(top,cat,pills);
- if(item.videoUrl||item.videoId||item.image||item.imageBlob){
-  const frame=document.createElement("div");frame.className="news-media-frame";
-  if(item.videoUrl){
-   const video=document.createElement("video");video.controls=true;video.preload="metadata";video.playsInline=true;video.src=item.videoUrl;video.setAttribute("aria-label","Видео к новости");frame.append(video);
-   const badge=document.createElement("span");badge.className="media-overlay";badge.textContent="▶ ВИДЕО";frame.append(badge);
-  }else{
-   const image=document.createElement("img");image.loading="lazy";image.alt="Фото к новости";
-   if(item.imageBlob instanceof Blob){
-    const objectUrl=URL.createObjectURL(item.imageBlob);image.src=objectUrl;
-    image.addEventListener("load",()=>URL.revokeObjectURL(objectUrl),{once:true});
-    image.onerror=()=>{URL.revokeObjectURL(objectUrl);frame.remove()};
-   }else if(item.image){image.src=item.image;image.onerror=()=>frame.remove()}
-   if(item.image||item.imageBlob)frame.append(image);
-  }
-  if(item.videoId){const watch=document.createElement("a");watch.className="media-overlay";watch.href="https://www.youtube.com/watch?v="+encodeURIComponent(item.videoId);watch.target="_blank";watch.rel="noopener noreferrer";watch.textContent="▶ Смотреть видео ↗";frame.append(watch)}
-  if(frame.childNodes.length)card.append(frame);
- }else{
-  const cover=document.createElement("div");cover.className="news-art-cover";
-  cover.style.setProperty("--topic-color",category(item.category).tone||category(item.category).color||"#a58bff");
-  const artIcon=document.createElement("span");artIcon.className="art-icon";artIcon.textContent=category(item.category).icon;
-  const artLabel=document.createElement("span");artLabel.className="art-label";artLabel.textContent=category(item.category).name+" · ORBIS EDITION";
-  cover.append(artIcon,artLabel);card.append(cover);
- }
- card.append(title,summary);
- const bottom=document.createElement("div");bottom.className="news-bottom";const actions=document.createElement("div");actions.className="news-actions";
- const like=document.createElement("button");like.type="button";like.className="news-action"+(articleLiked(item)?" liked":"");like.dataset.action="like";like.textContent=(articleLiked(item)?"♥ ":"♡ ")+articleLikes(item)+" · Лайк";like.setAttribute("aria-pressed",String(articleLiked(item)));
- const save=document.createElement("button");save.type="button";save.className="news-action"+(articleSaved(item)?" saved":"");save.dataset.action="save";save.textContent=articleSaved(item)?"▣ Сохранено":"▢ Сохранить";save.setAttribute("aria-pressed",String(articleSaved(item)));
- const translate=document.createElement("button");translate.type="button";translate.className="news-action";translate.dataset.action="translate";translate.textContent="文 Перевести";translate.title="Перевести материал на выбранный язык";
- actions.append(like,save,translate);
- const link=document.createElement("a");link.className="news-open";link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Читать источник ↗";
- bottom.append(actions,link);card.append(bottom);return card;
-}
-function makeAdCard(ad,index){
- ad=ad||{};
- const card=document.createElement("article");card.className="ad-card";card.style.animationDelay=(index%4)*45+"ms";
- const top=document.createElement("div");top.className="ad-top";const badge=document.createElement("span");badge.className="ad-badge";badge.textContent="РЕКЛАМА";const source=document.createElement("span");source.className="ad-sponsor";source.textContent=ad.id?"ORBIS PARTNER":"РЕКЛАМНОЕ МЕСТО ORBIS";top.append(badge,source);
- const title=document.createElement("h3");title.textContent=ad.headline||"Здесь может быть ваш бренд";
- const body=document.createElement("p");body.textContent=ad.body||"Нативный рекламный блок будет показывать одобренные предложения партнёров ORBIS.";
- card.append(top);
- if(ad.image_url){const image=document.createElement("img");image.src=ad.image_url;image.alt="";image.loading="lazy";image.onerror=()=>image.remove();card.append(image)}
- card.append(title,body);
- if(ad.destination_url){const link=document.createElement("a");link.className="ad-cta";link.href=ad.destination_url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Подробнее ↗";link.addEventListener("click",()=>api("/api/ads/events",{method:"POST",body:JSON.stringify({campaignId:ad.id,eventType:"click"})}).catch(()=>{}));card.append(link)}
- else {const note=document.createElement("span");note.className="ad-sponsor";note.textContent="Показываются только одобренные рекламные кампании";card.append(note)}
- if(ad&&ad.id){const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){api("/api/ads/events",{method:"POST",body:JSON.stringify({campaignId:ad.id,eventType:"impression"})}).catch(()=>{});observer.disconnect()}},{threshold:.55});observer.observe(card)}
- return card;
-}
-async function getFeedAd(){
- if(!guestToken||!navigator.onLine)return null;
- try{return (await api("/api/ads/feed")).ad||null}catch(error){return null}
-}
-async function renderArticles(items){
- const sequence=++renderVersion,feed=$("feed");feed.replaceChildren();
- if(!items.length){
-  const empty=document.createElement("div");empty.className="empty-state";
-  const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="✧";
-  const strong=document.createElement("strong");strong.textContent="Пока ничего не найдено";
-  const note=document.createElement("span");note.textContent="Попробуй другую страну, тему или язык.";
-  empty.append(icon,strong,note);feed.append(empty);return;
- }
- let ad=null;if(items.length>=5)ad=await getFeedAd();if(sequence!==renderVersion)return;
- const count=Math.min(items.length,Math.max(1,state.renderCount||24));
- for(let index=0;index<count;index++){
-  feed.append(makeNewsCard(items[index],index));
-  if((index+1)%5===0)feed.append(makeAdCard(ad,index));
- }
- if(items.length>count){
-  const moreWrap=document.createElement("div");moreWrap.className="more-feed-wrap";
-  const more=document.createElement("button");more.className="load-more-btn";more.type="button";
-  more.textContent="Показать ещё новости · "+Math.min(24,items.length-count);
-  more.addEventListener("click",()=>{
-   const current=count,next=Math.min(items.length,current+24);state.renderCount=next;
-   for(let index=current;index<next;index++){
-    feed.insertBefore(makeNewsCard(items[index],index),moreWrap);
-    if((index+1)%5===0)feed.insertBefore(makeAdCard(ad,index),moreWrap);
-   }
-   if(next>=items.length)moreWrap.remove();
-   else more.textContent="Показать ещё новости · "+Math.min(24,items.length-next);
-   if(state.autoTranslate)autoTranslateItems(items.slice(current,Math.min(next,current+8)),renderVersion);
-  });
-  moreWrap.append(more);feed.append(moreWrap);
- }
- if(state.autoTranslate)autoTranslateItems(items.slice(0,8),sequence);
-}
-
-function renderError(message){
- const feed=$("feed");feed.replaceChildren();const empty=document.createElement("div");empty.className="empty-state";const strong=document.createElement("strong");strong.textContent="Не удалось загрузить новости";const p=document.createElement("p");p.textContent=message||"Проверь подключение и попробуй снова.";const retry=document.createElement("button");retry.className="primary-btn";retry.textContent="Повторить";retry.addEventListener("click",loadFeed);empty.append(strong,p,retry);feed.append(empty);
-}
-async function renderSaved(){
- await loadSaved();const feed=$("feed");feed.replaceChildren();
- if(!state.saved.length){const empty=document.createElement("div");empty.className="empty-state";const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="▣";const strong=document.createElement("strong");strong.textContent="Кэш пока пуст";const p=document.createElement("p");p.textContent="Нажимай «Сохранить» под новостью — материалы останутся на устройстве и будут доступны без интернета.";empty.append(icon,strong,p);feed.append(empty);return}
- const query=state.search.trim().toLocaleLowerCase();
- const filtered=state.saved.filter(item=>!query||[item.title,item.summary,item.source,item.credit,category(item.category).name].join(" ").toLocaleLowerCase().includes(query));
- const toolbar=document.createElement("div");toolbar.className="saved-tools";const note=document.createElement("p");note.textContent="Сохранённые материалы · "+filtered.length+" из "+state.saved.length;const clear=document.createElement("button");clear.textContent="Очистить кэш";clear.addEventListener("click",async()=>{if(!confirm("Удалить все сохранённые новости с этого устройства?"))return;for(const item of state.saved)await cacheDelete(item.key);await loadSaved();renderSaved();updateStats();toast("Локальный кэш очищен")});toolbar.append(note,clear);feed.append(toolbar);
- if(!filtered.length){const empty=document.createElement("div");empty.className="empty-state";empty.textContent="В сохранённых новостях ничего не найдено.";feed.append(empty);return}
- filtered.forEach((item,index)=>feed.append(makeNewsCard(item,index)));
-}
-function renderNavigator(){
- const feed=$("feed");feed.replaceChildren();
- const head=document.createElement("div");head.className="navigator-head";
- const kicker=document.createElement("div");kicker.className="eyebrow";kicker.textContent="ORBIS · WORLD MAP";
- const title=document.createElement("h2");title.textContent="Открой новости со всего мира";
- const desc=document.createElement("p");desc.textContent=state.sourceDirectory.length+" RSS-лент в тематических направлениях. Выбирай страну, категорию, язык или отдельное издание — ORBIS соберёт отдельную ленту.";
- head.append(kicker,title,desc);feed.append(head);
- const section=(name,count)=>{const heading=document.createElement("div");heading.style.cssText="font-weight:950;font-size:14px;letter-spacing:.1px;margin:20px 0 10px";heading.textContent=name+(count!==undefined?" · "+count:"");feed.append(heading)};
- section("Страны и регионы",new Set(state.sourceDirectory.map(s=>s.country).filter(Boolean)).size);
- const countries=new Map();
- state.sourceDirectory.forEach(source=>{if(source.country){const old=countries.get(source.country);countries.set(source.country,{id:source.country,name:source.countryName||source.country,count:(old?.count||0)+1})}});
- const countryGrid=document.createElement("div");countryGrid.className="catalog-grid";
- const countryCards=[{id:"all",name:"Весь мир",count:state.sourceDirectory.length},...Array.from(countries.values()).sort((a,b)=>a.name.localeCompare(b.name))];
- countryCards.forEach(item=>{
-  const button=document.createElement("button");button.type="button";button.className="catalog-card";
-  const icon=document.createElement("div");icon.className="catalog-icon";icon.textContent=item.id==="all"?"🌐":countryFlag(item.id);
-  const name=document.createElement("b");name.textContent=item.name;
-  const detail=document.createElement("span");detail.textContent=item.count+" RSS-источников";
-  const arrow=document.createElement("i");arrow.className="catalog-arrow";arrow.textContent="↗";
-  button.append(icon,name,detail,arrow);
-  button.addEventListener("click",()=>{state.country=item.id;state.sourceId="";$("countrySelect").value=item.id;writeJson(COUNTRY_KEY,item.id);openView("for-you")});
-  countryGrid.append(button);
- });
- feed.append(countryGrid);
- section("Темы и направления",CATEGORIES.length);
- const categories=document.createElement("div");categories.className="catalog-grid";
- CATEGORIES.forEach(item=>{
-  const button=document.createElement("button");button.className="catalog-card";button.type="button";
-  const icon=document.createElement("div");icon.className="catalog-icon";icon.textContent=item.icon;
-  const name=document.createElement("b");name.textContent=item.name;
-  const count=document.createElement("span");count.textContent=state.sourceDirectory.filter(s=>s.category===item.id).length+" источников · "+item.description;
-  const arrow=document.createElement("i");arrow.className="catalog-arrow";arrow.textContent="↗";
-  button.append(icon,name,count,arrow);button.addEventListener("click",()=>{state.sourceId="";openView("category",item.id)});categories.append(button);
- });
- feed.append(categories);
- section("Каталог RSS-издателей",state.sourceDirectory.length);
- const controls=document.createElement("div");controls.className="source-directory-tools";
- const search=document.createElement("input");search.type="search";search.placeholder="Найти источник, страну, язык или тему…";search.setAttribute("aria-label","Поиск источника");
- const filter=document.createElement("select");filter.setAttribute("aria-label","Фильтр каталога");
- [["all","Все темы"],...CATEGORIES.map(c=>[c.id,c.name])].forEach(([id,label])=>{const opt=document.createElement("option");opt.value=id;opt.textContent=label;filter.append(opt)});
- controls.append(search,filter);feed.append(controls);
- const sourceList=document.createElement("div");sourceList.className="source-list source-directory-list";
- const renderSources=()=>{
-  sourceList.replaceChildren();
-  const query=search.value.trim().toLocaleLowerCase(),topic=filter.value;
-  const list=state.sourceDirectory.filter(source=>{
-   const text=[source.name,source.publisher,source.feed,source.languageName,source.countryName].join(" ").toLocaleLowerCase();
-   return (!query||text.includes(query))&&(topic==="all"||source.category===topic);
-  });
-  const info=document.createElement("div");info.className="source-result-count";info.textContent="Показано "+list.length+" из "+state.sourceDirectory.length+" источников";sourceList.append(info);
-  list.forEach(source=>{
-   const row=document.createElement("button");row.type="button";row.className="source-row source-directory-row";row.title="Открыть ленту "+source.name;
-   const label=document.createElement("span");label.textContent=countryFlag(source.country)+" "+source.name;
-   const meta=document.createElement("small");meta.textContent=category(source.category).name+" · "+(source.languageName||source.language)+" · "+(source.countryName||"Мир");
-   row.append(label,meta);
-   row.addEventListener("click",()=>{state.country=source.country||"all";state.sourceLanguage=source.language||"all";$("countrySelect").value=state.country;$("sourceLanguageSelect").value=state.sourceLanguage;writeJson(COUNTRY_KEY,state.country);writeJson(SOURCE_LANGUAGE_KEY,state.sourceLanguage);openView("category",source.category,source.id)});
-   sourceList.append(row);
-  });
-  if(!list.length){const empty=document.createElement("p");empty.className="news-summary";empty.textContent="Ничего не найдено по этому запросу.";sourceList.append(empty)}
- };
- search.addEventListener("input",renderSources);filter.addEventListener("change",renderSources);renderSources();feed.append(sourceList);
-}
-
-async function searchWiki(query){
- const box=$("wikiResults");if(!box)return;
- box.replaceChildren();const loading=document.createElement("div");loading.className="skeleton";loading.style.height="120px";box.append(loading);
- const lang=state.translationLang||"ru";
- try{
-  const response=await nativeFetch("/api/wiki?lang="+encodeURIComponent(lang)+"&q="+encodeURIComponent(query),{cache:"no-store"});
-  const data=await response.json().catch(()=>({}));
-  if(!response.ok)throw new Error(data.error||"Не удалось выполнить поиск.");
-  box.replaceChildren();
-  if(!data.results?.length){const empty=document.createElement("div");empty.className="empty-state";empty.textContent="Ничего не найдено. Попробуй другое написание или язык.";box.append(empty);return}
-  data.results.forEach(result=>{
-   const card=document.createElement("article");card.className="wiki-card";
-   if(result.image){const image=document.createElement("img");image.loading="lazy";image.src=result.image;image.alt="";image.onerror=()=>image.remove();card.append(image)}
-   const text=document.createElement("div");const title=document.createElement("h3");title.textContent=result.title;const extract=document.createElement("p");extract.textContent=result.extract||"Краткое описание пока не доступно.";
-   const actions=document.createElement("div");actions.className="wiki-card-actions";
-   const open=document.createElement("a");open.href=result.url;open.target="_blank";open.rel="noopener noreferrer";open.textContent="Открыть статью ↗";
-   const save=document.createElement("button");save.type="button";save.textContent="▣ Сохранить";save.dataset.wikiSave="1";
-   const article={title:result.title,summary:result.extract,url:result.url,image:result.image,source:"Wikipedia",credit:"Wikipedia",category:"science",language:result.language,languageName:result.language,key:null};
-   save.addEventListener("click",async()=>{article.key=await hashUrl(article.url);await cachePut(Object.assign({},article,{savedAt:new Date().toISOString()}));await loadSaved();updateStats();save.textContent="✓ Сохранено";toast("Статья сохранена для офлайн-чтения")});
-   actions.append(open,save);text.append(title,extract,actions);card.append(text);box.append(card);
-  });
- }catch(error){box.replaceChildren();const empty=document.createElement("div");empty.className="empty-state";empty.textContent=error.message;const retry=document.createElement("button");retry.className="primary-btn";retry.style.marginTop="12px";retry.textContent="Повторить поиск";retry.addEventListener("click",()=>searchWiki(query));empty.append(retry);box.append(empty)}
-}
-function renderWikiPanel(){
- const feed=$("feed");feed.replaceChildren();
- const panel=document.createElement("section");panel.className="wiki-search-panel";
- const kicker=document.createElement("div");kicker.className="eyebrow";kicker.textContent="ORBIS · KNOWLEDGE ATLAS";
- const title=document.createElement("h2");title.textContent="Открой целый мир знаний";
- const desc=document.createElement("p");desc.textContent="Поиск по Википедии на выбранном языке. Изучай историю, страны, науку, технологии, культуру и многое другое.";
- const form=document.createElement("form");form.className="wiki-search-row";
- const input=document.createElement("input");input.type="search";input.placeholder="Например: Баку, Солнечная система, Великий шёлковый путь…";input.required=true;
- const button=document.createElement("button");button.type="submit";button.textContent="Найти";
- form.append(input,button);form.addEventListener("submit",event=>{event.preventDefault();const query=input.value.trim();if(query.length>1)searchWiki(query)});
- const chips=document.createElement("div");chips.className="wiki-chips";
- ["Баку","Космос","История Азербайджана","Искусственный интеллект","Древний Рим","Океаны","Архитектура","Футбол"].forEach(query=>{const chip=document.createElement("button");chip.type="button";chip.textContent=query;chip.addEventListener("click",()=>{input.value=query;searchWiki(query)});chips.append(chip)});
- panel.append(kicker,title,desc,form,chips);
- const note=document.createElement("p");note.style.cssText="margin:10px 0 0;color:#8fa6c7;font-size:9px";note.textContent="Язык статей: "+($("translationLanguageSelect").selectedOptions[0]?.textContent||"Русский")+" · Материалы Википедии доступны на условиях лицензий проекта.";panel.append(note);
- const results=document.createElement("div");results.id="wikiResults";
- const footer=document.createElement("div");footer.className="navigator-head";footer.style.marginTop="13px";footer.innerHTML="<b>Знания рядом</b><p>Ищи статью на русском, азербайджанском, английском, турецком и других доступных языках. Сохраняй нужные материалы в свой офлайн-кэш.</p>";
- feed.append(panel,results,footer);
-}
-
-function openInterestDialog(){
- const grid=$("interestOptions");grid.replaceChildren();
- CATEGORIES.forEach(item=>{
-  const button=document.createElement("button");button.type="button";button.className="interest-option"+(state.interests.includes(item.id)?" selected":"");button.dataset.interest=item.id;
-  const icon=document.createElement("i");icon.textContent=item.icon;const label=document.createElement("span");label.textContent=item.name;button.append(icon,label);
-  button.addEventListener("click",()=>{const chosen=state.interests.includes(item.id);state.interests=chosen?state.interests.filter(x=>x!==item.id):state.interests.concat(item.id);button.classList.toggle("selected",!chosen)});
-  grid.append(button);
- });
- $("interestDialog").classList.add("open");
-}
-function burst(button){
- const card=button.closest(".news-card");if(!card)return;
- const rect=button.getBoundingClientRect(),base=card.getBoundingClientRect();
- for(let i=0;i<7;i++){const particle=document.createElement("span");particle.className="like-burst";particle.textContent=i%2?"✦":"♥";particle.style.left=(rect.left-base.left+rect.width/2)+"px";particle.style.top=(rect.top-base.top+rect.height/2)+"px";particle.style.setProperty("--dx",(Math.cos(i*Math.PI/3.5)*32)+"px");particle.style.setProperty("--dy",(Math.sin(i*Math.PI/3.5)*29-18)+"px");particle.style.setProperty("--rot",(i*48-90)+"deg");card.append(particle);setTimeout(()=>particle.remove(),900)}
-}
-async function toggleLike(item,button){
- const before=articleLiked(item),next=!before;
- state.liked[item.key]=Object.assign({},state.liked[item.key]||{},{liked:next,likes:Math.max(0,articleLikes(item)+(next?1:-1))});
- if(next)state.weights[item.category]=(Number(state.weights[item.category])||0)+2;
- writeJson(LIKES_KEY,state.liked);writeJson(WEIGHTS_KEY,state.weights);
- writeJson(INTEREST_KEY,state.interests);updateStats();renderInterestChips();
- button.classList.toggle("liked",next);button.setAttribute("aria-pressed",String(next));button.textContent=(next?"♥ ":"♡ ")+articleLikes(item)+" · Нравится";
- if(next)burst(button);
- if(!guestToken||!navigator.onLine){state.pending[item.key]=next;writeJson(PENDING_KEY,state.pending);toast(next?"Лайк сохранён на устройстве":"Реакция изменена офлайн");return}
- button.disabled=true;
- try{
-  const data=await api("/api/news/reactions",{method:"POST",body:JSON.stringify({key:item.key,liked:next})});
-  state.liked[item.key]={liked:data.liked,likes:data.likes};delete state.pending[item.key];writeJson(LIKES_KEY,state.liked);writeJson(PENDING_KEY,state.pending);
-  button.textContent=(data.liked?"♥ ":"♡ ")+data.likes+" · Нравится";
- }catch(error){
-  state.pending[item.key]=next;writeJson(PENDING_KEY,state.pending);toast("Сохранили реакцию локально — синхронизируем позже");
- }finally{button.disabled=false}
-}
-async function toggleTranslation(item,card,button){
- const titleNode=card.querySelector(".news-title"),summaryNode=card.querySelector(".news-summary");
- if(!titleNode||!summaryNode)return;
- const target=state.translationLang||"ru";
- if(card.dataset.translation===target){
-  titleNode.textContent=item.title;summaryNode.textContent=item.summary||"Открой оригинальную публикацию, чтобы прочитать подробности.";
-  card.dataset.translation="";button.textContent="文 Перевести";button.classList.remove("translated");return;
- }
- const cacheKey=item.key+":"+target;button.disabled=true;button.textContent="Переводим…";
- try{
-  let translated=state.translations[cacheKey];
-  if(!translated){
-   const response=await nativeFetch("/api/translate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({target,texts:[item.title,item.summary||item.title]})});
-   const data=await response.json().catch(()=>({}));
-   if(!response.ok)throw new Error(data.error||"Перевод временно недоступен.");
-   translated={title:data.translated?.[0]||item.title,summary:data.translated?.[1]||item.summary||""};
-   state.translations[cacheKey]=translated;
-   const keys=Object.keys(state.translations);if(keys.length>100)keys.slice(0,keys.length-100).forEach(key=>delete state.translations[key]);
-   writeJson(TRANSLATION_CACHE_KEY,state.translations);
-  }
-  titleNode.textContent=translated.title;summaryNode.textContent=translated.summary;
-  card.dataset.translation=target;button.textContent="↶ Оригинал";button.classList.add("translated");
- }catch(error){toast(error.message+" Оригинал доступен у издателя.");button.textContent="文 Повторить"}
- finally{button.disabled=false}
-}
-
-async function autoTranslateItems(items,sequence){
- if(!state.autoTranslate||!navigator.onLine||!items.length)return;
- const target=state.translationLang||"ru",feed=$("feed"),jobs=[];
- for(const item of items){
-  if(!item?.key||item.language===target)continue;
-  const card=[...feed.querySelectorAll(".news-card")].find(node=>node.dataset.key===item.key);
-  if(!card)continue;
-  const button=card.querySelector('[data-action="translate"]');
-  const title=card.querySelector(".news-title"),summary=card.querySelector(".news-summary");
-  if(!title||!summary||card.dataset.translation===target)continue;
-  const cacheKey=item.key+":"+target,cached=state.translations[cacheKey];
-  if(cached){
-   title.textContent=cached.title;summary.textContent=cached.summary;
-   card.dataset.translation=target;
-   if(button){button.textContent="↶ Оригинал";button.classList.add("translated")}
-  }else jobs.push({item,card,button,cacheKey});
- }
- for(let offset=0;offset<jobs.length;offset+=4){
-  if(sequence!==renderVersion||state.view==="saved")return;
-  const batch=jobs.slice(offset,offset+4);
-  batch.forEach(job=>{if(job.button){job.button.disabled=true;job.button.textContent="Перевод…"}});
-  try{
-   const response=await nativeFetch("/api/translate",{
-    method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({target,texts:batch.flatMap(job=>[job.item.title,job.item.summary||job.item.title])})
-   });
-   const data=await response.json().catch(()=>({}));
-   if(!response.ok)throw new Error(data.error||"Перевод недоступен");
-   batch.forEach((job,index)=>{
-    const translated={title:data.translated?.[index*2]||job.item.title,summary:data.translated?.[index*2+1]||job.item.summary||""};
-    state.translations[job.cacheKey]=translated;
-    if(sequence===renderVersion&&job.card.isConnected){
-     job.card.querySelector(".news-title").textContent=translated.title;
-     job.card.querySelector(".news-summary").textContent=translated.summary;
-     job.card.dataset.translation=target;
-     if(job.button){job.button.textContent="↶ Оригинал";job.button.classList.add("translated")}
-    }
-   });
-   const keys=Object.keys(state.translations);if(keys.length>120)keys.slice(0,keys.length-120).forEach(key=>delete state.translations[key]);
-   writeJson(TRANSLATION_CACHE_KEY,state.translations);
-  }catch(error){
-   batch.forEach(job=>{if(job.button)job.button.textContent="文 Перевести"});
-   console.warn("ORBIS auto translation:",error.message);
-   if(offset===0)toast("Автоперевод временно недоступен. Можно перевести карточку вручную.");
-  }finally{batch.forEach(job=>{if(job.button)job.button.disabled=false})}
- }
-}
-
-async function toggleSave(item,button){
- const saved=articleSaved(item);
- if(saved){await cacheDelete(item.key);state.saved=state.saved.filter(x=>x.key!==item.key);button.classList.remove("saved");button.textContent="▢ Сохранить";button.setAttribute("aria-pressed","false");toast("Удалено из кэша")}
- else{const stored=await cacheSavedArticle(item);state.saved.unshift(stored);button.classList.add("saved");button.textContent="▣ Сохранено";button.setAttribute("aria-pressed","true");toast(stored.imageBlob?"Новость и фото сохранены офлайн":"Новость сохранена офлайн")}
- $("savedCount").textContent=String(state.saved.length);updateStats();
-}
-async function cacheSavedArticle(item){
- const stored=Object.assign({},item,{savedAt:new Date().toISOString()});
- if(stored.image&&!stored.imageBlob&&navigator.onLine){
-  try{
-   const response=await nativeFetch(stored.image,{mode:"cors",credentials:"omit",signal:AbortSignal.timeout(4500)});
-   const blob=await response.blob();
-   if(response.ok&&blob.type.startsWith("image/")&&blob.size>0&&blob.size<=4*1024*1024)stored.imageBlob=blob;
-  }catch(error){console.debug("Image not available for offline cache:",error.message)}
- }
- await cachePut(stored);return stored;
-}
-function currentItem(key){return state.articles.find(item=>item.key===key)||state.saved.find(item=>item.key===key)}
-document.addEventListener("click",event=>{
- const viewButton=event.target.closest("[data-view]");
- if(viewButton){event.preventDefault();openView(viewButton.dataset.view);return}
- const catButton=event.target.closest("[data-category]");
- if(catButton){event.preventDefault();openView("category",catButton.dataset.category);return}
- const action=event.target.closest("[data-action]");
- if(action){const card=action.closest(".news-card"),item=card&&currentItem(card.dataset.key);if(!item)return;
-  if(action.dataset.action==="like")toggleLike(item,action);
-  if(action.dataset.action==="save")toggleSave(item,action);
-  if(action.dataset.action==="translate")toggleTranslation(item,card,action);
- }
-});
-$("refreshBtn").addEventListener("click",async()=>{await loadFeed();toast("Лента ORBIS обновлена")});
-$("lastUpdate").addEventListener("click",()=>{if(state.lastUpdated)toast("Последняя проверка: "+state.lastUpdated.toLocaleTimeString("ru-RU"))});
-$("interestsBtn").addEventListener("click",openInterestDialog);
-$("cancelInterests").addEventListener("click",()=>$("interestDialog").classList.remove("open"));
-$("saveInterests").addEventListener("click",()=>{
- if(!state.interests.length){toast("Выбери хотя бы одну тему");return}
- writeJson(INTEREST_KEY,state.interests);$("interestDialog").classList.remove("open");renderInterestChips();openView("for-you");toast("Подборка интересов обновлена");
-});
-$("interestDialog").addEventListener("click",event=>{if(event.target===$("interestDialog"))$("interestDialog").classList.remove("open")});
-$("searchInput").addEventListener("input",event=>{state.search=event.target.value;applySearch()});
-$("sortSelect").addEventListener("change",event=>{state.sort=event.target.value;openView(state.view,state.category)});
-$("countrySelect").addEventListener("change",event=>{state.country=event.target.value;state.sourceId="";writeJson(COUNTRY_KEY,state.country);if(state.view!=="saved"&&state.view!=="navigator"&&state.view!=="encyclopedia")loadFeed()});
-$("sourceLanguageSelect").addEventListener("change",event=>{state.sourceLanguage=event.target.value;state.sourceId="";writeJson(SOURCE_LANGUAGE_KEY,state.sourceLanguage);if(state.view!=="saved"&&state.view!=="navigator"&&state.view!=="encyclopedia")loadFeed()});
-$("translationLanguageSelect").addEventListener("change",event=>{
- state.translationLang=event.target.value;writeJson(TRANSLATION_LANGUAGE_KEY,state.translationLang);
- $("settingsTranslationSelect").value=state.translationLang;
- if(state.view==="encyclopedia")renderWikiPanel();
- else if(state.view!=="saved"&&state.view!=="navigator")openView(state.view,state.category,state.sourceId);
- toast("Язык перевода сохранён");
-});
-$("settingsBtn").addEventListener("click",()=>{$("settingsTranslationSelect").value=state.translationLang;$("settingsDialog").classList.add("open")});
-$("cancelSettings").addEventListener("click",()=>$("settingsDialog").classList.remove("open"));
-$("saveSettings").addEventListener("click",()=>{
- state.translationLang=$("settingsTranslationSelect").value||"ru";
- state.autoTranslate=$("autoTranslateToggle").checked;
- $("translationLanguageSelect").value=state.translationLang;
- writeJson(TRANSLATION_LANGUAGE_KEY,state.translationLang);
- writeJson(AUTO_TRANSLATE_KEY,state.autoTranslate);
- $("settingsDialog").classList.remove("open");
- toast("Настройки ORBIS сохранены");
- if(state.view==="encyclopedia")renderWikiPanel();
- else if(state.view!=="saved"&&state.view!=="navigator")openView(state.view,state.category,state.sourceId);
-});
-$("settingsDialog").addEventListener("click",event=>{if(event.target===$("settingsDialog"))$("settingsDialog").classList.remove("open")});
-window.addEventListener("online",async()=>{ $("sideSync").textContent="Соединение восстановлено";await syncPending();if(state.view!=="encyclopedia"&&!state.loading)loadFeed()});
-window.addEventListener("offline",()=>{$("sideSync").textContent="Офлайн-режим";toast("Нет подключения. Сохранённые новости доступны в кэше")});
-window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferredInstallPrompt=event;$("installBtn").hidden=false});
-window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;$("installBtn").hidden=true;toast("ORBIS установлен")});
-$("installBtn").addEventListener("click",async()=>{
- if(deferredInstallPrompt){
-  deferredInstallPrompt.prompt();
-  try{const choice=await deferredInstallPrompt.userChoice;if(choice?.outcome==="accepted")toast("ORBIS добавляется на устройство")}catch{}
-  deferredInstallPrompt=null;$("installBtn").hidden=true;
- }else toast("В меню браузера выбери «Установить приложение» или «Добавить на главный экран»");
-});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&navigator.onLine&&state.view!=="encyclopedia"&&state.lastUpdated&&Date.now()-state.lastUpdated.getTime()>600000)loadFeed()});
-function scheduleRefresh(){clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(!document.hidden&&navigator.onLine&&state.view!=="saved"&&state.view!=="navigator"&&state.view!=="encyclopedia")loadFeed()},600000)}
-async function boot(){
- renderInterestChips();await loadSaved();updateStats();await loadSources();
- try{await createGuestSession();await syncPending()}catch(error){console.warn("Guest session:",error.message)}
- if(!localStorage.getItem(INTEREST_KEY)){writeJson(INTEREST_KEY,state.interests);openInterestDialog()}
- else {state.interests=readJson(INTEREST_KEY,state.interests)}
- renderInterestChips();await loadFeed();scheduleRefresh();
-}
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(error=>console.warn("ORBIS offline shell:",error)));
-boot();
+async function install(){if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$("installBtn").classList.remove("visible")}else toast("Открой меню браузера и выбери «Добавить на главный экран».")}
+async function init(){applyLang();bind();renderTopic();setInterval(countdown,1000);countdown();if(!navigator.onLine){$("welcome").classList.remove("hidden")}else if(await restore()){$("welcome").classList.add("hidden");await loadFeed(true);poll()}else $("welcome").classList.remove("hidden");if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{})}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installPrompt=e;$("installBtn").classList.add("visible")});window.addEventListener("appinstalled",()=>{$("installBtn").classList.remove("visible");toast("ORBIS установлен")});window.addEventListener("online",()=>{if(token)loadFeed(false)});window.addEventListener("offline",()=>toast(tr("offline")));
+init();
 })();
 </script>
 </body>
