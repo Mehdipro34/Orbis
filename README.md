@@ -18,6 +18,7 @@ ORBIS is a lightweight daily-topic social network. Everyone sees the same questi
 - PWA: `public/manifest.webmanifest`, `public/sw.js`
 - Cloudflare Worker assets: `src/index.js`, `wrangler.toml`
 - Backend: Supabase Edge Function `supabase/functions/orbis-api/index.ts`
+- Database migrations: `supabase/migrations/`
 - Database: Supabase PostgreSQL tables for profiles, daily posts, reactions, bookmarks and cooldowns.
 - The Edge Function validates a signed device guest token and performs writes with its server-side service role key. The service role key is never sent to the browser.
 - The 24-hour post cooldown is atomic in PostgreSQL, not just a browser-side timer.
@@ -34,7 +35,7 @@ After both secrets are configured, each push to `main` deploys the Worker and `p
 
 ## Feed and reaction performance
 - Feed responses are paginated in 40-post pages using a keyset cursor (created_at + post ID), so the API no longer tries to return the entire community history at once.
-- Reaction totals are maintained in orbis_reaction_totals by a PostgreSQL trigger. Feed reads fetch up to four aggregate rows per post plus only the current member's own reactions, instead of downloading every member's reaction row.
+- Reaction totals are maintained in `orbis_reaction_totals` by a PostgreSQL trigger; the table is server-role-only. The feed uses a composite index for cursor paging. Feed reads fetch up to four aggregate rows per post plus only the current member's own reactions, instead of downloading every member's reaction row.
 - The browser refreshes an open feed about every 3 minutes with a small random delay, pauses while the tab is hidden, and refreshes when the member returns. Users can also refresh manually.
 - Reaction and bookmark actions update the visible UI without reloading the whole feed. The app also has a bounded API timeout and staggered card/reaction motion.
 
