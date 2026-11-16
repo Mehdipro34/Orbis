@@ -19,7 +19,7 @@ function basicTextGuard(value:string){
     const unique=new Set(words).size;
     if(unique/words.length<0.24)return "Текст похож на повторяющийся спам.";
   }
-  const allAgesBlocked=/(?:\\bporn(?:ography)?\\b|\\brape\\b|\\bsexual assault\\b|\\bsex trafficking\\b|\\bchild abuse\\b|\\bmurder(?:ed)?\\b|\\bmassacre\\b|\\bsuicide\\b|\\bself[- ]harm\\b|\\bdrug trafficking\\b|\\boverdose\\b|\\bshooting\\b|\\bbombing\\b|\\bbeheading\\b|\\btorture\\b|\\bterror attack\\b|порно|изнасил|сексуальн.{0,12}насил|домогательств|убийств|убит[аоы]?|труп|самоубийств|суицид|самоповрежден|наркотик|наркобанд|расстрел|взрыв|бомб|обезглав|пытк|теракт|cinsi zorakılıq|zorlama|qətl|öldür|intihar|narkotik|partlayış|terror)/iu;
+  const allAgesBlocked=/(?:\bporn(?:ography)?\b|\brape\b|\bsexual assault\b|\bsex trafficking\b|\bchild abuse\b|\bmurder(?:ed)?\b|\bmassacre\b|\bsuicide\b|\bself[- ]harm\b|\bdrug trafficking\b|\boverdose\b|\bshooting\b|\bbombing\b|\bbeheading\b|\btorture\b|\bterror attack\b|порно|изнасил|сексуальн.{0,12}насил|домогательств|убийств|убит[аоы]?|труп|самоубийств|суицид|самоповрежден|наркотик|наркобанд|расстрел|взрыв|бомб|обезглав|пытк|теракт|cinsi zorakılıq|zorlama|qətl|öldür|intihar|narkotik|partlayış|terror)/iu;
   if(allAgesBlocked.test(text))return "Этот материал не подходит для общей ленты ORBIS. Публикуй безопасный для всех возрастов контент.";
   return null;
 }
@@ -397,6 +397,224 @@ Deno.serve(async (req: Request) => {
   if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
   const {data:me}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
   if (!me) return out({error:"Профиль ORBIS не найден. Обнови страницу, чтобы восстановить гостевую сессию."},401);
+  if(req.method==="POST"&&path==="/api/sync/batch"){
+    if(!Array.isArray(body.operations)||body.operations.length<1||body.operations.length>20)
+      return out({error:"Пакет должен содержать от 1 до 20 операций."},400);
+    if(await isRateLimited(admin,uid,"sync_batch",30,60))
+      return out({error:"Слишком много пакетов синхронизации. Попробуй позже."},429);
+
+    const results:any[]=[];
+    for(const raw of body.operations){
+      const operationId=String(raw?.id||"").trim().toLowerCase();
+      const type=String(raw?.type||"");
+      const payload=raw?.payload&&typeof raw.payload==="object"&&!Array.isArray(raw.payload)?raw.payload:{};
+      if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(operationId)||
+         !["post.create","like.set","comment.create","follow.set","profile.update"].includes(type)){
+        results.push({id:operationId||null,status:"failed",error:"Операция имеет неверный ID или неизвестный тип."});
+        continue;
+      }
+
+      try{
+        const requestText=JSON.stringify({type,payload});
+        const digest=new Uint8Array(await crypto.subtle.digest("SHA-256",encoder.encode(requestText)));
+        const requestHash=bytesToBase64Url(digest);
+        let {data:operation,error:loadError}=await admin.from("orbis_sync_operations")
+          .select("operation_id,user_id,operation_type,request_hash,status,result")
+          .eq("operation_id",operationId).maybeSingle();
+        if(loadError)throw new Error("Не удалось проверить очередь синхронизации.");
+        if(operation){
+          if(operation.user_id!==uid||operation.operation_type!==type||operation.request_hash!==requestHash){
+            results.push({id:operationId,status:"failed",error:"ID операции уже использован с другими данными."});
+            continue;
+          }
+          if(operation.status==="done"){
+            results.push({id:operationId,status:"synced",result:operation.result,duplicate:true});
+            continue;
+          }
+        }else{
+          const {data:created,error:createError}=await admin.from("orbis_sync_operations")
+            .insert({operation_id:operationId,user_id:uid,operation_type:type,request_hash:requestHash,status:"processing",attempts:0})
+            .select("operation_id,user_id,operation_type,request_hash,status,result").maybeSingle();
+          if(createError&&createError.code!=="23505")throw new Error("Не удалось зарегистрировать операцию синхронизации.");
+          if(created)operation=created;
+          else{
+            const {data:again,error:againError}=await admin.from("orbis_sync_operations")
+              .select("operation_id,user_id,operation_type,request_hash,status,result")
+              .eq("operation_id",operationId).maybeSingle();
+            if(againError||!again)throw new Error("Не удалось повторно проверить операцию.");
+            operation=again;
+            if(operation.user_id!==uid||operation.operation_type!==type||operation.request_hash!==requestHash){
+              results.push({id:operationId,status:"failed",error:"ID операции уже использован с другими данными."});
+              continue;
+            }
+            if(operation.status==="done"){
+              results.push({id:operationId,status:"synced",result:operation.result,duplicate:true});
+              continue;
+            }
+          }
+        }
+
+        await admin.from("orbis_sync_operations").update({
+          status:"processing",attempts:(Number(operation?.attempts)||0)+1,
+          updated_at:new Date().toISOString(),last_error:null
+        }).eq("operation_id",operationId).eq("user_id",uid);
+
+        let result:any=null;
+
+        if(type==="post.create"){
+          if(await isRateLimited(admin,uid,"post_create",12,3600))throw new Error("Лимит публикаций — 12 постов в час.");
+          const text=String(payload.body||"").trim().slice(0,4000);
+          const media=Array.isArray(payload.media)?payload.media:[];
+          if(media.length>4)throw new Error("Можно прикрепить не более четырёх фотографий.");
+          if(!text&&!media.length)throw new Error("Публикация не может быть пустой.");
+          const titleInput=String(payload.title||"").trim().slice(0,120);
+          const title=titleInput||(text.split("\n")[0].slice(0,80)||"Фото");
+          const topic=String(payload.topic||"Global").trim().slice(0,48)||"Global";
+          const moderation=basicTextGuard(title+" "+text);if(moderation)throw new Error(moderation);
+          const mediaBase="https://wdwvcvpgovvkoodozbxf.supabase.co/storage/v1/object/public/orbis-media/";
+          if(media.some((item:any)=>!item||typeof item.key!=="string"||!item.key.startsWith(uid+"/")||
+            typeof item.url!=="string"||item.url!==mediaBase+item.key||!["image/jpeg","image/png","image/webp"].includes(item.type)))
+            throw new Error("Один из файлов публикации недействителен.");
+          let {data:post,error:postError}=await admin.from("posts").select("*")
+            .eq("author_id",uid).eq("client_operation_id",operationId).maybeSingle();
+          if(postError)throw new Error("Не удалось проверить ранее созданную публикацию.");
+          if(!post){
+            const inserted=await admin.from("posts").insert({
+              author_id:uid,title,topic,body:text||"Фото",media,
+              client_operation_id:operationId
+            }).select("*").single();
+            post=inserted.data;postError=inserted.error;
+            if(postError&&postError.code==="23505"){
+              const retry=await admin.from("posts").select("*").eq("author_id",uid).eq("client_operation_id",operationId).maybeSingle();
+              post=retry.data;postError=retry.error;
+            }
+          }
+          if(postError||!post)throw new Error("Не удалось сохранить публикацию.");
+          result={post:{
+            id:post.id,postNumber:String(post.post_number),title:post.title,topic:post.topic,body:post.body,
+            username:me.username,author:me.display_name,authorNumber:me.public_number==null?null:String(me.public_number),
+            avatar_url:me.avatar_url||null,createdAt:post.created_at,media:post.media||[],
+            likes:0,liked:false,saved:false
+          }};
+        }
+
+        if(type==="like.set"){
+          if(await isRateLimited(admin,uid,"like",90,60))throw new Error("Слишком много реакций. Попробуй позже.");
+          const postId=String(payload.postId||"").trim(),liked=payload.liked;
+          if(!/^[0-9a-f-]{36}$/i.test(postId)||typeof liked!=="boolean")throw new Error("Некорректная реакция.");
+          const {data:target,error:targetError}=await admin.from("posts").select("id,author_id")
+            .eq("id",postId).eq("status","published").maybeSingle();
+          if(targetError||!target)throw new Error("Публикация не найдена.");
+          const {data:existing,error:existingError}=await admin.from("post_likes").select("post_id")
+            .eq("post_id",postId).eq("user_id",uid).maybeSingle();
+          if(existingError)throw new Error("Не удалось проверить реакцию.");
+          if(liked&&!existing){
+            const {error}=await admin.from("post_likes").upsert({post_id:postId,user_id:uid},{onConflict:"post_id,user_id",ignoreDuplicates:true});
+            if(error)throw new Error("Не удалось сохранить лайк.");
+            await notifyUser(admin,target.author_id,uid,"like",postId,"Пользователю понравилась твоя публикация.");
+          }else if(!liked&&existing){
+            const {error}=await admin.from("post_likes").delete().eq("post_id",postId).eq("user_id",uid);
+            if(error)throw new Error("Не удалось убрать лайк.");
+          }
+          const {data:count,error:countError}=await admin.from("post_like_counts").select("like_count").eq("post_id",postId).maybeSingle();
+          if(countError)throw new Error("Лайк сохранён, но счётчик временно недоступен.");
+          result={postId,liked,likes:Number(count?.like_count)||0};
+        }
+
+        if(type==="comment.create"){
+          if(await isRateLimited(admin,uid,"comment_create",30,60))throw new Error("Слишком много комментариев. Попробуй позже.");
+          const postId=String(payload.postId||"").trim(),text=String(payload.body||"").trim(),parentId=String(payload.parentId||"").trim()||null;
+          if(!/^[0-9a-f-]{36}$/i.test(postId)||!text||text.length>1000)throw new Error("Проверь текст комментария.");
+          const moderation=basicTextGuard(text);if(moderation)throw new Error(moderation);
+          const {data:post,error:postError}=await admin.from("posts").select("id,author_id")
+            .eq("id",postId).eq("status","published").maybeSingle();
+          if(postError||!post)throw new Error("Публикация не найдена.");
+          let parent:any=null;
+          if(parentId){
+            const {data:parentRow,error:parentError}=await admin.from("post_comments")
+              .select("id,author_id,parent_id").eq("id",parentId).eq("post_id",postId).eq("status","published").maybeSingle();
+            if(parentError||!parentRow||parentRow.parent_id)throw new Error("Ответить можно только на комментарий первого уровня.");
+            parent=parentRow;
+          }
+          let {data:comment,error:commentError}=await admin.from("post_comments").select("id,post_id,author_id,body,created_at,parent_id")
+            .eq("author_id",uid).eq("client_operation_id",operationId).maybeSingle();
+          if(commentError)throw new Error("Не удалось проверить комментарий.");
+          if(!comment){
+            const inserted=await admin.from("post_comments").insert({
+              post_id:postId,author_id:uid,body:text,parent_id:parentId,client_operation_id:operationId
+            }).select("id,post_id,author_id,body,created_at,parent_id").single();
+            comment=inserted.data;commentError=inserted.error;
+            if(commentError&&commentError.code==="23505"){
+              const retry=await admin.from("post_comments").select("id,post_id,author_id,body,created_at,parent_id")
+                .eq("author_id",uid).eq("client_operation_id",operationId).maybeSingle();
+              comment=retry.data;commentError=retry.error;
+            }
+          }
+          if(commentError||!comment)throw new Error("Не удалось сохранить комментарий.");
+          if(comment.created_at&&Date.now()-new Date(comment.created_at).getTime()<5000)
+            await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"comment_reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
+          result={comment:{
+            id:comment.id,postId:comment.post_id,parentId:comment.parent_id,body:comment.body,
+            createdAt:comment.created_at,own:true,
+            author:{username:me.username,displayName:me.display_name,avatarUrl:me.avatar_url||null},
+            repliesCount:0
+          }};
+        }
+
+        if(type==="follow.set"){
+          if(await isRateLimited(admin,uid,"follow",30,60))throw new Error("Слишком много подписок. Попробуй позже.");
+          const username=String(payload.username||"").trim().toLowerCase(),following=payload.following;
+          if(!/^[a-z0-9_.]{3,24}$/.test(username)||typeof following!=="boolean")throw new Error("Некорректная подписка.");
+          const {data:target,error:targetError}=await admin.from("profiles").select("id")
+            .eq("username",username).maybeSingle();
+          if(targetError||!target)throw new Error("Пользователь не найден.");
+          if(target.id===uid)throw new Error("Нельзя подписаться на себя.");
+          const {data:existing,error:existingError}=await admin.from("follows").select("following_id")
+            .eq("follower_id",uid).eq("following_id",target.id).maybeSingle();
+          if(existingError)throw new Error("Не удалось проверить подписку.");
+          if(following&&!existing){
+            const {error}=await admin.from("follows").upsert({follower_id:uid,following_id:target.id},{onConflict:"follower_id,following_id",ignoreDuplicates:true});
+            if(error)throw new Error("Не удалось подписаться.");
+            await notifyUser(admin,target.id,uid,"follow",null,"Новый подписчик: @"+me.username);
+          }else if(!following&&existing){
+            const {error}=await admin.from("follows").delete().eq("follower_id",uid).eq("following_id",target.id);
+            if(error)throw new Error("Не удалось отписаться.");
+          }
+          result={username,following};
+        }
+
+        if(type==="profile.update"){
+          if(await isRateLimited(admin,uid,"profile_edit",20,60))throw new Error("Слишком много изменений профиля.");
+          const name=String(payload.name||"").trim(),bio=String(payload.bio||"").trim();
+          if(name.length<2||name.length>32||bio.length>180)throw new Error("Проверь имя и описание профиля.");
+          const patch:any={display_name:name,bio,updated_at:new Date().toISOString()};
+          if(payload.avatarUrl!==undefined){
+            const avatar=String(payload.avatarUrl||"").trim();
+            const base="https://wdwvcvpgovvkoodozbxf.supabase.co/storage/v1/object/public/orbis-media/";
+            if(avatar&&!avatar.startsWith(base+uid+"/"))throw new Error("Аватар должен быть из твоего ORBIS-хранилища.");
+            patch.avatar_url=avatar||null;
+          }
+          const {data:user,error}=await admin.from("profiles").update(patch).eq("id",uid).select("*").single();
+          if(error)throw new Error("Не удалось сохранить профиль.");
+          result={user:safeProfile(user)};
+        }
+
+        const {error:finishError}=await admin.from("orbis_sync_operations").update({
+          status:"done",result,last_error:null,completed_at:new Date().toISOString(),updated_at:new Date().toISOString()
+        }).eq("operation_id",operationId).eq("user_id",uid);
+        if(finishError)throw new Error("Изменение сохранено, но не удалось подтвердить пакет. Его можно безопасно отправить повторно.");
+        results.push({id:operationId,status:"synced",result});
+      }catch(error){
+        const message=error instanceof Error?error.message:"Неизвестная ошибка синхронизации.";
+        await admin.from("orbis_sync_operations").update({
+          status:"retry",last_error:message,updated_at:new Date().toISOString()
+        }).eq("operation_id",operationId).eq("user_id",uid);
+        results.push({id:operationId,status:"retry",error:message});
+      }
+    }
+    return out({ok:true,results,serverTime:new Date().toISOString()});
+  }
+
   if(req.method==="POST"&&path==="/api/guest/link-key"){
     if(await isRateLimited(admin,uid,"link_recovery_key",5,3600))return out({error:"Слишком много попыток настройки ключа."},429);
     const jwk=body.publicKey||{};
