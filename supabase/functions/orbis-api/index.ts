@@ -691,22 +691,42 @@ Deno.serve(async (req: Request) => {
     }
     const mode=String(u.searchParams.get("mode")||"for-you"),ranked=mode==="for-you"||mode==="popular";
     if(cursor&&ranked&&!Number.isInteger(cursor.score))return out({error:"Некорректный курсор рекомендаций."},400);
-    let q=admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
-      .eq("status","published").is("reply_to",null);
-    if(ranked)q=q.order("engagement_score",{ascending:false});
-    q=q.order("created_at",{ascending:false}).order("id",{ascending:false});
-    const topic=u.searchParams.get("topic");if(topic)q=q.ilike("topic",topic);
+    let rows:any[]=[];
+    let hasMore=false;
     if(mode==="following"){
-      const {data:follows,error:followError}=await admin.from("follows").select("following_id").eq("follower_id",uid).limit(5000);
-      if(followError)return out({error:"Не удалось загрузить подписки."},400);
-      const ids=(follows||[]).map((x:any)=>x.following_id);
-      if(!ids.length)return out({posts:[],hasMore:false,nextCursor:null});
-      q=q.in("author_id",ids);
+      const {data,error}=await admin.rpc("orbis_following_feed",{
+        p_user_id:uid,
+        p_limit:limit+1,
+        p_cursor_created_at:cursor?.createdAt||null,
+        p_cursor_id:cursor?.id||null
+      });
+      if(error)return out({error:"Не удалось загрузить ленту подписок."},503);
+      rows=data||[];
+      hasMore=rows.length>limit;
+      if(hasMore)rows=rows.slice(0,limit);
+      const authorIds=[...new Set(rows.map((p:any)=>p.author_id))];
+      const {data:profiles,error:profileError}=authorIds.length
+        ?await admin.from("profiles").select("id,username,display_name,avatar_url,public_number").in("id",authorIds)
+        :{data:[],error:null};
+      if(profileError)return out({error:"Не удалось загрузить профили авторов."},503);
+      const profileMap=new Map((profiles||[]).map((p:any)=>[p.id,p]));
+      rows=rows.map((p:any)=>({...p,profiles:profileMap.get(p.author_id)||null}));
+    }else{
+      let q=admin.from("posts").select("*,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
+        .eq("status","published").is("reply_to",null);
+      if(ranked)q=q.order("engagement_score",{ascending:false});
+      q=q.order("created_at",{ascending:false}).order("id",{ascending:false});
+      const topic=u.searchParams.get("topic");if(topic)q=q.ilike("topic",topic);
+      if(cursor){
+        if(ranked)q=q.or("engagement_score.lt."+cursor.score+",and(engagement_score.eq."+cursor.score+",created_at.lt."+cursor.createdAt+"),and(engagement_score.eq."+cursor.score+",created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");
+        else q=q.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");
+      }
+      const {data,error}=await q.limit(limit+1);
+      if(error)return out({error:error.message},503);
+      rows=data||[];
+      hasMore=rows.length>limit;
+      if(hasMore)rows=rows.slice(0,limit);
     }
-    if(cursor){if(ranked)q=q.or("engagement_score.lt."+cursor.score+",and(engagement_score.eq."+cursor.score+",created_at.lt."+cursor.createdAt+"),and(engagement_score.eq."+cursor.score+",created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");else q=q.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");}
-    const {data,error}=await q.limit(limit+1);
-    if(error)return out({error:error.message},400);
-    let rows=data||[];const hasMore=rows.length>limit;if(hasMore)rows=rows.slice(0,limit);
     const enriched=await enrichPolls(admin,uid,rows),ids=enriched.map((p:any)=>p.id);
     const [{data:likes},{data:mine},{data:bookmarks}]=await Promise.all([
       ids.length?admin.from("post_like_counts").select("post_id,like_count").in("post_id",ids):Promise.resolve({data:[]}),
