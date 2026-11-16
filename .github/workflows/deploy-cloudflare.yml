@@ -24,6 +24,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Run ORBIS checks
+        run: node --test tests/orbis-static.test.mjs
+
       - name: Install Wrangler
         run: npm install --global wrangler@4
 
