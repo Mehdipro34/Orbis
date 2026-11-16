@@ -118,17 +118,21 @@ async function showApp(){
  $("authScreen").hidden=true;$("appShell").hidden=false;
  $("sidebarName").textContent=me?.name||me?.username||auth.username;
  $("sidebarHandle").textContent="@"+(me?.username||auth.username);
- $("sidebarAvatar").textContent=initial(me?.name||me?.username);$("composerAvatar").textContent=initial(me?.name||me?.username);
- $("rightAvatar").textContent=initial(me?.name||me?.username);$("rightName").textContent=me?.name||me?.username;
+ setAvatarNode($("sidebarAvatar"),me?.avatar_url,me?.name||me?.username);
+ setAvatarNode($("composerAvatar"),me?.avatar_url,me?.name||me?.username);
+ setAvatarNode($("rightAvatar"),me?.avatar_url,me?.name||me?.username);
+ $("rightName").textContent=me?.name||me?.username;
  $("rightHandle").textContent="@"+(me?.username||"member");$("cacheStatus").textContent=t("cacheReady");
  await openFeed("home",true);refreshUnread();
 }
 function skeleton(){ $("feedList").innerHTML='<div class="skeleton-card"></div><div class="skeleton-card"></div>'}
-function cacheKey(view){return "feed:"+view}
+function cacheKey(view){return "feed:"+(auth?.deviceId||"guest")+":"+view}
 async function openFeed(view,force){
  currentView=view;profileUsername=null;activate(view);const state=feeds[view];
- if(!force&&state.items.length){renderPosts($("feedList"),state.items);const cache=await get("cache",cacheKey(view));if(cache&&Date.now()-cache.savedAt<90000)return}
- if(!state.items.length){const cached=await get("cache",cacheKey(view));if(cached?.data?.posts){state.items=cached.data.posts;state.cursor=cached.data.nextCursor;state.hasMore=!!cached.data.hasMore;renderPosts($("feedList"),state.items)}else skeleton()}
+ if(state.items.length){renderPosts($("feedList"),state.items)}
+ else{const cached=await get("cache",cacheKey(view));if(cached?.data?.posts){state.items=cached.data.posts;state.cursor=cached.data.nextCursor;state.hasMore=!!cached.data.hasMore;renderPosts($("feedList"),state.items)}else skeleton()}
+ const cached=await get("cache",cacheKey(view));
+ if(!force&&cached&&Date.now()-cached.savedAt<90000){$("loadMore").hidden=!state.hasMore;return}
  await fetchFeed(view,false);
 }
 async function fetchFeed(view,append){
