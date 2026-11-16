@@ -358,7 +358,7 @@ async function markRetry(item,error){
  if(syncRetryTimer)clearTimeout(syncRetryTimer);
  syncRetryTimer=setTimeout(()=>{if(navigator.onLine)flushSyncQueue()},delay+100);
 }
-async async function flushSyncQueue(){
+async function flushSyncQueue(){
  if(outboxBusy||!auth?.token||!navigator.onLine)return;
  outboxBusy=true;
  try{
