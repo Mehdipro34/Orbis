@@ -398,6 +398,7 @@ Deno.serve(async (req: Request) => {
   const {data:me}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
   if (!me) return out({error:"Профиль ORBIS не найден. Обнови страницу, чтобы восстановить гостевую сессию."},401);
   if(req.method==="POST"&&path==="/api/guest/link-key"){
+    if(await isRateLimited(admin,uid,"link_recovery_key",5,3600))return out({error:"Слишком много попыток настройки ключа."},429);
     const jwk=body.publicKey||{};
     if(jwk.kty!=="EC"||jwk.crv!=="P-256"||typeof jwk.x!=="string"||typeof jwk.y!=="string"||!/^[A-Za-z0-9_-]{40,50}$/.test(jwk.x)||!/^[A-Za-z0-9_-]{40,50}$/.test(jwk.y))return out({error:"Некорректный публичный ключ устройства."},400);
     if(me.auth_public_key)return out({error:"У профиля уже настроен защищённый ключ."},409);
@@ -531,6 +532,7 @@ Deno.serve(async (req: Request) => {
   }
   const postComments=path.match(/^\/api\/posts\/([0-9a-f-]{36})\/comments$/i);
   if(postComments&&req.method==="GET"){
+    if(await isRateLimited(admin,uid,"comments_read",120,60))return out({error:"Слишком много запросов к комментариям."},429);
     const postId=postComments[1],rawLimit=Number(u.searchParams.get("limit")||20);
     const limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
     const {data:post}=await admin.from("posts").select("id").eq("id",postId).eq("status","published").maybeSingle();
@@ -570,6 +572,7 @@ Deno.serve(async (req: Request) => {
   }
   const commentReplies=path.match(/^\/api\/comments\/([0-9a-f-]{36})\/replies$/i);
   if(commentReplies&&req.method==="GET"){
+    if(await isRateLimited(admin,uid,"comment_replies_read",120,60))return out({error:"Слишком много запросов к ответам."},429);
     const parentId=commentReplies[1];
     const {data:parent}=await admin.from("post_comments").select("id,parent_id").eq("id",parentId).eq("status","published").maybeSingle();
     if(!parent||parent.parent_id)return out({error:"Комментарий не найден."},404);
@@ -672,6 +675,7 @@ Deno.serve(async (req: Request) => {
     if(error)return out({error:error.message},400);return out({ok:true,user:{id:uid,...safeProfile(data)}});
   }
   if(req.method==="GET"&&path.startsWith("/api/profile/")){
+    if(await isRateLimited(admin,uid,"profile_read",120,60))return out({error:"Слишком много просмотров профилей."},429);
     const username=decodeURIComponent(path.slice("/api/profile/".length)).toLowerCase();
     const {data:p}=await admin.from("profiles").select("*").eq("username",username).maybeSingle();if(!p)return out({error:"Профиль не найден."},404);
     const [{data:posts},{count:followers},{count:following},{data:follow}]=await Promise.all([
@@ -704,6 +708,7 @@ Deno.serve(async (req: Request) => {
     return error?out({error:error.message},400):out({ok:true},201);
   }
   if(req.method==="GET"&&path==="/api/bookmarks"){
+    if(await isRateLimited(admin,uid,"bookmarks_read",60,60))return out({error:"Слишком много запросов к сохранённому."},429);
     const {data,error}=await admin.from("bookmarks").select("post_id,posts(*,profiles!posts_author_id_fkey(username,display_name,public_number))").eq("user_id",uid).order("created_at",{ascending:false}).limit(30);
     if(error)return out({error:error.message},400);
     const rawPosts=(data||[]).map((x:any)=>x.posts).filter(Boolean);
@@ -884,6 +889,7 @@ Deno.serve(async (req: Request) => {
     return out({ok:true,message:{id:message.id,body:message.body,createdAt:message.created_at,own:true}},201);
   }
   if(req.method==="GET"&&path==="/api/notifications"){
+    if(await isRateLimited(admin,uid,"notifications_read",60,60))return out({error:"Слишком много запросов к уведомлениям."},429);
     const {data:rows,error}=await admin.from("notifications").select("id,actor_id,kind,entity_id,body,created_at,read_at").eq("recipient_id",uid).order("created_at",{ascending:false}).limit(60);
     if(error)return out({error:"Не удалось загрузить уведомления."},400);
     const actorIds=[...new Set((rows||[]).map((n:any)=>n.actor_id).filter(Boolean))];
