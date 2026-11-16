@@ -1,45 +1,50 @@
-# ORBIS — One thought. One world.
+# ORBIS — Your world. Your voice.
 
-ORBIS is a lightweight daily-topic social network. Everyone sees the same question for the day, each member can publish one short answer per 24 hours, and the whole community can react.
+ORBIS is an international username-first social network. The main app is a responsive PWA for public posts, photos, profiles and community activity.
 
-## Product
-- One shared daily topic, rotated using the Asia/Baku calendar day.
-- One-click guest identity with an automatically generated nickname; no email/password form.
-- Shared public feed: latest, popular, and personal posts.
-- 140-character posts with an atomic 24-hour server-side cooldown.
-- Four reactions: 🔥 💎 🚀 😂 — one active reaction per member per post.
-- Save posts, share post links, and search the feed.
-- Russian, Azerbaijani and English interface.
-- Installable PWA with an offline-cached app shell.
-- Responsive dark-glass UI; no fake online counters or fake ad impressions.
+## Product features
+- Username-first registration without email or phone.
+- P-256 key-based login; an encrypted recovery file and separate recovery code protect account recovery.
+- Public global feed, following feed and popular feed.
+- Profiles with unique username, display name, bio and avatar.
+- Text posts with up to four photos per post.
+- Browser-side WebP compression before batched photo upload.
+- Likes, bookmarks, comments and one-level replies.
+- Follow/unfollow and notifications for likes, comments and follows.
+- Russian, English and Azerbaijani interface.
+- IndexedDB local feed cache and service-worker app-shell cache.
+- No direct messages and no user/post search.
 
-## Architecture
-- Frontend: `public/index.html`
-- PWA: `public/manifest.webmanifest`, `public/sw.js`
-- Cloudflare Worker assets: `src/index.js`, `wrangler.toml`
-- Backend: Supabase Edge Function `supabase/functions/orbis-api/index.ts`
-- Database migrations: `supabase/migrations/`
-- Database: Supabase PostgreSQL tables for profiles, daily posts, reactions, bookmarks and cooldowns.
-- The Edge Function validates a signed device guest token and performs writes with its server-side service role key. The service role key is never sent to the browser.
-- The 24-hour post cooldown is atomic in PostgreSQL, not just a browser-side timer.
+## Current architecture
+- Static frontend: `public/index.html`, `public/orbis.css`, `public/orbis-app.js`.
+- PWA: `public/manifest.webmanifest`, `public/sw.js`.
+- Vercel API: `api/public/posts.js` proxies only public, non-personalised feed pages and sets shared CDN cache headers.
+- Database and write API: Supabase PostgreSQL plus the Edge Function `orbis-api`.
+- Media: Supabase Storage bucket `orbis-media`.
+- Optional Cloudflare Worker: `src/index.js` and `wrangler.toml` provide a static-asset origin and edge cache for the public feed. It requires GitHub Actions secrets and is not assumed active until deployment is verified.
 
-## Guest identity
-Guest identity is tied to a device ID stored in the browser. Clearing site data or switching devices can make a guest profile inaccessible. Posts are visible to all ORBIS visitors. Do not share personal information.
+## Important data boundaries
+- PostgreSQL is the source of truth. Browser caches never replace profiles, posts, likes, follows, comments or media.
+- IndexedDB feed pages are per local account.
+- CDN-cached public feed data contains no user-specific liked/saved state. That state is fetched separately in one batch per page.
+- Media stays in persistent object storage, not only in a user's browser cache.
+- Service Worker does not cache authenticated API responses.
 
-## Cloudflare deployment
-The repository includes `.github/workflows/deploy-cloudflare.yml`. Add repository Actions secrets:
-- `CF_API_TOKEN`: Cloudflare API token with Workers Scripts edit and account read permissions.
-- `CF_ACCOUNT_ID`: Cloudflare account ID.
+## Development and operations
+- Supabase migrations live under `supabase/migrations/`.
+- Edge Function source lives in `supabase/functions/orbis-api/index.ts`.
+- The main product architecture is described in `docs/ARCHITECTURE.md`.
+- Deployment and staged testing guidance is in `docs/DEPLOYMENT.md`.
+- Supabase access/security guidance is in `docs/SUPABASE_SETUP.md`.
 
-After both secrets are configured, each push to `main` deploys the Worker and `public/` static assets using the existing `wrangler.toml` and KV namespace. The Worker URL / custom domain is managed in Cloudflare.
+## Free-tier reality
+Current limits checked Nov 16, 2026:
+- Cloudflare Workers Free: 100,000 Worker requests/day and 10 ms CPU per invocation.
+- Cloudflare Workers KV Free: 100,000 reads/day and 1,000 writes/day.
+- Supabase Free: 500,000 Edge Function invocations/month, 500 MB database, 1 GB Storage, 5 GB egress.
+- Vercel Hobby: 1,000,000 function invocations/month and is intended for personal, non-commercial projects.
 
-## Feed and reaction performance
-- Feed responses are paginated in 40-post pages using a keyset cursor (created_at + post ID), so the API no longer tries to return the entire community history at once.
-- Reaction totals are maintained in `orbis_reaction_totals` by a PostgreSQL trigger; the table is server-role-only. The feed uses a composite index for cursor paging. Feed reads fetch up to four aggregate rows per post plus only the current member's own reactions, instead of downloading every member's reaction row.
-- The browser refreshes an open feed about every 3 minutes with a small random delay, pauses while the tab is hidden, and refreshes when the member returns. Users can also refresh manually.
-- Reaction and bookmark actions update the visible UI without reloading the whole feed. The app also has a bounded API timeout and staggered card/reaction motion.
+CDN caching and local caching reduce duplicate feed reads, but cache hits still count as inbound edge requests. User actions still use the authenticated API. The current build has not been load-tested at 100,000 concurrent users; no such capacity claim is made.
 
-## Capacity and free-tier reality
-This is a more efficient starting architecture, not a promise of a specific concurrent-user count. Supabase Free currently includes 500,000 Edge Function invocations per month and 500 MB of database size per project; Cloudflare Workers Free currently lists 100,000 requests per day and 10 ms CPU time per invocation. The three-minute polling interval still consumes invocations: an illustrative 30 minutes of open-tab time per day is roughly 8–10 feed refreshes per member per day, before counting posts, reactions, bookmarks, and session checks. Thousands of daily active members may exceed the free quota. Capacity must be established by a realistic load test and usage monitoring before a public launch.
-## Notes
-No load test has been run, so there is no verified concurrent-user capacity claim. Cloudflare/Supabase quotas still apply. Offline mode caches the app shell, not live posting or feed updates.
+## Safety and privacy
+Never expose `SUPABASE_SERVICE_ROLE_KEY` or the guest HMAC signing secret in frontend code. Recovery files contain encrypted private-key material; store the recovery file and code separately.
