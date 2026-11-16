@@ -4,7 +4,7 @@ const API="https://wdwvcvpgovvkoodozbxf.supabase.co/functions/v1/orbis-api";
 const ANON="sb_publishable_B-88igN5GVsuj67o-vtCVA_--RFWsLx";
 const OLD_DEVICE="orbis.device.v1",OLD_TOKEN="orbis.guest.token.v1",DB_NAME="orbis-local-v3";
 const $=id=>document.getElementById(id),encoder=new TextEncoder(),decoder=new TextDecoder();
-let lang=localStorage.getItem("orbis.language.v1")||"ru",auth=null,me=null,currentView="home",profileUsername=null,selectedFiles=[],lastFeedRefresh=0,installPrompt=null,pendingBackup=null,pendingCode=null,toastTimer=null,outboxBusy=false,pendingPosts=[];
+let lang=localStorage.getItem("orbis.language.v1")||"ru",auth=null,me=null,currentView="home",profileUsername=null,selectedFiles=[],lastFeedRefresh=0,installPrompt=null,pendingBackup=null,pendingCode=null,toastTimer=null,outboxBusy=false,outboxRequested=false,pendingPosts=[],syncRetryTimer=null;
 const feeds={home:{items:[],cursor:null,hasMore:false,loading:false},following:{items:[],cursor:null,hasMore:false,loading:false},popular:{items:[],cursor:null,hasMore:false,loading:false}};
 const T={
 ru:{welcomeKicker:"МЕЖДУНАРОДНОЕ СООБЩЕСТВО",welcomeTitle:"Твои идеи заслуживают аудитории.",welcomeText:"Создай профиль за несколько секунд. Без почты и номера телефона.",nicknameLabel:"Никнейм",bioLabel:"О себе",optional:"(необязательно)",createAccount:"Создать профиль",alreadyMember:"Уже есть аккаунт?",restoreAccess:"Войти или восстановить доступ",recoveryHelp:"Выбери файл восстановления и введи секретный код.",recoveryFile:"Файл восстановления",recoveryCode:"Секретный код",restoreButton:"Восстановить аккаунт",authFoot:"Сохрани файл восстановления и секретный код отдельно. Без них доступ с другого устройства может быть потерян.",workspace:"ПРОСТРАНСТВО",home:"Главная",following:"Подписки",popular:"Популярное",notifications:"Уведомления",myProfile:"Мой профиль",settings:"Настройки",homeTitle:"Главная лента",composerPlaceholder:"Что нового?",composerHint:"Поделись идеей с миром",publish:"Опубликовать",newPost:"Новая публикация",publicPost:"Публикация будет видна всем",addPhotos:"Добавить фото",community:"ORBIS COMMUNITY",liveFeed:"Общая лента",refresh:"Обновить",loadMore:"Показать ещё",followers:"Подписчики",followingCountLabel:"Подписки",posts:"Публикации",back:"Назад",markAll:"Прочитать всё",yourAccount:"YOUR ACCOUNT",aboutOrbis:"ABOUT ORBIS",aboutTitle:"Мир идей без границ.",aboutText:"Публикуй, находи единомышленников, поддерживай хорошие идеи и создавай свою аудиторию.",yourActivity:"YOUR ACTIVITY",yourPosts:"Твои посты",yourFollowers:"Подписчики",viewProfile:"Открыть профиль",footer:"Your world. Your voice.",privacyNote:"Никнейм публичен. Не публикуй адрес, пароль или личные документы.",saveAccess:"Сохрани доступ к аккаунту",saveAccessHelp:"Скачай файл восстановления и сохрани секретный код отдельно. Это единственный способ войти с другого устройства.",downloadBackup:"Скачать файл восстановления",secretCode:"СЕКРЕТНЫЙ КОД",copy:"Скопировать",backupConfirmed:"Я скачал файл и сохранил код отдельно",continue:"Продолжить",language:"Язык интерфейса",downloadBackupAgain:"Скачать файл восстановления",logout:"Выйти на этом устройстве",logoutWarning:"Выход удалит локальный ключ и токен с этого устройства. Сначала сохрани файл восстановления.",postPlaceholder:"О чём ты думаешь?",like:"Нравится",comment:"Комментарии",save:"Сохранить",follow:"Подписаться",unfollow:"Отписаться",reply:"Ответить",writeComment:"Напиши комментарий…",send:"Отправить",noPosts:"Здесь пока нет публикаций.",noFollowing:"Лента подписок пока пуста. Подпишись на интересных авторов.",noNotifications:"Пока нет уведомлений.",commentsTitle:"Комментарии",edit:"Изменить",delete:"Удалить",profileEdit:"Изменить профиль",displayName:"Имя",bioPlaceholder:"Расскажи о себе…",saveChanges:"Сохранить изменения",saved:"Сохранено",removed:"Удалено",followed:"Подписка добавлена.",unfollowed:"Подписка удалена.",uploading:"Загружаем фото…",loading:"Загружаем…",offline:"Нет подключения. Показаны сохранённые публикации.",retry:"Повторить",noMore:"Больше публикаций нет.",backupReady:"Файл восстановления готов. Обязательно сохрани его и код.",invalidBackup:"Не удалось открыть файл восстановления. Проверь код.",rateLimit:"Слишком много запросов. Попробуй позже.",profileUpdated:"Профиль обновлён.",confirmDelete:"Удалить эту публикацию?",deletedPost:"Публикация удалена.",editPrompt:"Введи новый текст публикации:",photoLimit:"Можно добавить не более четырёх фото.",photoTooLarge:"Не удалось обработать фото.",cacheReady:"ЛОКАЛЬНЫЙ КЭШ ГОТОВ",signingIn:"Проверяем ключ…",publicKeyError:"Браузер не поддерживает безопасные криптографические ключи. Открой приложение по HTTPS.",profileMissing:"Профиль не найден.",backupWarning:"Сохрани файл и код в разных местах."},
@@ -359,8 +359,9 @@ async function markRetry(item,error){
  syncRetryTimer=setTimeout(()=>{if(navigator.onLine)flushSyncQueue()},delay+100);
 }
 async function flushSyncQueue(){
- if(outboxBusy||!auth?.token||!navigator.onLine)return;
- outboxBusy=true;
+ if(outboxBusy){outboxRequested=true;return}
+ if(!auth?.token||!navigator.onLine)return;
+ outboxBusy=true;outboxRequested=false;
  try{
   let items=(await getAll("outbox")).filter(x=>x.status!=="failed"&&Number(x.nextAttemptAt||0)<=Date.now())
    .sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt)).slice(0,20);
@@ -398,7 +399,11 @@ async function flushSyncQueue(){
  }catch(error){
   const pending=(await getAll("outbox")).filter(x=>x.status!=="failed").slice(0,20);
   for(const item of pending)await markRetry(item,error.message);
- }finally{outboxBusy=false}
+ }finally{
+  outboxBusy=false;
+  if(outboxRequested&&navigator.onLine){outboxRequested=false;setTimeout(()=>flushSyncQueue(),0)}
+  else if(navigator.onLine){getAll("outbox").then(items=>{if(items.some(x=>x.status!=="failed"&&Number(x.nextAttemptAt||0)<=Date.now()))setTimeout(()=>flushSyncQueue(),0)}).catch(()=>{})}
+ }
 }
 async function changeAvatar(file){
  if(!file)return;if(!navigator.onLine){toast("Аватар можно изменить после восстановления подключения.");return}
@@ -420,8 +425,11 @@ async function editProfile(){
  const bio=prompt(t("bioLabel"),me?.bio||"");if(bio===null)return;
  try{
   const local={...me,name,bio};me=local;auth.profile=me;await put("kv",{id:"auth",...auth});
-  $("sidebarName").textContent=me.name;await openProfile(me.username);
-  await enqueueSync("profile.update",{name,bio});toast(navigator.onLine?t("profileUpdated"):"Профиль сохранён на устройстве и ожидает синхронизации.");
+  $("sidebarName").textContent=me.name||me.username;
+  $("profileDisplayName").textContent=me.name||me.username;
+  $("profileBio").textContent=me.bio||"";
+  await enqueueSync("profile.update",{name,bio});
+  toast(navigator.onLine?t("profileUpdated"):"Профиль сохранён на устройстве и ожидает синхронизации.");
  }catch(e){toast(e.message)}
 }
 async function downloadBackupAgain(){
