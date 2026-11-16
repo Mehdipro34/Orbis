@@ -146,20 +146,111 @@ Deno.serve(async (req: Request) => {
     const {data:existing,error:loadError}=await admin.from("profiles").select("*").eq("id",deviceId).maybeSingle();
     if(loadError)return out({error:"Не удалось загрузить гостевой профиль."},500);
     let profile=existing;
+    const aliasPool=["Nova","Visionary","Founder","Pioneer","Thinker","Creator","Builder","Strategist","Explorer","Atlas","Orbit","Spark","Vector","Voyager"];
+    const makeAlias=()=>{const word=aliasPool[Math.floor(Math.random()*aliasPool.length)];const code=100+Math.floor(Math.random()*900);return {username:word.toLowerCase()+"_"+code,display_name:word+" #"+code};};
     if(!profile){
-      const username="guest_"+deviceId.replace(/-/g,"").slice(0,16);
-      const {data:created,error}=await admin.from("profiles").insert({id:deviceId,username,display_name:"Гость ORBIS"}).select("*").single();
-      if(error){
-        const {data:retry}=await admin.from("profiles").select("*").eq("id",deviceId).maybeSingle();
-        if(!retry)return out({error:"Не удалось создать гостевой профиль: "+error.message},500);
-        profile=retry;
-      }else profile=created;
+      for(let attempt=0;attempt<8&&!profile;attempt++){
+        const alias=makeAlias();
+        const {data:created,error}=await admin.from("profiles").insert({id:deviceId,username:alias.username,display_name:alias.display_name}).select("*").single();
+        if(!error)profile=created;
+        else if(attempt===7)return out({error:"Не удалось создать уникальный ник: "+error.message},500);
+      }
+    }else if(profile.display_name==="Гость ORBIS" && String(profile.username||"").startsWith("guest_")){
+      const alias=makeAlias();
+      const {data:renamed,error}=await admin.from("profiles").update({username:alias.username,display_name:alias.display_name}).eq("id",deviceId).select("*").single();
+      if(!error)profile=renamed;
     }
     const signed=await issueGuestToken(deviceId,service);
     return out({ok:true,token:signed,user:{id:deviceId,...safeProfile(profile)}});
   }
   if (req.method==="POST" && path==="/api/media") {
-    if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
+    if (req.method==="GET" && path==="/api/daily/feed") {
+    if(!uid)return out({error:"Гостевая сессия не найдена."},401);
+    if(await isRateLimited(admin,uid,"daily_feed",120,60))return out({error:"Слишком много обновлений ленты. Подожди немного."},429);
+    const {data:posts,error}=await admin.from("orbis_daily_posts").select("id,author_id,body,status,created_at,boosted_until").eq("status","published").order("created_at",{ascending:false}).limit(100);
+    if(error)return out({error:"Не удалось загрузить общую ленту."},500);
+    const postIds=(posts||[]).map((p:any)=>p.id);
+    const authorIds=[...new Set((posts||[]).map((p:any)=>p.author_id))];
+    const [{data:profiles,error:profileError},{data:reactions,error:reactionError},{data:bookmarks,error:bookmarkError},{data:limitRow}]=await Promise.all([
+      authorIds.length?admin.from("profiles").select("id,username,display_name,public_number").in("id",authorIds):Promise.resolve({data:[],error:null}),
+      postIds.length?admin.from("orbis_reactions").select("post_id,user_id,reaction").in("post_id",postIds):Promise.resolve({data:[],error:null}),
+      postIds.length?admin.from("orbis_bookmarks").select("post_id").eq("user_id",uid).in("post_id",postIds):Promise.resolve({data:[],error:null}),
+      admin.from("orbis_post_limits").select("last_post_at").eq("user_id",uid).maybeSingle()
+    ]);
+    if(profileError||reactionError||bookmarkError)return out({error:"Не удалось собрать ленту ORBIS."},500);
+    const profileMap=new Map((profiles||[]).map((p:any)=>[p.id,p]));
+    const bookmarkSet=new Set((bookmarks||[]).map((b:any)=>b.post_id));
+    const reactMap=new Map<string,any>();
+    for(const r of reactions||[]){
+      const counts=reactMap.get(r.post_id)||{"🔥":0,"💎":0,"🚀":0,"😂":0,myReaction:null};
+      counts[r.reaction]=(counts[r.reaction]||0)+1;
+      if(r.user_id===uid)counts.myReaction=r.reaction;
+      reactMap.set(r.post_id,counts);
+    }
+    const result=(posts||[]).map((p:any)=>{
+      const counts=reactMap.get(p.id)||{"🔥":0,"💎":0,"🚀":0,"😂":0,myReaction:null};
+      return {...p,author:profileMap.get(p.author_id)||{display_name:"ORBIS member",username:"member"},reaction_counts:{"🔥":counts["🔥"]||0,"💎":counts["💎"]||0,"🚀":counts["🚀"]||0,"😂":counts["😂"]||0},my_reaction:counts.myReaction||null,saved:bookmarkSet.has(p.id)};
+    });
+    const sort=String(u.searchParams.get("sort")||"fresh");
+    if(sort==="top")result.sort((a:any,b:any)=>((b.reaction_counts["🔥"]+b.reaction_counts["💎"]+b.reaction_counts["🚀"]+b.reaction_counts["😂"])-(a.reaction_counts["🔥"]+a.reaction_counts["💎"]+a.reaction_counts["🚀"]+a.reaction_counts["😂"]))||String(b.created_at).localeCompare(String(a.created_at)));
+    const nextAt=limitRow?.last_post_at?new Date(new Date(limitRow.last_post_at).getTime()+24*60*60*1000).toISOString():null;
+    return out({posts:result,nextPostAt:nextAt,serverTime:new Date().toISOString()});
+  }
+  if (req.method==="POST" && path==="/api/daily/post") {
+    if(!uid)return out({error:"Сначала создай гостевой профиль ORBIS."},401);
+    if(await isRateLimited(admin,uid,"daily_post_request",6,60))return out({error:"Слишком часто. Попробуй через минуту."},429);
+    const text=String(body.body||"").trim();
+    if(!text||text.length>140)return out({error:"Публикация должна содержать от 1 до 140 символов."},400);
+    const guard=basicTextGuard(text);if(guard)return out({error:guard},422);
+    const {data:post,error}=await admin.rpc("orbis_publish_daily_post",{p_user_id:uid,p_body:text});
+    if(error){
+      if(String(error.message||"").includes("DAILY_LIMIT")){
+        const {data:nextAt}=await admin.rpc("orbis_get_next_post_at",{p_user_id:uid});
+        return out({error:"Ты уже опубликовал сегодня. Следующая публикация будет доступна через 24 часа.",nextPostAt:nextAt},429);
+      }
+      console.error("ORBIS daily post:",error.message);
+      return out({error:"Не удалось опубликовать. Попробуй ещё раз."},400);
+    }
+    const {data:profile}=await admin.from("profiles").select("id,username,display_name,public_number").eq("id",uid).maybeSingle();
+    return out({ok:true,post:{...post,author:profile||{display_name:"ORBIS member",username:"member"},reaction_counts:{"🔥":0,"💎":0,"🚀":0,"😂":0},my_reaction:null,saved:false},nextPostAt:new Date(Date.now()+24*60*60*1000).toISOString()},201);
+  }
+  if (req.method==="POST" && path==="/api/daily/react") {
+    if(!uid)return out({error:"Гостевая сессия не найдена."},401);
+    if(await isRateLimited(admin,uid,"daily_reaction",90,60))return out({error:"Слишком много реакций. Подожди немного."},429);
+    const postId=String(body.postId||""),reaction=String(body.reaction||"");
+    if(!/^[0-9a-f-]{36}$/i.test(postId)||!["🔥","💎","🚀","😂"].includes(reaction))return out({error:"Некорректная реакция."},400);
+    const {data:existing,error:readError}=await admin.from("orbis_reactions").select("reaction").eq("post_id",postId).eq("user_id",uid).maybeSingle();
+    if(readError)return out({error:"Не удалось загрузить твою реакцию."},500);
+    let myReaction=existing?.reaction||null;
+    if(myReaction===reaction){
+      const {error}=await admin.from("orbis_reactions").delete().eq("post_id",postId).eq("user_id",uid);
+      if(error)return out({error:"Не удалось убрать реакцию."},500);
+      myReaction=null;
+    }else{
+      const {error}=await admin.from("orbis_reactions").upsert({post_id:postId,user_id:uid,reaction},{onConflict:"post_id,user_id"});
+      if(error)return out({error:"Не удалось сохранить реакцию."},500);
+      myReaction=reaction;
+    }
+    const {data:rows,error}=await admin.from("orbis_reactions").select("reaction").eq("post_id",postId);
+    if(error)return out({error:"Реакция сохранена, но счётчики недоступны."},500);
+    const counts={"🔥":0,"💎":0,"🚀":0,"😂":0};for(const r of rows||[])counts[r.reaction]=(counts[r.reaction]||0)+1;
+    return out({ok:true,myReaction,counts});
+  }
+  if (req.method==="POST" && path==="/api/daily/bookmark") {
+    if(!uid)return out({error:"Гостевая сессия не найдена."},401);
+    const postId=String(body.postId||"");
+    if(!/^[0-9a-f-]{36}$/i.test(postId))return out({error:"Некорректная публикация."},400);
+    const {data:existing}=await admin.from("orbis_bookmarks").select("post_id").eq("post_id",postId).eq("user_id",uid).maybeSingle();
+    if(existing){
+      const {error}=await admin.from("orbis_bookmarks").delete().eq("post_id",postId).eq("user_id",uid);
+      if(error)return out({error:"Не удалось убрать из сохранённого."},500);
+      return out({ok:true,saved:false});
+    }
+    const {error}=await admin.from("orbis_bookmarks").insert({post_id:postId,user_id:uid});
+    if(error)return out({error:"Не удалось сохранить публикацию."},500);
+    return out({ok:true,saved:true});
+  }
+  if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
     if(await isRateLimited(admin,uid,"media",10,60))return out({error:"Слишком много загрузок. Подожди минуту."},429);
     const files=(form?.getAll("files")||[]).filter((f:any)=>f && typeof f.size==="number") as File[];
     if (!files.length || files.length>4) return out({error:"Выбери от 1 до 4 файлов."},400);
