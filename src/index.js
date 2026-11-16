@@ -130,7 +130,7 @@ export default {
       catch (error) { return json({ error: "Ошибка новостного сервиса ORBIS. " + error.message }, 500); }
     }
     if (request.method === "GET" && url.pathname === "/health") {
-      return json({ ok: true, service: "orbissocial", version: "0.3.0", api: "Supabase" });
+      return json({ ok: true, service: "orbissocial", version: "0.4.0", api: "Supabase daily social feed" });
     }
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return json({ app: "ORBIS", status: "online", version: "0.3.0" });
