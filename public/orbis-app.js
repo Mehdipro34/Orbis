@@ -258,17 +258,55 @@ function setAvatarNode(node,url,name){
  if(safe){const img=document.createElement("img");img.src=safe;img.alt="";img.loading="lazy";node.append(img)}
  else node.textContent=initial(name);
 }
+function renderProfileData(data){
+ const user=data.user;if(!user)return;
+ $("profileDisplayName").textContent=user.name||user.username;
+ $("profileUsername").textContent="@"+user.username;
+ $("profileBio").textContent=user.bio||"";
+ $("followersCount").textContent=Number(data.followers||0).toLocaleString();
+ $("followingCount").textContent=Number(data.following||0).toLocaleString();
+ const own=user.username===me?.username;
+ $("profileFollow").hidden=own;$("profileEdit").hidden=!own;$("avatarChange").hidden=!own;
+ let followerCount=Number(data.followers)||0,isFollowing=!!data.isFollowing;
+ $("profileFollow").textContent=isFollowing?t("unfollow"):t("follow");
+ setAvatarNode($("profileAvatar"),user.avatar_url,user.name||user.username);
+ $("profileFollow").onclick=async()=>{
+  const desired=!isFollowing,previousCount=followerCount;
+  isFollowing=desired;followerCount=Math.max(0,followerCount+(desired?1:-1));
+  $("profileFollow").textContent=desired?t("unfollow"):t("follow");
+  $("followersCount").textContent=followerCount.toLocaleString();
+  try{
+   await enqueueSync("follow.set",{username:user.username,following:desired});
+   if(navigator.onLine)setTimeout(()=>flushSyncQueue(),0);
+  }catch(e){
+   isFollowing=!desired;followerCount=previousCount;
+   $("profileFollow").textContent=isFollowing?t("unfollow"):t("follow");
+   $("followersCount").textContent=followerCount.toLocaleString();toast(e.message);
+  }
+ };
+ renderPosts($("profilePosts"),data.posts||[]);
+}
 async function openProfile(username){
- if(!username)return;profileUsername=username;currentView="profile";activate("profile");$("profilePosts").innerHTML='<div class="skeleton-card"></div>';
+ if(!username)return;
+ profileUsername=username;currentView="profile";activate("profile");
+ const cacheId="profile:"+String(username).toLowerCase();
+ let cached=null;
+ try{cached=await get("cache",cacheId)}catch{}
+ if(cached?.data){renderProfileData(cached.data)}
+ else $("profilePosts").innerHTML='<div class="skeleton-card"></div>';
+ if(!navigator.onLine){
+  if(!cached?.data)$("profilePosts").textContent=t("offline");
+  return;
+ }
+ if(cached?.savedAt&&Date.now()-cached.savedAt<120000)return;
  try{
-  const data=await api("/api/profile/"+encodeURIComponent(username)),user=data.user;
-  $("profileDisplayName").textContent=user.name||user.username;$("profileUsername").textContent="@"+user.username;$("profileBio").textContent=user.bio||"";
-  $("profileAvatar").textContent=initial(user.name||user.username);$("followersCount").textContent=Number(data.followers||0).toLocaleString();$("followingCount").textContent=Number(data.following||0).toLocaleString();
-  const own=user.username===me?.username;$("profileFollow").hidden=own;$("profileEdit").hidden=!own;$("avatarChange").hidden=!own;$("profileFollow").textContent=data.isFollowing?t("unfollow"):t("follow");
-  setAvatarNode($("profileAvatar"),user.avatar_url,user.name||user.username);
-  $("profileFollow").onclick=async()=>{const b=$("profileFollow");b.disabled=true;try{const r=await api("/api/users/"+encodeURIComponent(user.username)+"/follow",{method:"POST",body:{}});b.textContent=r.following?t("unfollow"):t("follow");$("followersCount").textContent=Math.max(0,Number(data.followers)+(r.following?1:-1))}catch(e){toast(e.message)}finally{b.disabled=false}};
-  renderPosts($("profilePosts"),data.posts||[]);
- }catch(e){$("profilePosts").textContent=e.message}
+  const data=await api("/api/profile/"+encodeURIComponent(username));
+  await put("cache",{key:cacheId,data,savedAt:Date.now()});
+  renderProfileData(data);
+ }catch(e){
+  if(!cached?.data)$("profilePosts").textContent=e.message;
+  else toast(e.message);
+ }
 }
 async function loadNotifications(){
  currentView="notifications";activate("notifications");const list=$("notificationList");list.innerHTML='<div class="skeleton-card"></div>';
