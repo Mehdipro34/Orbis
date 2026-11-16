@@ -105,7 +105,7 @@ async function publicFeed(request, env, url, ctx) {
   let upstream;
   try {
     upstream = await fetch(upstreamUrl, {
-      headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, accept: "application/json" },
+      headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, accept: "application/json", "x-forwarded-for": request.headers.get("CF-Connecting-IP") || "unknown" },
       signal: AbortSignal.timeout(12000)
     });
   } catch {
