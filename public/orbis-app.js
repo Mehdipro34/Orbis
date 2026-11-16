@@ -148,11 +148,7 @@ async function fetchFeed(view,append){
   if(view==="following"){
    data=await api("/api/posts?"+new URLSearchParams({limit:"20",mode:"following",...(append&&state.cursor?{cursor:state.cursor}:{})}).toString());
   }else{
-   let response;
-   try{response=await fetch("/api/public/posts?"+query.toString(),{headers:{accept:"application/json"},cache:"default"})}catch{}
-   if(!response?.ok){
-    response=await fetch(API+"/api/public/posts?"+query.toString(),{headers:{apikey:ANON,accept:"application/json"},cache:"no-store"});
-   }
+   const response=await fetch("/api/public/posts?"+query.toString(),{headers:{accept:"application/json"},cache:"default"});
    if(!response.ok)throw new Error("Публичная лента временно недоступна (HTTP "+response.status+").");
    data=await response.json();
    const ids=(data.posts||[]).map(p=>p.id);
