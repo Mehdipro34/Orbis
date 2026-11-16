@@ -74,8 +74,58 @@ function parseNewsXml(xml, source, limit = 30) {
   return entries;
 }
 
-async function api(request, env, url) {
+async function publicFeed(request, env, url, ctx) {
+  if (request.method !== "GET") return json({ error: "Method not allowed." }, 405);
+  if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
+    return json({ error: "Public feed proxy is not configured." }, 503);
+  }
+
+  const mode = String(url.searchParams.get("mode") || "latest");
+  const limit = Math.max(1, Math.min(30, Number(url.searchParams.get("limit")) || 20));
+  const cursor = String(url.searchParams.get("cursor") || "");
+  if (!["latest", "popular"].includes(mode) || cursor.length > 700) {
+    return json({ error: "Invalid public feed query." }, 400);
+  }
+
+  const cacheUrl = new URL(url.origin + "/api/public/posts");
+  cacheUrl.searchParams.set("mode", mode);
+  cacheUrl.searchParams.set("limit", String(limit));
+  if (cursor) cacheUrl.searchParams.set("cursor", cursor);
+  const cacheKey = new Request(cacheUrl.toString(), { method: "GET" });
+  const cache = caches.default;
+  const cached = await cache.match(cacheKey);
+  if (cached) {
+    const headers = new Headers(cached.headers);
+    headers.set("X-ORBIS-Feed-Cache", "HIT");
+    return new Response(cached.body, { status: cached.status, headers });
+  }
+
+  const upstreamUrl = env.SUPABASE_URL.replace(/\/$/, "") +
+    "/functions/v1/orbis-api/api/public/posts?" + cacheUrl.searchParams.toString();
+  let upstream;
+  try {
+    upstream = await fetch(upstreamUrl, {
+      headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, accept: "application/json" },
+      signal: AbortSignal.timeout(12000)
+    });
+  } catch {
+    return json({ error: "Public feed is temporarily unavailable." }, 503);
+  }
+
+  const headers = new Headers(upstream.headers);
+  headers.set("Cache-Control", "public, max-age=60");
+  headers.set("CDN-Cache-Control", "public, max-age=60");
+  headers.set("X-ORBIS-Feed-Cache", "MISS");
+  const response = new Response(upstream.body, { status: upstream.status, headers });
+  if (upstream.ok && ctx && typeof ctx.waitUntil === "function") {
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  }
+  return response;
+}
+
+async function api(request, env, url, ctx) {
   const path = url.pathname;
+  if (path === "/api/public/posts") return publicFeed(request, env, url, ctx);
   if (request.method === "GET" && path === "/api/news/sources") {
     return json({ sources: Object.entries(NEWS_SOURCES).map(([id, source]) => ({ id, name: source.name, language: source.language, credit: source.credit })) });
   }
@@ -120,13 +170,13 @@ async function api(request, env, url) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith("/api/") && !["/api/news", "/api/news/sources"].includes(url.pathname)) {
+    if (url.pathname.startsWith("/api/") && !["/api/news", "/api/news/sources", "/api/public/posts"].includes(url.pathname)) {
       return json({ error: "Основной ORBIS API работает через Supabase. Обнови приложение и повтори запрос." }, 410);
     }
     if (url.pathname.startsWith("/api/")) {
-      try { return await api(request, env, url); }
+      try { return await api(request, env, url, ctx); }
       catch (error) { return json({ error: "Ошибка новостного сервиса ORBIS. " + error.message }, 500); }
     }
     if (request.method === "GET" && url.pathname === "/health") {
