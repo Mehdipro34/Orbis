@@ -1,5 +1,29 @@
-const CACHE="orbis-social-shell-v1";
-const SHELL=["/","/manifest.webmanifest","/orbis-icon.svg"];
-self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
-self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener("fetch",e=>{const r=e.request,u=new URL(r.url);if(r.method!=="GET"||u.origin!==self.location.origin||u.pathname.startsWith("/api/"))return;if(r.mode==="navigate"){e.respondWith(fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put("/",res.clone()));return res}).catch(async()=>await caches.match("/")||Response.error()));return}if(SHELL.includes(u.pathname))e.respondWith(caches.match(r).then(hit=>hit||fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})))});
+const CACHE_NAME="orbis-shell-v3";
+const APP_SHELL=["/","/manifest.webmanifest","/orbis-icon.svg","/orbis.css","/orbis-app.js"];
+self.addEventListener("install",event=>{
+ event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()));
+});
+self.addEventListener("activate",event=>{
+ event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
+});
+self.addEventListener("fetch",event=>{
+ const request=event.request,url=new URL(request.url);
+ if(request.method!=="GET"||url.origin!==self.location.origin)return;
+ if(url.pathname.startsWith("/api/"))return;
+ if(request.mode==="navigate"){
+  event.respondWith(fetch(request).then(response=>{
+   if(response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put("/",copy))}
+   return response;
+  }).catch(async()=>await caches.match("/")||Response.error()));
+  return;
+ }
+ if(APP_SHELL.includes(url.pathname)){
+  event.respondWith(caches.match(request).then(cached=>{
+   const fresh=fetch(request).then(response=>{
+    if(response.ok)caches.open(CACHE_NAME).then(cache=>cache.put(request,response.clone()));
+    return response;
+   }).catch(()=>cached);
+   return cached||fresh;
+  }));
+ }
+});
