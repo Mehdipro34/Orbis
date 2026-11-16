@@ -178,7 +178,7 @@ Deno.serve(async (req: Request) => {
 
     if(cursor){
       const parts=cursor.split("|");
-      if(parts.length!==2||!Number.isFinite(Date.parse(parts[0]))||!/^[0-9a-f-]{36}$/i.test(parts[1]))
+      if(parts.length!==2||!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,3})?Z$/.test(parts[0])||!Number.isFinite(Date.parse(parts[0]))||!/^[0-9a-f-]{36}$/i.test(parts[1]))
         return out({error:"Некорректный курсор ленты."},400);
       const createdAt=parts[0],postId=parts[1];
       query=query.or("created_at.lt."+createdAt+",and(created_at.eq."+createdAt+",id.lt."+postId+")");
