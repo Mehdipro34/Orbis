@@ -1,29 +1,15 @@
 {
-  "id": "/",
-  "name": "ORBIS — News Universe",
-  "short_name": "ORBIS",
-  "description": "Международные новости из 568 RSS-лент, персональные темы, перевод и офлайн-сохранение.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
-  "orientation": "any",
-  "background_color": "#060817",
-  "theme_color": "#080b16",
-  "categories": [
-    "news",
-    "education",
-    "entertainment"
-  ],
-  "icons": [
-    {
-      "src": "/orbis-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "id":"/",
+  "name":"ORBIS — One thought. One world.",
+  "short_name":"ORBIS",
+  "description":"Одна тема каждый день. Короткие мысли, идеи и люди со всего мира.",
+  "start_url":"/",
+  "scope":"/",
+  "display":"standalone",
+  "display_override":["standalone","minimal-ui"],
+  "orientation":"portrait",
+  "background_color":"#07090e",
+  "theme_color":"#07090e",
+  "categories":["social","education","lifestyle"],
+  "icons":[{"src":"/orbis-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
