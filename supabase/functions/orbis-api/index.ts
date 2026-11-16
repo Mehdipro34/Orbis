@@ -379,16 +379,35 @@ Deno.serve(async (req: Request) => {
     if(await isRateLimited(admin,uid,"media",10,60))return out({error:"Слишком много загрузок. Подожди минуту."},429);
     const files=(form?.getAll("files")||[]).filter((f:any)=>f && typeof f.size==="number") as File[];
     if (!files.length || files.length>4) return out({error:"Выбери от 1 до 4 файлов."},400);
-    const allowed=new Set(["image/jpeg","image/png","image/webp","image/gif","video/mp4","video/webm"]);
-    const uploaded=[];
-    for (const file of files) {
+    const extensions:Record<string,string>={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm"};
+    const prepared:any[]=[];
+    // Validate the entire batch before uploading anything, including the actual file signature.
+    for(const file of files){
+      if(!extensions[file.type])return out({error:"Формат файла не поддерживается."},415);
       const isVideo=file.type.startsWith("video/");
-      if (!allowed.has(file.type)) return out({error:"Формат файла не поддерживается."},415);
-      if (!file.size || file.size>(isVideo?50:12)*1024*1024) return out({error:isVideo?"Видео должно быть не больше 50 МБ.":"Фото должно быть не больше 12 МБ."},413);
-      const ext=({ "image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm"} as Record<string,string>)[file.type];
+      if(!file.size||file.size>(isVideo?50:12)*1024*1024)
+        return out({error:isVideo?"Видео должно быть не больше 50 МБ.":"Фото должно быть не больше 12 МБ."},413);
+      const bytes=new Uint8Array(await file.slice(0,16).arrayBuffer());
+      const ascii=(offset:number,length:number)=>String.fromCharCode(...bytes.slice(offset,offset+length));
+      let valid=false;
+      if(file.type==="image/jpeg")valid=bytes.length>=3&&bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff;
+      else if(file.type==="image/png")valid=bytes.length>=8&&bytes[0]===0x89&&ascii(1,3)==="PNG"&&bytes[4]===0x0d&&bytes[5]===0x0a&&bytes[6]===0x1a&&bytes[7]===0x0a;
+      else if(file.type==="image/webp")valid=bytes.length>=12&&ascii(0,4)==="RIFF"&&ascii(8,4)==="WEBP";
+      else if(file.type==="image/gif")valid=bytes.length>=6&&(ascii(0,6)==="GIF87a"||ascii(0,6)==="GIF89a");
+      else if(file.type==="video/mp4")valid=bytes.length>=12&&ascii(4,4)==="ftyp";
+      else if(file.type==="video/webm")valid=bytes.length>=4&&bytes[0]===0x1a&&bytes[1]===0x45&&bytes[2]===0xdf&&bytes[3]===0xa3;
+      if(!valid)return out({error:"Содержимое файла не соответствует заявленному формату."},415);
+      prepared.push({file,ext:extensions[file.type]});
+    }
+    const uploaded:any[]=[];
+    for(const item of prepared){
+      const {file,ext}=item;
       const key=uid+"/"+crypto.randomUUID()+"."+ext;
       const {error}=await admin.storage.from("orbis-media").upload(key,file,{contentType:file.type,upsert:false});
-      if(error)return out({error:"Не удалось сохранить файл: "+error.message},500);
+      if(error){
+        if(uploaded.length)await admin.storage.from("orbis-media").remove(uploaded.map(x=>x.key));
+        return out({error:"Не удалось сохранить пакет файлов: "+error.message},500);
+      }
       const {data:publicData}=admin.storage.from("orbis-media").getPublicUrl(key);
       uploaded.push({key,url:publicData.publicUrl,type:file.type,size:file.size});
     }
@@ -536,6 +555,7 @@ Deno.serve(async (req: Request) => {
             if(parentError||!parentRow||parentRow.parent_id)throw new Error("Ответить можно только на комментарий первого уровня.");
             parent=parentRow;
           }
+          let createdNow=false;
           let {data:comment,error:commentError}=await admin.from("post_comments").select("id,post_id,author_id,body,created_at,parent_id")
             .eq("author_id",uid).eq("client_operation_id",operationId).maybeSingle();
           if(commentError)throw new Error("Не удалось проверить комментарий.");
@@ -544,6 +564,7 @@ Deno.serve(async (req: Request) => {
               post_id:postId,author_id:uid,body:text,parent_id:parentId,client_operation_id:operationId
             }).select("id,post_id,author_id,body,created_at,parent_id").single();
             comment=inserted.data;commentError=inserted.error;
+            if(!commentError&&comment)createdNow=true;
             if(commentError&&commentError.code==="23505"){
               const retry=await admin.from("post_comments").select("id,post_id,author_id,body,created_at,parent_id")
                 .eq("author_id",uid).eq("client_operation_id",operationId).maybeSingle();
@@ -551,8 +572,7 @@ Deno.serve(async (req: Request) => {
             }
           }
           if(commentError||!comment)throw new Error("Не удалось сохранить комментарий.");
-          if(comment.created_at&&Date.now()-new Date(comment.created_at).getTime()<5000)
-            await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"comment_reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
+          if(createdNow)await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"comment_reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
           result={comment:{
             id:comment.id,postId:comment.post_id,parentId:comment.parent_id,body:comment.body,
             createdAt:comment.created_at,own:true,
