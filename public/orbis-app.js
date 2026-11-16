@@ -316,7 +316,7 @@ async function saveFeedCache(view){
 async function enqueueSync(type,payload){
  const id=crypto.randomUUID();
  await put("outbox",{id,type,payload,createdAt:new Date().toISOString(),attempts:0,nextAttemptAt:0,status:"pending",lastError:null});
- if(navigator.onLine)flushSyncQueue();
+ if(navigator.onLine)setTimeout(()=>flushSyncQueue(),0);
  return id;
 }
 function updateLocalPostStatus(operationId,status,error){
@@ -355,8 +355,10 @@ async function markRetry(item,error){
  const updated={...item,attempts,nextAttemptAt:Date.now()+delay,status:"retry",lastError:String(error||"Sync failed").slice(0,300)};
  await put("outbox",updated);
  if(item.type==="post.create")updateLocalPostStatus(item.id,"retry",updated.lastError);
+ if(syncRetryTimer)clearTimeout(syncRetryTimer);
+ syncRetryTimer=setTimeout(()=>{if(navigator.onLine)flushSyncQueue()},delay+100);
 }
-async function flushSyncQueue(){
+async async function flushSyncQueue(){
  if(outboxBusy||!auth?.token||!navigator.onLine)return;
  outboxBusy=true;
  try{
