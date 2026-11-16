@@ -134,9 +134,23 @@ async function openFeed(view,force){
 async function fetchFeed(view,append){
  const state=feeds[view];if(state.loading)return;state.loading=true;$("loadMore").disabled=true;$("loadMore").textContent=t("loading");
  try{
-  const query=new URLSearchParams({limit:"20",mode:view==="following"?"following":view==="popular"?"popular":"for-you"});
+  const query=new URLSearchParams({limit:"20",mode:view==="popular"?"popular":view==="following"?"following":"latest"});
   if(append&&state.cursor)query.set("cursor",state.cursor);
-  const data=await api("/api/posts?"+query.toString()),incoming=Array.isArray(data.posts)?data.posts:[];
+  let data;
+  if(view==="following"){
+   data=await api("/api/posts?"+new URLSearchParams({limit:"20",mode:"following",...(append&&state.cursor?{cursor:state.cursor}:{})}).toString());
+  }else{
+   let response=await fetch("/api/public/posts?"+query.toString(),{headers:{accept:"application/json"},cache:"default"});
+   if(!response.ok)throw new Error("Публичная лента временно недоступна (HTTP "+response.status+").");
+   data=await response.json();
+   const ids=(data.posts||[]).map(p=>p.id);
+   if(auth?.token&&ids.length){
+    const own=await api("/api/posts/state?ids="+ids.join(","));
+    const liked=new Set(own.likedIds||[]),saved=new Set(own.savedIds||[]);
+    data.posts.forEach(p=>{p.liked=liked.has(p.id);p.saved=saved.has(p.id)});
+   }
+  }
+  const incoming=Array.isArray(data.posts)?data.posts:[];
   if(append){const seen=new Set(state.items.map(p=>p.id));state.items=state.items.concat(incoming.filter(p=>!seen.has(p.id)))}else state.items=incoming;
   state.cursor=data.nextCursor||null;state.hasMore=!!data.hasMore;lastFeedRefresh=Date.now();
   renderPosts($("feedList"),state.items);await put("cache",{key:cacheKey(view),data:{posts:state.items,nextCursor:state.cursor,hasMore:state.hasMore},savedAt:Date.now()});
@@ -196,13 +210,20 @@ function commentNode(comment,postId){
  form.onsubmit=async e=>{e.preventDefault();if(!input.value.trim())return;send.disabled=true;try{const r=await api("/api/posts/"+postId+"/comments",{method:"POST",body:{body:input.value.trim(),parentId:comment.id}});wrap.append(commentNode(r.comment,postId));input.value=""}catch(err){toast(err.message)}finally{send.disabled=false}};
  wrap.append(form);return wrap;
 }
+function setAvatarNode(node,url,name){
+ node.replaceChildren();
+ const safe=safeUrl(url);
+ if(safe){const img=document.createElement("img");img.src=safe;img.alt="";img.loading="lazy";node.append(img)}
+ else node.textContent=initial(name);
+}
 async function openProfile(username){
  if(!username)return;profileUsername=username;currentView="profile";activate("profile");$("profilePosts").innerHTML='<div class="skeleton-card"></div>';
  try{
   const data=await api("/api/profile/"+encodeURIComponent(username)),user=data.user;
   $("profileDisplayName").textContent=user.name||user.username;$("profileUsername").textContent="@"+user.username;$("profileBio").textContent=user.bio||"";
   $("profileAvatar").textContent=initial(user.name||user.username);$("followersCount").textContent=Number(data.followers||0).toLocaleString();$("followingCount").textContent=Number(data.following||0).toLocaleString();
-  const own=user.username===me?.username;$("profileFollow").hidden=own;$("profileEdit").hidden=!own;$("profileFollow").textContent=data.isFollowing?t("unfollow"):t("follow");
+  const own=user.username===me?.username;$("profileFollow").hidden=own;$("profileEdit").hidden=!own;$("avatarChange").hidden=!own;$("profileFollow").textContent=data.isFollowing?t("unfollow"):t("follow");
+  setAvatarNode($("profileAvatar"),user.avatar_url,user.name||user.username);
   $("profileFollow").onclick=async()=>{const b=$("profileFollow");b.disabled=true;try{const r=await api("/api/users/"+encodeURIComponent(user.username)+"/follow",{method:"POST",body:{}});b.textContent=r.following?t("unfollow"):t("follow");$("followersCount").textContent=Math.max(0,Number(data.followers)+(r.following?1:-1))}catch(e){toast(e.message)}finally{b.disabled=false}};
   renderPosts($("profilePosts"),data.posts||[]);
  }catch(e){$("profilePosts").textContent=e.message}
@@ -242,6 +263,21 @@ async function publishPost(){
  }catch(e){toast(e.message)}
  finally{btn.disabled=false;btn.textContent=t("publish")}
 }
+async function changeAvatar(file){
+ if(!file)return;
+ try{
+  const image=await compressImage(file),form=new FormData();form.append("files",image,image.name);
+  const uploaded=await api("/api/media",{method:"POST",body:form}),item=uploaded.media?.[0];
+  if(!item?.url)throw new Error("Не удалось загрузить аватар.");
+  const updated=await api("/api/profile",{method:"PUT",body:{name:me?.name||me?.username,bio:me?.bio||"",avatarUrl:item.url}});
+  me=updated.user;await put("kv",{id:"auth",...auth});
+  setAvatarNode($("profileAvatar"),item.url,me.name||me.username);
+  setAvatarNode($("sidebarAvatar"),item.url,me.name||me.username);
+  setAvatarNode($("rightAvatar"),item.url,me.name||me.username);
+  setAvatarNode($("composerAvatar"),item.url,me.name||me.username);
+  toast(t("profileUpdated"));
+ }catch(e){toast(e.message)}
+}
 async function editProfile(){
  const name=prompt(t("displayName"),me?.name||me?.username||"");if(name===null)return;
  const bio=prompt(t("bioLabel"),me?.bio||"");if(bio===null)return;
@@ -278,7 +314,7 @@ function bind(){
  $("refreshBtn").onclick=()=>currentView==="profile"?openProfile(profileUsername):currentView==="notifications"?loadNotifications():fetchFeed(currentView,false);
  $("refreshFeed").onclick=()=>fetchFeed(currentView,false);$("backToFeed").onclick=()=>openFeed("home",true);
  $("readAll").onclick=async()=>{try{await api("/api/notifications/read",{method:"POST",body:{}});await loadNotifications()}catch(e){toast(e.message)}};
- $("profileEdit").onclick=editProfile;
+ $("profileEdit").onclick=editProfile;$("avatarInput").onchange=e=>{const file=e.target.files?.[0];if(file)changeAvatar(file);e.target.value="";};
 }
 function renderMediaPreview(){
  const root=$("mediaPreview");root.replaceChildren();
