@@ -480,6 +480,17 @@ Deno.serve(async (req: Request) => {
     const last=rows[rows.length-1],nextCursor=last?bytesToBase64Url(encoder.encode(JSON.stringify({createdAt:last.created_at,id:last.id,...(ranked?{score:Number(last.engagement_score)||0}:{})}))):null;
     return out({posts,hasMore,nextCursor});
   }
+  if(req.method==="GET"&&path==="/api/posts/state"){
+    if(await isRateLimited(admin,uid,"post_state",120,60))return out({error:"Слишком много запросов состояния ленты."},429);
+    const ids=[...new Set(String(u.searchParams.get("ids")||"").split(",").filter(x=>/^[0-9a-f-]{36}$/i.test(x)))].slice(0,30);
+    if(!ids.length)return out({likedIds:[],savedIds:[]});
+    const [{data:likes,error:likeError},{data:saved,error:savedError}]=await Promise.all([
+      admin.from("post_likes").select("post_id").eq("user_id",uid).in("post_id",ids),
+      admin.from("bookmarks").select("post_id").eq("user_id",uid).in("post_id",ids)
+    ]);
+    if(likeError||savedError)return out({error:"Не удалось загрузить личное состояние публикаций."},503);
+    return out({likedIds:(likes||[]).map((x:any)=>x.post_id),savedIds:(saved||[]).map((x:any)=>x.post_id)});
+  }
   const singlePost=path.match(/^\/api\/posts\/([0-9a-f-]+)$/i);
   if(req.method==="GET"&&singlePost){
     const {data:p,error}=await admin.from("posts")
