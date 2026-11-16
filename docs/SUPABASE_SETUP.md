@@ -1,48 +1,50 @@
-# ORBIS — Supabase setup
+# ORBIS — Supabase setup and security
 
-## Deployed components
+## Connected project
+- Project: `Orbis`
+- Project ref: `wdwvcvpgovvkoodozbxf`
+- Region: `ap-southeast-2`
+- Database engine: PostgreSQL 17
+- Storage bucket: `orbis-media`
+- Edge Function: `orbis-api` (live version is checked through the Supabase project tools; version changes as code is deployed).
 
-- Supabase project: `Orbis` (`wdwvcvpgovvkoodozbxf`).
-- Edge Function: `orbis-api` (active version 27 at the latest verification).
-- Storage bucket: `orbis-media`.
-- Authentication: email + password, with a unique username stored in the public profile.
-- Username-to-email lookup: `account_lookup`, blocked from direct `anon` and `authenticated` access.
-- Application tables have Row Level Security enabled. Tables accessed only through the service-role Edge Function intentionally have no direct browser policies; the function must validate the JWT and enforce ownership or conversation membership before every operation.
+## Authentication model
+ORBIS uses username-first guest identities backed by a cryptographic key, not username-only authentication:
+1. The browser generates a random UUID and a P-256 ECDSA key pair.
+2. The public key is stored in `profiles.auth_public_key`.
+3. A one-use challenge is stored in `orbis_auth_challenges`, expires after five minutes and is marked used after successful verification.
+4. The browser signs the challenge with its local private key. The server verifies the signature and returns a time-limited signed guest token.
+5. The private key is held in IndexedDB as a non-exportable CryptoKey. A user can export an encrypted recovery file protected by a separate random recovery code.
+6. The recovery file and recovery code must be kept separately. ORBIS cannot recover an account from its username alone.
 
-## Account flow
+The server's HMAC signing secret and Supabase service-role key stay in Edge Function secrets. Neither is embedded in frontend JavaScript.
 
-1. A user signs up with email, username and password through Supabase Auth.
-2. The `on_auth_user_created_orbis` database trigger creates the profile and a private `account_lookup` row.
-3. Login accepts either an email address or username. For username login, `orbis-api` resolves the email server-side and exchanges the credentials with Supabase Auth.
-4. The browser receives the resulting Supabase session, not the account email belonging to another user.
-5. Passwords are never stored in public profile or lookup tables.
-
-## Required Auth configuration
-
-1. In Authentication → Sign In / Providers, ensure the Email provider is enabled.
-2. Keep email confirmation enabled.
-3. In Authentication → URL Configuration, set the Site URL and Redirect URLs to include `https://orbis-mehdipro34.vercel.app`.
-4. Enable leaked-password protection in Auth password security settings.
-5. Never expose the service-role key in browser JavaScript.
+## Tables used by the social product
+- `profiles`: usernames, display names, bios, avatar URLs and public profile metadata.
+- `posts`: text/photo posts and engagement score.
+- `post_likes`, `follows`, `bookmarks`: relationship and engagement rows.
+- `post_comments`: comments and one-level replies (`parent_id`).
+- `notifications`: recipient-scoped activity notifications.
+- `orbis_auth_challenges`: private, expiring login challenges.
+- `api_rate_limits`: server-side rate-limit windows.
+- Existing `orbis_daily_posts` tables remain in the database for compatibility with earlier ORBIS releases; the current main UI uses `posts`.
 
 ## Media
+- Bucket: `orbis-media`.
+- The browser converts selected photos to WebP (max edge 1,800 px, quality around 0.82) before upload.
+- Up to four photos are sent together in one multipart request.
+- The Edge Function checks MIME type, file size and the caller's UUID object-key prefix.
+- Profile avatar updates accept only a URL under that same user's media prefix.
+- Storage is persistent; IndexedDB is only a local cache, not the media origin.
 
-- The `orbis-media` bucket exists and is public-read for media URLs.
-- Uploads are performed by `orbis-api` using the server-side service-role client.
-- The API validates the authenticated user, allowed MIME types, file sizes and ownership of uploaded object keys.
-- Cloudflare R2 is not required for the current storage design.
+## Access boundaries
+- RLS remains enabled on public-schema application tables.
+- Browser writes are routed through `orbis-api`; the service-role key bypasses RLS only on the server.
+- Recovery challenges are inaccessible to `anon` and `authenticated` roles.
+- Public cached feed payloads exclude personal liked/saved flags.
+- Never grant a client the Supabase service-role key or remove RLS to fix a frontend issue.
 
-## Verification status
-
-- Supabase project status: `ACTIVE_HEALTHY`.
-- The latest migration adds the private username/email mapping and updates the auth-user trigger.
-- The database currently contains one profile, one private account lookup row, zero posts and zero Stories.
-- The Edge Function is active at version 27 and includes the email/username login endpoint.
-- The latest Vercel production deployment reported `READY`.
-- A real end-to-end account registration, email confirmation, username login and media upload test has not yet been completed.
-- Supabase Security Advisor reports leaked-password protection disabled. Enable it before broad public launch.
-- The Security Advisor also reports some RLS-enabled service-only tables without direct client policies. This is intentional for tables accessed only through the authenticated Edge Function; do not grant direct browser access as a shortcut.
-
-## Capacity
-
-No load test has been run. Free-tier quotas can pause or throttle the project. Do not claim a specific supported number of users or concurrent sessions until measured.
+## Verification notes
+- Apply schema changes through tracked migrations and run Supabase advisors after changes.
+- Exercise signup, recovery login, post/media upload, like, bookmark, comment, follow and notification flows in a dedicated test account.
+- The current backend contains working handlers for these operations; a full multi-device end-to-end suite and high-concurrency test are still required before public scale claims.
