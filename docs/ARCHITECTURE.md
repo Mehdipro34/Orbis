@@ -1,54 +1,60 @@
-# ORBIS — News Universe Architecture
+# ORBIS — Social Network Architecture
 
-Status: news-only responsive PWA. No user-authored posts, comments, replies, stories, public profile pages, DMs, clans, or user media publishing.
+## Product scope
+ORBIS is an international, username-first social network. The shipped interface contains:
+- A global public feed, a following feed and a popular feed.
+- User profiles with username, display name, bio and avatar.
+- Text posts and up to four photo attachments per post.
+- Likes, bookmarks, comments and one-level replies.
+- Follow/unfollow and notifications for likes, comments and new followers.
+- Russian, English and Azerbaijani interface.
+- Responsive PWA with a service-worker app shell and IndexedDB feed cache.
 
-## Product
-- **For You:** cross-topic feed from a rotating sample of the 15 category catalogs. Interest preferences and liked categories rank relevant stories higher without hiding the other categories.
-- **Latest:** cross-topic feed sorted by publication time.
-- **Category feeds:** 15 topics: World, Politics, Business, Technology, Science, Movies & Series, Culture, Gaming, Sports, Auto, Health, Education, Environment, Travel, Food.
-- **Navigator:** search the 568-URL RSS catalog across 151 host domains by source, category, country or language metadata. A source can be opened directly.
-- **Media:** RSS image/thumbnail/enclosure extraction; direct video enclosure and YouTube video links when present. Topic-art fallback is used when the publisher has not provided a photo.
-- **Translation:** per-card title and summary translation to a reader-selected language from a 62-language target list. Auto-translation covers the first eight visible cards by default; further cards can be translated on demand. Results are cached in local storage. Translation is third-party, best-effort, and not certified.
-- **Encyclopedia:** Wikipedia API search in the selected language. Search result excerpts and thumbnails are linked to the original Wikipedia page.
-- **Saved:** IndexedDB stores explicitly saved articles. Image blobs are saved only when browser cross-origin access succeeds and image size is within the local limit. The saved cache is per browser/device.
-- **Feed cache:** last 160 article records are stored in IndexedDB for offline reading.
-- **Refresh:** manual and 10-minute foreground refresh, with 10-minute CDN caching for RSS.
-- **Pagination:** first 24 feed cards render, then the user can load more in batches to avoid rendering every card at once.
+User discovery/search and direct messages are intentionally not part of this product scope.
 
-## RSS data and ingestion
-- `api/news/catalog.js` contains 568 unique feed URLs across international publisher sources and selected topic feeds; source records include category, country, source-language metadata, publisher label, and host.
-- `api/news/sources.js` exposes the full directory.
-- `api/news.js` rotates through bounded feed batches. All-topics feed selects a small rotating sample across all 15 categories (up to 30 publishers); a category feed selects up to 12 feeds; a specific source query selects exactly one.
-- Feed requests use timeouts and `Promise.allSettled`, deduplicate article URLs, sort by publication date and cap the response size.
-- RSS headlines and short excerpts are shown with original-publisher links. Full third-party articles are not republished.
-- RSS media is displayed only when supplied by the feed. For items without media, the UI displays a category-themed graphic card.
-- Some feed URLs may be inactive, redirect, become rate-limited or change. Country and language fields are source-level catalogue metadata and are approximate, not guaranteed article-language detection.
-- Rule-based headline screening is imperfect and is not a full editorial or AI moderation system.
+## Runtime architecture
+- **Frontend:** static HTML/CSS/JavaScript in `public/`; no client framework or build step.
+- **Production hosting:** Vercel currently serves the PWA and the cacheable public-feed API route.
+- **Optional edge path:** `src/index.js` and `wrangler.toml` define a Cloudflare Worker that serves the same assets and caches public feed pages using the Cloudflare Cache API. This Worker is not considered active until its GitHub Actions deployment is confirmed.
+- **Persistent data:** Supabase PostgreSQL stores profiles, posts, likes, follows, bookmarks, comments, notifications, rate-limit windows and key challenges.
+- **Server API:** Supabase Edge Function `orbis-api` validates signed guest tokens and performs writes using its server-side service-role key. The service-role key is never shipped to the browser.
+- **Media:** Supabase Storage bucket `orbis-media` stores uploaded photos. The browser compresses photos to WebP before batching them into one upload request. Public object URLs are delivered through the storage CDN.
 
-## Anonymous identity and reactions
-- The browser stores a random device UUID and signed guest token; these are not presented as a public profile.
-- Supabase Edge Function validates the token.
-- `news_reactions` stores an article URL hash, anonymous device user ID, and timestamp. Primary key `(article_key,user_id)` enforces one active reaction per device/article.
-- Likes update the recommendation weight locally, then synchronize through the Edge Function. Offline reactions queue for later sync.
+## Authentication and recovery
+- Registration needs only a unique username and optional bio; no email or phone number is requested.
+- Each browser profile receives a random UUID and a P-256 ECDSA key pair.
+- The private key is kept as a non-exportable CryptoKey in IndexedDB on the device.
+- The server stores only the public key. Login uses a short-lived, single-use challenge signed by the private key; the server then issues a 30-day signed guest token.
+- A recovery file contains the private key encrypted with AES-GCM. PBKDF2-SHA-256 derives its encryption key from a randomly generated recovery code. The file and code must be stored separately.
+- Clearing browser data removes the local key and token. A recovery file and its code are needed to restore access on another device. Losing both means the account cannot be recovered by username alone.
 
-## Translation and encyclopedia
-- `api/translate.js` validates target languages and bounds text length/batch size before calling an external translation endpoint.
-- `api/wiki.js` queries Wikipedia's API and returns article title, short extract, thumbnail and original URL.
-- Translation and Wikipedia availability depend on external provider availability; the original publisher link remains available.
+## Read and cache strategy
+- Public feed pages are unauthenticated and contain only public post/profile fields and aggregate like counts. No user's liked/saved state is included in CDN-cached responses.
+- `/api/public/posts` serves keyset-paginated public pages (20 by default, server maximum 30). The Vercel route sets a 60-second shared cache with stale-while-revalidate. The Cloudflare Worker path uses Cache API with a 60-second edge TTL.
+- Personal liked/saved state is requested separately in one batch for the current page, so one person's state is never cached for another user.
+- The following feed and writes remain authenticated and are not shared-cacheable.
+- IndexedDB stores recent feed pages per local account. Cached pages render immediately; the app refreshes on navigation, manual refresh, return to a visible tab after a long pause, or reconnect.
+- Service Worker caches only the static app shell and same-origin assets. API responses and private state are not stored in the Service Worker cache.
+- Pagination uses a composite cursor based on creation time and post ID (plus rank score for the popular feed); database indexes support those orders.
 
-## Advertising
-- Web feed requests an approved ORBIS Ad Center campaign and inserts a card after every five articles.
-- Impressions are recorded when the card becomes visible; clicks are recorded at its destination.
-- If there is no approved campaign, the UI clearly labels the empty advertising placement rather than pretending an external ad is live.
-- The supplied AdMob Android IDs are recorded in `config/admob.json`. A web/PWA cannot render a mobile SDK AdMob unit. Real AdMob requires a native Android client with the Google Mobile Ads SDK and privacy/consent implementation.
+## Writes and abuse controls
+- Post creation is limited to 12 posts per user per hour.
+- Media upload accepts a maximum of four files per post, validates MIME types and size, and stores objects under the uploader's UUID prefix.
+- Likes, follows, comments and bookmarks have server-side rate limits.
+- Post edits/deletes are restricted to the authenticated author.
+- Comment edits/deletes are restricted to the comment author; replies are limited to one level.
+- Notifications are written server-side after likes, comments/replies and follows.
+- RLS remains enabled on exposed public-schema tables. Browser writes are routed through the Edge Function; the service-role key is never exposed.
 
-## Offline and PWA
-- Service worker caches the static app shell and manifest.
-- IndexedDB stores last-feed metadata and explicit article saves.
-- The app attempts to cache an article's image blob when cross-origin access allows it; image/video availability offline is not guaranteed.
-- RSS refresh, translation, Wikipedia, advertising, publisher links and reaction synchronization need a connection.
+## Scale and limits
+- CDN caching reduces repeated database reads of public pages. IndexedDB reduces repeat reads on the same device. Neither replaces PostgreSQL as the source of truth.
+- A cache hit still consumes an inbound request at the CDN/Worker edge. A cache miss reaches the Vercel route or Cloudflare Worker and then Supabase.
+- Supabase Free currently includes 500,000 Edge Function invocations/month, 500 MB database storage, 1 GB file storage and 5 GB egress. Cloudflare Workers Free currently includes 100,000 Worker requests/day and 10 ms CPU per invocation. Vercel Hobby includes 1 million function invocations/month, subject to its fair-use rules.
+- These quotas are hard ceilings, not a concurrent-user guarantee. A busy social network will exceed free limits through posting, reactions, profile views, follows, comments and media egress before it can sustain 100,000 active users at meaningful engagement.
+- No 100,000-user or 100,000-concurrent-user load test has been run. Do not make a capacity claim until staged load tests and usage monitoring support it.
 
-## Reliability and capacity
-- Feed aggregation is bounded: at most 30 sources for all-topic requests and 12 for a topic request.
-- RSS directory size is not the same as simultaneous upstream load. A request only checks a rotating subset.
-- No load test or complete multi-device end-to-end test has been completed. Do not promise a concurrent-user figure. Vercel/Supabase free-tier limits, database load, egress, function runtime, publisher rate limiting and external translation limits must be monitored before scaling.
+## Explicit non-goals
+- No direct messages.
+- No user search or post search.
+- No automatic paid upgrades, paid add-ons or billing changes.
+- No claim that the free tier is unlimited.
