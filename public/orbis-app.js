@@ -231,6 +231,23 @@ function postMenu(post,card){
  if(choice==="1"){const text=prompt(t("editPrompt"),post.body);if(text===null)return;api("/api/posts/"+post.id,{method:"PUT",body:{body:text}}).then(()=>{post.body=text;card.querySelector(".post-body").textContent=text;toast(t("profileUpdated"))}).catch(e=>toast(e.message))}
  else if(choice==="2"&&confirm(t("confirmDelete"))){api("/api/posts/"+post.id,{method:"DELETE"}).then(()=>{card.remove();toast(t("deletedPost"))}).catch(e=>toast(e.message))}
 }
+function commentsCacheKey(postId){return "comments:"+(auth?.deviceId||"guest")+":"+postId}
+async function saveCommentsCache(postId,comments){
+ await put("cache",{key:commentsCacheKey(postId),data:{comments},savedAt:Date.now()});
+}
+async function addCachedComment(postId,comment){
+ const cached=await get("cache",commentsCacheKey(postId));
+ const comments=Array.isArray(cached?.data?.comments)?cached.data.comments:[];
+ if(comment.parentId){
+  const parent=comments.find(x=>x.id===comment.parentId);
+  if(parent){
+   parent.replies=Array.isArray(parent.replies)?parent.replies:[];
+   if(!parent.replies.some(x=>x.id===comment.id))parent.replies.push(comment);
+   parent.repliesCount=parent.replies.length;
+  }
+ }else if(!comments.some(x=>x.id===comment.id))comments.push(comment);
+ await saveCommentsCache(postId,comments.slice(-60));
+}
 async function toggleComments(card,post){
  let panel=card.querySelector(".comments-panel");if(panel){panel.remove();return}
  panel=document.createElement("section");panel.className="comments-panel";
@@ -239,17 +256,46 @@ async function toggleComments(card,post){
  const form=document.createElement("form");form.className="comment-form";
  const input=document.createElement("input");input.maxLength=1000;input.placeholder=t("writeComment");input.required=true;
  const send=document.createElement("button");send.className="btn btn-primary btn-small";send.type="submit";send.textContent=t("send");form.append(input,send);panel.append(title,list,form);card.append(panel);
- try{const data=await api("/api/posts/"+post.id+"/comments?limit=20");(data.comments||[]).forEach(c=>list.append(commentNode(c,post.id)))}catch(e){list.textContent=e.message}
- form.onsubmit=async e=>{e.preventDefault();const body=input.value.trim();if(!body)return;send.disabled=true;try{const opId=await enqueueSync("comment.create",{postId:post.id,body,parentId:null});list.append(commentNode({id:"local-"+opId,postId:post.id,body,createdAt:new Date().toISOString(),own:true,syncStatus:"pending",author:{username:me.username,displayName:me.name||me.username}},post.id));input.value=""}catch(err){toast(err.message)}finally{send.disabled=false}};
+ let cached=null;
+ try{cached=await get("cache",commentsCacheKey(post.id))}catch{}
+ if(cached?.data?.comments)(cached.data.comments||[]).forEach(c=>list.append(commentNode(c,post.id)));
+ if(!navigator.onLine){
+  if(!cached?.data?.comments?.length)list.textContent=t("offline");
+ }else if(!cached?.savedAt||Date.now()-cached.savedAt>60000){
+  try{
+   const data=await api("/api/posts/"+post.id+"/comments?limit=20");
+   await saveCommentsCache(post.id,data.comments||[]);
+   list.replaceChildren();(data.comments||[]).forEach(c=>list.append(commentNode(c,post.id)));
+  }catch(e){if(!cached?.data?.comments?.length)list.textContent=e.message}
+ }
+ form.onsubmit=async e=>{
+  e.preventDefault();const body=input.value.trim();if(!body)return;send.disabled=true;
+  try{
+   const opId=await enqueueSync("comment.create",{postId:post.id,body,parentId:null});
+   const comment={id:"local-"+opId,postId:post.id,body,createdAt:new Date().toISOString(),own:true,syncStatus:"pending",author:{username:me.username,displayName:me.name||me.username}};
+   list.append(commentNode(comment,post.id));await addCachedComment(post.id,comment);input.value="";
+  }catch(err){toast(err.message)}finally{send.disabled=false}
+ };
+}
+async function addCachedCommentReplies(postId,updatedComment){
+ const cached=await get("cache",commentsCacheKey(postId));
+ const comments=Array.isArray(cached?.data?.comments)?cached.data.comments:[];
+ const parent=comments.find(x=>x.id===updatedComment.id);
+ if(parent){parent.replies=updatedComment.replies||[];parent.repliesCount=parent.replies.length;await saveCommentsCache(postId,comments)}
 }
 function commentNode(comment,postId){
  const wrap=document.createElement("div");wrap.className="comment-item";const text=document.createElement("div");text.className="comment-text";
  const name=document.createElement("button");name.className="comment-author";name.textContent=comment.author?.displayName||comment.author?.username||"Member";name.onclick=()=>openProfile(comment.author?.username);
  const body=document.createElement("p");body.textContent=comment.body;const time=document.createElement("small");time.textContent=age(comment.createdAt);text.append(name,body,time);wrap.append(text);
- if(comment.repliesCount){const btn=document.createElement("button");btn.className="reply-toggle";btn.textContent=t("reply")+" · "+comment.repliesCount;btn.onclick=async()=>{btn.disabled=true;try{const r=await api("/api/comments/"+comment.id+"/replies");(r.replies||[]).forEach(x=>wrap.append(commentNode(x,postId)))}catch(e){toast(e.message)}finally{btn.disabled=false}};wrap.append(btn)}
+ if(comment.repliesCount){const btn=document.createElement("button");btn.className="reply-toggle";btn.textContent=t("reply")+" · "+comment.repliesCount;btn.onclick=async()=>{btn.disabled=true;try{
+  if(!navigator.onLine){if(Array.isArray(comment.replies)&&comment.replies.length)comment.replies.forEach(x=>wrap.append(commentNode(x,postId)));else toast(t("offline"));return}
+  const r=await api("/api/comments/"+comment.id+"/replies");comment.replies=r.replies||[];
+  (comment.replies).forEach(x=>wrap.append(commentNode(x,postId)));
+  await addCachedCommentReplies(postId,comment);
+ }catch(e){toast(e.message)}finally{btn.disabled=false}};wrap.append(btn)}
  const form=document.createElement("form");form.className="reply-form";const input=document.createElement("input");input.maxLength=1000;input.placeholder=t("reply")+"…";const send=document.createElement("button");send.textContent="↗";send.type="submit";form.append(input,send);
  if(String(comment.id).startsWith("local-")){input.disabled=true;send.disabled=true;input.placeholder="Дождись синхронизации комментария"}
- form.onsubmit=async e=>{e.preventDefault();if(!input.value.trim()||String(comment.id).startsWith("local-"))return;send.disabled=true;try{const body=input.value.trim(),opId=await enqueueSync("comment.create",{postId,parentId:comment.id,body});wrap.append(commentNode({id:"local-"+opId,postId,parentId:comment.id,body,createdAt:new Date().toISOString(),own:true,syncStatus:"pending",author:{username:me.username,displayName:me.name||me.username}},postId));input.value=""}catch(err){toast(err.message)}finally{send.disabled=false}};
+ form.onsubmit=async e=>{e.preventDefault();if(!input.value.trim()||String(comment.id).startsWith("local-"))return;send.disabled=true;try{const body=input.value.trim(),opId=await enqueueSync("comment.create",{postId,parentId:comment.id,body});const localReply={id:"local-"+opId,postId,parentId:comment.id,body,createdAt:new Date().toISOString(),own:true,syncStatus:"pending",author:{username:me.username,displayName:me.name||me.username}};wrap.append(commentNode(localReply,postId));await addCachedComment(postId,localReply);input.value=""}catch(err){toast(err.message)}finally{send.disabled=false}};
  wrap.append(form);return wrap;
 }
 function setAvatarNode(node,url,name){
@@ -466,6 +512,8 @@ async function editProfile(){
   $("sidebarName").textContent=me.name||me.username;
   $("profileDisplayName").textContent=me.name||me.username;
   $("profileBio").textContent=me.bio||"";
+  const profileCache=await get("cache","profile:"+String(me.username).toLowerCase());
+  if(profileCache?.data){profileCache.data.user={...profileCache.data.user,name:me.name,bio:me.bio};profileCache.savedAt=Date.now();await put("cache",profileCache)}
   await enqueueSync("profile.update",{name,bio});
   toast(navigator.onLine?t("profileUpdated"):"Профиль сохранён на устройстве и ожидает синхронизации.");
  }catch(e){toast(e.message)}
