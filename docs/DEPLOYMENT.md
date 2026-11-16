@@ -1,66 +1,57 @@
-# ORBIS deployment and smoke-test checklist
+# ORBIS deployment and staged load-test guide
 
-## Current production
+## Current hosting model
+- Production application: `https://orbis-mehdipro34.vercel.app` (the exact alias is verified from Vercel deployment records).
+- Vercel automatically deploys pushes to `main`.
+- PWA files: `public/`.
+- Public cacheable feed route: `api/public/posts.js`.
+- Social API and persistent database: Supabase Edge Function `orbis-api`.
+- Media: Supabase Storage bucket `orbis-media`.
 
-- App: https://orbis-mehdipro34.vercel.app
-- Hosting: Vercel, connected to the GitHub `main` branch.
-- Static app: `public/`.
-- RSS endpoint: `api/news.js`.
-- Social API and media uploads: Supabase Edge Function `orbis-api`.
-- Supabase project ref: `wdwvcvpgovvkoodozbxf`.
+## Cloudflare Worker option
+The repository includes `src/index.js`, `wrangler.toml` and `.github/workflows/deploy-cloudflare.yml`.
+The Worker:
+- serves static assets from `public/`;
+- caches unauthenticated public-feed pages for 60 seconds using the Cache API;
+- proxies cache misses to the Supabase public-feed endpoint;
+- does not cache authenticated writes or per-user state.
 
-A GitHub commit to `main` triggers a Vercel production deployment. Confirm the deployment state is `READY` before sharing the release.
+To activate it, add GitHub Actions secrets:
+- `CF_API_TOKEN`: Cloudflare API token with Workers Scripts edit and account read permissions.
+- `CF_ACCOUNT_ID`: the Cloudflare account ID.
 
-## 1. Supabase Auth configuration
+Then check the GitHub Actions run. A commit to GitHub alone does not prove the Worker was deployed. No paid Cloudflare plan is enabled by this repository.
 
-Open the ORBIS Supabase project → Authentication → Sign In / Providers.
+## Smoke-test checklist
+Use a test account that you control. Never publish recovery codes or private keys.
 
-1. Ensure the **Email** provider is enabled.
-2. Keep email confirmation enabled.
-3. In Authentication → URL Configuration, set the Site URL to `https://orbis-mehdipro34.vercel.app` and add that exact origin to Redirect URLs.
-4. Registration uses email, username and password. Login accepts either email or username plus password.
-5. Username-to-email mapping is stored in the server-only `account_lookup` table; the browser never receives another user's email address.
-6. Enable leaked-password protection in Auth password security settings.
-7. Keep `SUPABASE_SERVICE_ROLE_KEY` in Edge Function secrets only. Never add it to frontend code.
+1. Open the production URL and register with a unique username and bio.
+2. Download the encrypted recovery file and keep the displayed recovery code separately.
+3. Refresh and confirm the local key signs in automatically.
+4. Import the recovery file on a separate browser profile and confirm access is restored.
+5. Publish text-only content.
+6. Publish a post with multiple photos; verify they appear in the global feed.
+7. Like/unlike, save/unsave, create a comment, create a one-level reply and test notifications.
+8. Follow/unfollow another test profile and verify the following feed.
+9. Edit profile name/bio and upload an avatar.
+10. Edit and delete a post you own; verify another account cannot do so.
+11. Go offline after loading the feed and confirm cached posts render. Confirm writes fail clearly while offline rather than pretending they were saved.
 
-## 2. Production smoke test
+## Staged load test
+Do not run a 100,000-VU test against the free production project. First use a separate staging project and a low request rate. Measure:
+- cache hit ratio and cache age;
+- p50/p95/p99 response latency;
+- Supabase Edge Function invocation count;
+- PostgreSQL CPU/active connections and slow queries;
+- Storage egress and upload failures;
+- API 429/5xx rates.
 
-Use a test account that you control. Never send passwords, confirmation links or recovery tokens to anyone.
+Ramp in controlled steps (for example 10, 25, 50, 100, 250, 500 and 1,000 virtual users), pause to inspect metrics between steps, and stop on rising 5xx, sustained high database CPU, connection saturation or quota warnings. Move to larger tests only after the previous step is stable and the account owner has approved the expected traffic.
 
-1. Open the production URL and create an account using email, username and password.
-2. Confirm the email using the message from Supabase Auth.
-3. Sign in using the email address.
-4. Sign out and sign in again using the username and the same password.
-5. Refresh the page and confirm that the session is restored.
-6. Edit the profile and confirm that the changes persist.
-7. Publish a text post and confirm it appears in the feed after refresh.
-8. Upload a photo, then a short supported video, and confirm each appears in the post.
-9. Test likes, comments, post replies, follows, bookmarks and search.
-10. Publish a Story and confirm it appears in the Stories area.
-11. Test a one-to-one message, notifications and clan membership.
-12. Submit a report on a test post and confirm it is stored for review.
+## Free-tier guardrails (checked Nov 16, 2026)
+- Cloudflare Workers Free: 100,000 Worker requests/day and 10 ms CPU per invocation.
+- Cloudflare Workers KV Free: 100,000 reads/day and 1,000 writes/day. The public-feed Worker uses Cache API rather than writing every view to KV.
+- Supabase Free: 500,000 Edge Function invocations/month, 500 MB database size, 1 GB Storage and 5 GB egress; the Free database may pause after a week of inactivity.
+- Vercel Hobby: 1,000,000 function invocations/month. Hobby is intended for personal, non-commercial usage and is subject to fair-use limits.
 
-## 3. Media rules
-
-- Bucket: `orbis-media`.
-- Photos: JPEG, PNG, WebP or GIF, up to 12 MB.
-- Videos: MP4 or WebM, up to 50 MB.
-- Maximum four files per post and one file per Story.
-- Uploads require a valid authenticated session and are stored under the user's UUID.
-
-## 4. Architecture notes
-
-- Vercel is the current production host for the PWA and `api/news.js`.
-- Supabase Auth handles account credentials and sessions.
-- Supabase PostgreSQL stores profiles and social data.
-- Supabase Storage stores post and Story media.
-- Supabase Edge Function `orbis-api` validates access tokens and handles social actions.
-- `src/index.js` and `wrangler.toml` describe an optional Cloudflare Worker path; it is not required for the current Vercel production URL.
-
-## 5. Limits and launch safety
-
-- The latest Vercel production deployment reported `READY`; this is not a substitute for the smoke test above.
-- No full browser E2E suite or load test has been completed.
-- Free-tier quotas can pause or throttle services.
-- The app has report submission and basic anti-spam checks, but no full human moderation console yet.
-- Do not advertise a user-capacity or concurrent-user figure until load testing supports it.
+These are quotas, not a promise of users or concurrency. With 100,000 active users, posts, likes, comments, follows, notification reads, personal state calls and image delivery can exceed free quotas. Do not enable paid features or upgrades without explicit approval.
