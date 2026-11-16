@@ -484,13 +484,25 @@ Deno.serve(async (req: Request) => {
   if(req.method==="GET"&&path==="/api/posts/state"){
     if(await isRateLimited(admin,uid,"post_state",120,60))return out({error:"Слишком много запросов состояния ленты."},429);
     const ids=[...new Set(String(u.searchParams.get("ids")||"").split(",").filter(x=>/^[0-9a-f-]{36}$/i.test(x)))].slice(0,30);
-    if(!ids.length)return out({likedIds:[],savedIds:[]});
-    const [{data:likes,error:likeError},{data:saved,error:savedError}]=await Promise.all([
-      admin.from("post_likes").select("post_id").eq("user_id",uid).in("post_id",ids),
-      admin.from("bookmarks").select("post_id").eq("user_id",uid).in("post_id",ids)
+    const usernames=[...new Set(String(u.searchParams.get("authors")||"").split(",").map((x:string)=>x.trim().toLowerCase()).filter((x:string)=>/^[a-z0-9_.]{3,24}$/.test(x)))].slice(0,30);
+    const [likesResult,savedResult,profileResult]=await Promise.all([
+      ids.length?admin.from("post_likes").select("post_id").eq("user_id",uid).in("post_id",ids):Promise.resolve({data:[],error:null}),
+      ids.length?admin.from("bookmarks").select("post_id").eq("user_id",uid).in("post_id",ids):Promise.resolve({data:[],error:null}),
+      usernames.length?admin.from("profiles").select("id,username").in("username",usernames):Promise.resolve({data:[],error:null})
     ]);
-    if(likeError||savedError)return out({error:"Не удалось загрузить личное состояние публикаций."},503);
-    return out({likedIds:(likes||[]).map((x:any)=>x.post_id),savedIds:(saved||[]).map((x:any)=>x.post_id)});
+    if(likesResult.error||savedResult.error||profileResult.error)return out({error:"Не удалось загрузить личное состояние публикаций."},503);
+    const authorIds=(profileResult.data||[]).map((x:any)=>x.id);
+    const {data:follows,error:followError}=authorIds.length
+      ?await admin.from("follows").select("following_id").eq("follower_id",uid).in("following_id",authorIds)
+      :{data:[],error:null};
+    if(followError)return out({error:"Не удалось загрузить состояние подписок."},503);
+    const followIds=new Set((follows||[]).map((x:any)=>x.following_id));
+    const followingUsernames=(profileResult.data||[]).filter((x:any)=>followIds.has(x.id)).map((x:any)=>x.username);
+    return out({
+      likedIds:(likesResult.data||[]).map((x:any)=>x.post_id),
+      savedIds:(savedResult.data||[]).map((x:any)=>x.post_id),
+      followingUsernames
+    });
   }
   const singlePost=path.match(/^\/api\/posts\/([0-9a-f-]+)$/i);
   if(req.method==="GET"&&singlePost){
@@ -631,8 +643,9 @@ Deno.serve(async (req: Request) => {
     const r=exists?await admin.from("post_likes").delete().eq("post_id",postId).eq("user_id",uid):await admin.from("post_likes").insert({post_id:postId,user_id:uid});
     if(r.error)return out({error:r.error.message},400);
     if(!exists){const {data:postOwner}=await admin.from("posts").select("author_id").eq("id",postId).maybeSingle();if(postOwner)await notifyUser(admin,postOwner.author_id,uid,"like",postId,"Пользователю понравилась твоя публикация.");}
-    const {count}=await admin.from("post_likes").select("*",{count:"exact",head:true}).eq("post_id",postId);
-    return out({ok:true,liked:!exists,likes:count||0});
+    const {data:likeCountRow,error:countError}=await admin.from("post_like_counts").select("like_count").eq("post_id",postId).maybeSingle();
+    if(countError)return out({error:"Реакция сохранена, но счётчик пока недоступен."},200);
+    return out({ok:true,liked:!exists,likes:Number(likeCountRow?.like_count)||0});
   }
   const pollVote=path.match(/^\/api\/posts\/([0-9a-f-]{36})\/vote$/i);
   if(req.method==="POST"&&pollVote){
