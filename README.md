@@ -32,5 +32,13 @@ The repository includes `.github/workflows/deploy-cloudflare.yml`. Add repositor
 
 After both secrets are configured, each push to `main` deploys the Worker and `public/` static assets using the existing `wrangler.toml` and KV namespace. The Worker URL / custom domain is managed in Cloudflare.
 
+## Feed and reaction performance
+- Feed responses are paginated in 40-post pages using a keyset cursor (created_at + post ID), so the API no longer tries to return the entire community history at once.
+- Reaction totals are maintained in orbis_reaction_totals by a PostgreSQL trigger. Feed reads fetch up to four aggregate rows per post plus only the current member's own reactions, instead of downloading every member's reaction row.
+- The browser refreshes an open feed about every 3 minutes with a small random delay, pauses while the tab is hidden, and refreshes when the member returns. Users can also refresh manually.
+- Reaction and bookmark actions update the visible UI without reloading the whole feed. The app also has a bounded API timeout and staggered card/reaction motion.
+
+## Capacity and free-tier reality
+This is a more efficient starting architecture, not a promise of a specific concurrent-user count. Supabase Free currently includes 500,000 Edge Function invocations per month and 500 MB of database size per project; Cloudflare Workers Free currently lists 100,000 requests per day and 10 ms CPU time per invocation. The three-minute polling interval still consumes invocations: an illustrative 30 minutes of open-tab time per day is roughly 8–10 feed refreshes per member per day, before counting posts, reactions, bookmarks, and session checks. Thousands of daily active members may exceed the free quota. Capacity must be established by a realistic load test and usage monitoring before a public launch.
 ## Notes
 No load test has been run, so there is no verified concurrent-user capacity claim. Cloudflare/Supabase quotas still apply. Offline mode caches the app shell, not live posting or feed updates.
