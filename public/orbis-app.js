@@ -98,7 +98,11 @@ async function bootstrap(){
   const device=localStorage.getItem(OLD_DEVICE),token=localStorage.getItem(OLD_TOKEN);
   if(device&&token){
    auth={deviceId:device,token};
-   try{const r=await api("/api/guest/me");me=r.user;await migrateLegacy();$("authScreen").hidden=true;return}catch(e){authMessage(e.message||t("alreadyBackedUp"))}
+   try{
+    const r=await api("/api/guest/me");me=r.user;
+    if(r.authMode==="legacy"){await migrateLegacy();$("authScreen").hidden=true;return}
+    authMessage(t("alreadyBackedUp"));
+   }catch(e){authMessage(e.message||t("alreadyBackedUp"))}
   }
  }catch(e){console.warn("Local bootstrap",e)}
  $("authScreen").hidden=false;$("appShell").hidden=true;
@@ -144,7 +148,11 @@ async function fetchFeed(view,append){
   if(view==="following"){
    data=await api("/api/posts?"+new URLSearchParams({limit:"20",mode:"following",...(append&&state.cursor?{cursor:state.cursor}:{})}).toString());
   }else{
-   let response=await fetch("/api/public/posts?"+query.toString(),{headers:{accept:"application/json"},cache:"default"});
+   let response;
+   try{response=await fetch("/api/public/posts?"+query.toString(),{headers:{accept:"application/json"},cache:"default"})}catch{}
+   if(!response?.ok){
+    response=await fetch(API+"/api/public/posts?"+query.toString(),{headers:{apikey:ANON,accept:"application/json"},cache:"no-store"});
+   }
    if(!response.ok)throw new Error("Публичная лента временно недоступна (HTTP "+response.status+").");
    data=await response.json();
    const ids=(data.posts||[]).map(p=>p.id);
