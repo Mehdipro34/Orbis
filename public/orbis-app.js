@@ -156,10 +156,14 @@ async function fetchFeed(view,append){
    if(!response.ok)throw new Error("Публичная лента временно недоступна (HTTP "+response.status+").");
    data=await response.json();
    const ids=(data.posts||[]).map(p=>p.id);
-   if(auth?.token&&ids.length){
-    const own=await api("/api/posts/state?ids="+ids.join(","));
-    const liked=new Set(own.likedIds||[]),saved=new Set(own.savedIds||[]);
-    data.posts.forEach(p=>{p.liked=liked.has(p.id);p.saved=saved.has(p.id)});
+   const authors=[...new Set((data.posts||[]).map(p=>p.username).filter(Boolean))];
+   if(auth?.token&&(ids.length||authors.length)){
+    const params=new URLSearchParams();
+    if(ids.length)params.set("ids",ids.join(","));
+    if(authors.length)params.set("authors",authors.join(","));
+    const own=await api("/api/posts/state?"+params.toString());
+    const liked=new Set(own.likedIds||[]),saved=new Set(own.savedIds||[]),following=new Set(own.followingUsernames||[]);
+    data.posts.forEach(p=>{p.liked=liked.has(p.id);p.saved=saved.has(p.id);p.isFollowing=following.has(p.username)});
    }
   }
   const incoming=Array.isArray(data.posts)?data.posts:[];
@@ -183,7 +187,7 @@ function postCard(post,index){
  if(safeUrl(post.avatar_url)){const img=document.createElement("img");img.src=safeUrl(post.avatar_url);img.alt="";img.loading="lazy";avatar.append(img)}else avatar.textContent=initial(post.author||post.username);
  const author=document.createElement("div");author.className="post-author";const name=document.createElement("button");name.textContent=post.author||post.username||"ORBIS member";name.onclick=()=>openProfile(post.username);
  const handle=document.createElement("small");handle.textContent="@"+(post.username||"member")+" · "+age(post.createdAt||post.created_at);author.append(name,handle);header.append(avatar,author);
- if(post.username&&post.username!==me?.username){const follow=document.createElement("button");follow.className="follow-mini";follow.textContent=t("follow");follow.onclick=async()=>{follow.disabled=true;try{const r=await api("/api/users/"+encodeURIComponent(post.username)+"/follow",{method:"POST",body:{}});follow.textContent=r.following?t("unfollow"):t("follow");toast(r.following?t("followed"):t("unfollowed"))}catch(e){toast(e.message)}finally{follow.disabled=false}};header.append(follow)}
+ if(post.username&&post.username!==me?.username){const follow=document.createElement("button");follow.className="follow-mini";follow.textContent=post.isFollowing?t("unfollow"):t("follow");follow.onclick=async()=>{follow.disabled=true;try{const r=await api("/api/users/"+encodeURIComponent(post.username)+"/follow",{method:"POST",body:{}});post.isFollowing=r.following;follow.textContent=r.following?t("unfollow"):t("follow");toast(r.following?t("followed"):t("unfollowed"))}catch(e){toast(e.message)}finally{follow.disabled=false}};header.append(follow)}
  card.append(header);
  const content=document.createElement("p");content.className="post-body";content.textContent=post.body||"";card.append(content);
  const media=(post.media||[]).filter(m=>safeUrl(m.url)).slice(0,4);
