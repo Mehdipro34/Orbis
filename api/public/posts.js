@@ -29,7 +29,8 @@ module.exports = async function handler(req, res) {
         method: "GET",
         headers: {
           apikey: SUPABASE_PUBLISHABLE_KEY,
-          accept: "application/json"
+          accept: "application/json",
+          "x-forwarded-for": String(req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown").split(",")[0].trim()
         },
         signal: AbortSignal.timeout(12000)
       }
