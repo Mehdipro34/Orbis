@@ -163,38 +163,64 @@ Deno.serve(async (req: Request) => {
     const signed=await issueGuestToken(deviceId,service);
     return out({ok:true,token:signed,user:{id:deviceId,...safeProfile(profile)}});
   }
-  if (req.method==="POST" && path==="/api/media") {
-    if (req.method==="GET" && path==="/api/daily/feed") {
+  if (req.method==="GET" && path==="/api/daily/feed") {
     if(!uid)return out({error:"Гостевая сессия не найдена."},401);
-    if(await isRateLimited(admin,uid,"daily_feed",120,60))return out({error:"Слишком много обновлений ленты. Подожди немного."},429);
-    const {data:posts,error}=await admin.from("orbis_daily_posts").select("id,author_id,body,status,created_at,boosted_until").eq("status","published").order("created_at",{ascending:false}).limit(100);
+    if(await isRateLimited(admin,uid,"daily_feed",30,60))return out({error:"Слишком много обновлений ленты. Подожди немного."},429);
+
+    const pageLimit=40;
+    const cursor=String(u.searchParams.get("cursor")||"");
+    let query=admin.from("orbis_daily_posts")
+      .select("id,author_id,body,status,created_at,boosted_until")
+      .eq("status","published")
+      .order("created_at",{ascending:false})
+      .order("id",{ascending:false})
+      .limit(pageLimit+1);
+
+    if(cursor){
+      const parts=cursor.split("|");
+      if(parts.length!==2||!Number.isFinite(Date.parse(parts[0]))||!/^[0-9a-f-]{36}$/i.test(parts[1]))
+        return out({error:"Некорректный курсор ленты."},400);
+      const createdAt=parts[0],postId=parts[1];
+      query=query.or("created_at.lt."+createdAt+",and(created_at.eq."+createdAt+",id.lt."+postId+")");
+    }
+
+    const {data:pageRows,error}=await query;
     if(error)return out({error:"Не удалось загрузить общую ленту."},500);
-    const postIds=(posts||[]).map((p:any)=>p.id);
-    const authorIds=[...new Set((posts||[]).map((p:any)=>p.author_id))];
-    const [{data:profiles,error:profileError},{data:reactions,error:reactionError},{data:bookmarks,error:bookmarkError},{data:limitRow}]=await Promise.all([
+    const hasMore=(pageRows||[]).length>pageLimit;
+    const posts=(pageRows||[]).slice(0,pageLimit);
+    const lastPost=posts.length?posts[posts.length-1]:null;
+    const nextCursor=hasMore&&lastPost?String(lastPost.created_at)+"|"+String(lastPost.id):null;
+    const postIds=posts.map((p:any)=>p.id);
+    const authorIds=[...new Set(posts.map((p:any)=>p.author_id))];
+
+    const [{data:profiles,error:profileError},{data:totals,error:totalsError},{data:myReactions,error:mineError},{data:bookmarks,error:bookmarkError},{data:limitRow,error:limitError}]=await Promise.all([
       authorIds.length?admin.from("profiles").select("id,username,display_name,public_number").in("id",authorIds):Promise.resolve({data:[],error:null}),
-      postIds.length?admin.from("orbis_reactions").select("post_id,user_id,reaction").in("post_id",postIds):Promise.resolve({data:[],error:null}),
+      postIds.length?admin.from("orbis_reaction_totals").select("post_id,reaction,reaction_count").in("post_id",postIds):Promise.resolve({data:[],error:null}),
+      postIds.length?admin.from("orbis_reactions").select("post_id,reaction").eq("user_id",uid).in("post_id",postIds):Promise.resolve({data:[],error:null}),
       postIds.length?admin.from("orbis_bookmarks").select("post_id").eq("user_id",uid).in("post_id",postIds):Promise.resolve({data:[],error:null}),
       admin.from("orbis_post_limits").select("last_post_at").eq("user_id",uid).maybeSingle()
     ]);
-    if(profileError||reactionError||bookmarkError)return out({error:"Не удалось собрать ленту ORBIS."},500);
+    if(profileError||totalsError||mineError||bookmarkError||limitError)return out({error:"Не удалось собрать ленту ORBIS."},500);
+
     const profileMap=new Map((profiles||[]).map((p:any)=>[p.id,p]));
     const bookmarkSet=new Set((bookmarks||[]).map((b:any)=>b.post_id));
-    const reactMap=new Map<string,any>();
-    for(const r of reactions||[]){
-      const counts=reactMap.get(r.post_id)||{"🔥":0,"💎":0,"🚀":0,"😂":0,myReaction:null};
-      counts[r.reaction]=(counts[r.reaction]||0)+1;
-      if(r.user_id===uid)counts.myReaction=r.reaction;
-      reactMap.set(r.post_id,counts);
+    const countMap=new Map<string,any>();
+    for(const row of totals||[]){
+      const counts=countMap.get(row.post_id)||{"🔥":0,"💎":0,"🚀":0,"😂":0};
+      counts[row.reaction]=Number(row.reaction_count)||0;
+      countMap.set(row.post_id,counts);
     }
-    const result=(posts||[]).map((p:any)=>{
-      const counts=reactMap.get(p.id)||{"🔥":0,"💎":0,"🚀":0,"😂":0,myReaction:null};
-      return {...p,author:profileMap.get(p.author_id)||{display_name:"ORBIS member",username:"member"},reaction_counts:{"🔥":counts["🔥"]||0,"💎":counts["💎"]||0,"🚀":counts["🚀"]||0,"😂":counts["😂"]||0},my_reaction:counts.myReaction||null,saved:bookmarkSet.has(p.id)};
+    const mineMap=new Map((myReactions||[]).map((r:any)=>[r.post_id,r.reaction]));
+    const result=posts.map((p:any)=>{
+      const counts=countMap.get(p.id)||{"🔥":0,"💎":0,"🚀":0,"😂":0};
+      return {...p,author:profileMap.get(p.author_id)||{display_name:"ORBIS member",username:"member"},
+        reaction_counts:{"🔥":counts["🔥"]||0,"💎":counts["💎"]||0,"🚀":counts["🚀"]||0,"😂":counts["😂"]||0},
+        my_reaction:mineMap.get(p.id)||null,saved:bookmarkSet.has(p.id)};
     });
     const sort=String(u.searchParams.get("sort")||"fresh");
     if(sort==="top")result.sort((a:any,b:any)=>((b.reaction_counts["🔥"]+b.reaction_counts["💎"]+b.reaction_counts["🚀"]+b.reaction_counts["😂"])-(a.reaction_counts["🔥"]+a.reaction_counts["💎"]+a.reaction_counts["🚀"]+a.reaction_counts["😂"]))||String(b.created_at).localeCompare(String(a.created_at)));
     const nextAt=limitRow?.last_post_at?new Date(new Date(limitRow.last_post_at).getTime()+24*60*60*1000).toISOString():null;
-    return out({posts:result,nextPostAt:nextAt,serverTime:new Date().toISOString()});
+    return out({posts:result,nextPostAt:nextAt,nextCursor,hasMore,serverTime:new Date().toISOString()});
   }
   if (req.method==="POST" && path==="/api/daily/post") {
     if(!uid)return out({error:"Сначала создай гостевой профиль ORBIS."},401);
@@ -231,13 +257,15 @@ Deno.serve(async (req: Request) => {
       if(error)return out({error:"Не удалось сохранить реакцию."},500);
       myReaction=reaction;
     }
-    const {data:rows,error}=await admin.from("orbis_reactions").select("reaction").eq("post_id",postId);
+    const {data:rows,error}=await admin.from("orbis_reaction_totals").select("reaction,reaction_count").eq("post_id",postId);
     if(error)return out({error:"Реакция сохранена, но счётчики недоступны."},500);
-    const counts={"🔥":0,"💎":0,"🚀":0,"😂":0};for(const r of rows||[])counts[r.reaction]=(counts[r.reaction]||0)+1;
+    const counts={"🔥":0,"💎":0,"🚀":0,"😂":0};
+    for(const row of rows||[])counts[row.reaction]=Number(row.reaction_count)||0;
     return out({ok:true,myReaction,counts});
   }
   if (req.method==="POST" && path==="/api/daily/bookmark") {
     if(!uid)return out({error:"Гостевая сессия не найдена."},401);
+    if(await isRateLimited(admin,uid,"daily_bookmark",60,60))return out({error:"Слишком много сохранений. Подожди немного."},429);
     const postId=String(body.postId||"");
     if(!/^[0-9a-f-]{36}$/i.test(postId))return out({error:"Некорректная публикация."},400);
     const {data:existing}=await admin.from("orbis_bookmarks").select("post_id").eq("post_id",postId).eq("user_id",uid).maybeSingle();
@@ -250,7 +278,9 @@ Deno.serve(async (req: Request) => {
     if(error)return out({error:"Не удалось сохранить публикацию."},500);
     return out({ok:true,saved:true});
   }
-  if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
+  
+  if (req.method==="POST" && path==="/api/media") {
+    if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
     if(await isRateLimited(admin,uid,"media",10,60))return out({error:"Слишком много загрузок. Подожди минуту."},429);
     const files=(form?.getAll("files")||[]).filter((f:any)=>f && typeof f.size==="number") as File[];
     if (!files.length || files.length>4) return out({error:"Выбери от 1 до 4 файлов."},400);
