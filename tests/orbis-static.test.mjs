@@ -86,14 +86,14 @@ test("public feed and media handlers are reachable outside the authenticated soc
 test("offline bookmarks use the idempotent sync queue", async () => {
   const js = await read("public/orbis-app.js");
   const backend = await read("supabase/functions/orbis-api/index.ts");
-  assert.match(js, /enqueueSync\\("bookmark\\.set"/);
-  assert.match(js, /type===\"bookmark\\.set\"/);
-  assert.match(backend, /"bookmark\\.set"/);
-  assert.match(backend, /type==="bookmark\\.set"/);
+  assert.ok(js.includes('enqueueSync("bookmark.set"'));
+  assert.ok(js.includes('type==="bookmark.set"'));
+  assert.ok(backend.includes('"bookmark.set"'));
+  assert.ok(backend.includes('type==="bookmark.set"'));
 });
 
 test("image compression preserves the actual output MIME type", async () => {
   const js = await read("public/orbis-app.js");
-  assert.match(js, /toBlob\\(resolve,\"image\\/jpeg\",\\.84\\)/);
-  assert.match(js, /blob\\.type===\"image\\/webp\"\\?\"webp\":\"jpg\"/);
+  assert.ok(js.includes('toBlob(resolve,"image/jpeg",.84)'));
+  assert.ok(js.includes('blob.type==="image/webp"?"webp":"jpg"'));
 });
