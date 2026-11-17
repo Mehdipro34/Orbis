@@ -64,7 +64,7 @@ export function PostComposer() {
       }
       setBody("");
       setSuccess("Публикация сохранена и отправлена в общую ленту.");
-      window.dispatchEvent(new Event("orbis-post-created"));
+      window.dispatchEvent(new CustomEvent("orbis-post-created",{detail:post}));
     } catch(value) {
       setError(value instanceof Error?value.message:"Не удалось опубликовать запись.");
     } finally {
