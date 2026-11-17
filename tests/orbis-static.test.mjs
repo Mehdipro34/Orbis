@@ -69,3 +69,31 @@ test("backend includes idempotent sync and indexed following feed", async () => 
   assert.match(backend, /client_operation_id/);
   assert.match(backend, /auth_public_key/);
 });
+
+
+test("public feed and media handlers are reachable outside the authenticated social routes", async () => {
+  const backend = await read("supabase/functions/orbis-api/index.ts");
+  const publicFeed = backend.indexOf('path==="/api/public/posts"');
+  const firstMedia = backend.indexOf('path==="/api/media"');
+  const media = backend.indexOf('path==="/api/media"', firstMedia + 1);
+  const authGate = backend.indexOf('if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."}');
+  assert.ok(publicFeed > 0 && publicFeed < authGate, "Public feed must be routed before the guest-auth gate");
+  assert.ok(media > 0 && media < authGate, "Media upload must have a dedicated authenticated route");
+  assert.match(backend, /instanceof File/);
+  assert.doesNotMatch(backend, /comment_reply/);
+});
+
+test("offline bookmarks use the idempotent sync queue", async () => {
+  const js = await read("public/orbis-app.js");
+  const backend = await read("supabase/functions/orbis-api/index.ts");
+  assert.match(js, /enqueueSync\\("bookmark\\.set"/);
+  assert.match(js, /type===\"bookmark\\.set\"/);
+  assert.match(backend, /"bookmark\\.set"/);
+  assert.match(backend, /type==="bookmark\\.set"/);
+});
+
+test("image compression preserves the actual output MIME type", async () => {
+  const js = await read("public/orbis-app.js");
+  assert.match(js, /toBlob\\(resolve,\"image\\/jpeg\",\\.84\\)/);
+  assert.match(js, /blob\\.type===\"image\\/webp\"\\?\"webp\":\"jpg\"/);
+});
