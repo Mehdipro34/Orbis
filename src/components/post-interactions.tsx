@@ -162,9 +162,12 @@ export function PostInteractions({
     setLoadingReplies(commentId);setError("");
     try {
       const payload=await requestJson("/api/comments/"+commentId+"/replies","GET");
-      if(!Array.isArray(payload.replies)) throw new Error("Не удалось загрузить ответы.");
-      setRepliesByParent(current=>({...current,[commentId]:payload.replies
-        .map(parseComment).filter((item):item is PostComment=>item!==null)}));
+      const replyRows=payload.replies;
+      if(!Array.isArray(replyRows)) throw new Error("Не удалось загрузить ответы.");
+      const parsedReplies=replyRows
+        .map((row:unknown)=>parseComment(row))
+        .filter((item):item is PostComment=>item!==null);
+      setRepliesByParent(current=>({...current,[commentId]:parsedReplies}));
     } catch(value) {
       setExpandedReplies(current=>{const copy=new Set(current);copy.delete(commentId);return copy;});
       setError(value instanceof Error?value.message:"Не удалось загрузить ответы.");
