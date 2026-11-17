@@ -16,6 +16,7 @@ export default function HomePage() {
         <a href="#feed" className="top-navigation-link active">Лента</a>
         <Link href="/clans" className="top-navigation-link">Кланы</Link>
         <Link href="/notifications" className="top-navigation-link">Уведомления</Link>
+        <Link href="/bookmarks" className="top-navigation-link">Закладки</Link>
         <a href="#about" className="top-navigation-link">О проекте</a>
       </nav>
       <div className="topbar-actions">
