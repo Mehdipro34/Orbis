@@ -114,3 +114,26 @@ export function isValidGuestToken(value:unknown):value is string {
   return typeof value==="string" &&
     /^[A-Za-z0-9_-]{20,300}\.[A-Za-z0-9_-]{40,100}$/.test(value);
 }
+
+export async function callGuestApiForm(
+  path:string,formData:FormData,bearerToken:string,request?:Request
+):Promise<{status:number;payload:unknown}> {
+  const headers=new Headers({apikey:supabasePublishableKey,accept:"application/json"});
+  headers.set("Authorization","Bearer "+bearerToken);
+  const ip=getClientIp(request);
+  if(ip)headers.set("x-real-ip",ip);
+
+  let response:Response;
+  try {
+    response=await fetch(orbisEdgeFunctionUrl+path,{
+      method:"POST",headers,body:formData,cache:"no-store",
+      signal:AbortSignal.timeout(30_000)
+    });
+  } catch {
+    return {status:503,payload:{error:"Не удалось загрузить фотографии. Попробуй ещё раз."}};
+  }
+  let payload:unknown;
+  try{payload=await response.json();}
+  catch{payload={error:"Сервис ORBIS вернул некорректный ответ."};}
+  return {status:response.status,payload};
+}
