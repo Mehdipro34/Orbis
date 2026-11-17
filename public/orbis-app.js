@@ -211,8 +211,13 @@ function postCard(post,index){
  card.append(header);
  if(post.syncStatus){
   const status=document.createElement("small");status.className="post-sync-status";
-  status.textContent=post.syncStatus==="failed"?"⚠ Требуется исправление: "+(post.syncError||"операция не принята"):"◷ Сохранено на устройстве · ожидает синхронизации";
+  status.textContent=post.syncStatus==="failed"?"⚠ Не удалось отправить: "+(post.syncError||"ошибка"):"◷ Сохранено на устройстве · ожидает синхронизации";
   card.append(status);
+  if(post.syncStatus==="failed"){
+   const retry=document.createElement("button");retry.type="button";retry.className="subtle-btn";retry.textContent="Повторить отправку";
+   retry.onclick=()=>retrySyncOperation(String(post.id).replace(/^local-/,""));
+   card.append(retry);
+  }
  }
   const content=document.createElement("p");content.className="post-body";content.textContent=post.body||"";card.append(content);
  const media=(post.media||[]).filter(m=>safeUrl(m.url)).slice(0,4);
@@ -554,6 +559,21 @@ async function flushSyncQueue(){
     await put("outbox",failed);
     if(item.type==="post.create")updateLocalPostStatus(item.id,"failed",failed.lastError);
     if(item.type==="comment.create")await setLocalCommentSyncStatus(item.id,"failed",failed.lastError);
+    if(item.type==="like.set"){
+     for(const feed of Object.values(feeds))for(const post of feed.items)if(post.id===item.payload.postId){
+      post.liked=!item.payload.liked;post.likes=Math.max(0,Number(post.likes||0)+(item.payload.liked?-1:1));
+     }
+     if(["home","following","popular"].includes(currentView))renderPosts($("feedList"),feeds[currentView].items);
+    }
+    if(item.type==="follow.set"){
+     for(const feed of Object.values(feeds))for(const post of feed.items)if(post.username===item.payload.username)post.isFollowing=!item.payload.following;
+     if(["home","following","popular"].includes(currentView))renderPosts($("feedList"),feeds[currentView].items);
+    }
+    if(item.type==="profile.update"){
+     try{const actual=await api("/api/guest/me");me=actual.user;auth.profile=me;await put("kv",{id:"auth",...auth});
+      $("sidebarName").textContent=me.name||me.username;$("profileDisplayName").textContent=me.name||me.username;$("profileBio").textContent=me.bio||"";
+     }catch{}
+    }
     toast(failed.lastError);
    }else await markRetry(item,outcome?.error||"Операция не подтверждена сервером.");
   }
@@ -585,13 +605,15 @@ async function editProfile(){
  const name=prompt(t("displayName"),me?.name||me?.username||"");if(name===null)return;
  const bio=prompt(t("bioLabel"),me?.bio||"");if(bio===null)return;
  try{
+  const previousName=me?.name||me?.username||"";
+  const previousBio=me?.bio||"";
   const local={...me,name,bio};me=local;auth.profile=me;await put("kv",{id:"auth",...auth});
   $("sidebarName").textContent=me.name||me.username;
   $("profileDisplayName").textContent=me.name||me.username;
   $("profileBio").textContent=me.bio||"";
   const profileCache=await get("cache","profile:"+String(me.username).toLowerCase());
   if(profileCache?.data){profileCache.data.user={...profileCache.data.user,name:me.name,bio:me.bio};profileCache.savedAt=Date.now();await put("cache",profileCache)}
-  await enqueueSync("profile.update",{name,bio});
+  await enqueueSync("profile.update",{name,bio,previousName,previousBio});
   toast(navigator.onLine?t("profileUpdated"):"Профиль сохранён на устройстве и ожидает синхронизации.");
  }catch(e){toast(e.message)}
 }
