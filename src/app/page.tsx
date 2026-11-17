@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {ArrowUpRight,Globe2,Orbit,ShieldCheck,Sparkles} from "lucide-react";
 import {LiveFeed} from "@/components/live-feed";
+import {PostComposer} from "@/components/post-composer";
 import {ThemeToggle} from "@/components/theme-toggle";
 import {AuthNavigation} from "@/components/auth-navigation";
 import {currentProductionUrl} from "@/lib/orbis/config";
@@ -36,6 +37,7 @@ export default function HomePage() {
             <span className="hero-note"><ShieldCheck size={15} aria-hidden="true"/> Публичные данные · Без авторизации</span>
           </div>
         </div>
+        <PostComposer/>
         <div id="feed" className="section-heading">
           <div><div className="eyebrow">СООБЩЕСТВО ORBIS</div><h2>Что происходит</h2></div>
           <span className="live-label"><span className="status-dot"/> Live feed</span>
