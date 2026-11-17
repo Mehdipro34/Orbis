@@ -173,3 +173,48 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
 .composer-message.success{color:var(--mint)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:520px){.composer-panel{padding:15px}.composer-account{font-size:10px}.composer-heading{gap:9px}.composer-submit{padding:0 11px}}
+
+
+/* Authenticated post interactions */
+.post-interactions{margin-top:14px;padding-top:11px;border-top:1px solid var(--border)}
+.post-action-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.post-action-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:35px;padding:0 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--muted);font-size:11px;font-weight:650;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease}
+.post-action-button:hover{background:var(--surface-soft);border-color:var(--border);color:var(--text)}
+.post-action-button.active{background:rgba(137,119,237,.12);border-color:rgba(137,119,237,.18);color:var(--accent)}
+.post-action-button:disabled{opacity:.52;cursor:not-allowed}
+.post-login-hint,.post-interaction-error{margin:9px 0 0;color:var(--subtle);font-size:10px;line-height:1.5}
+.post-login-hint a{color:var(--accent);font-weight:750}
+.post-interaction-error{color:#e58a91}
+.post-comments-panel{display:grid;gap:12px;margin-top:12px;padding:13px;border:1px solid var(--border);border-radius:14px;background:var(--surface-soft)}
+.post-comment-form,.post-reply-form{display:flex;align-items:center;gap:8px;min-width:0}
+.post-comment-form input,.post-reply-form input{width:100%;min-width:0;height:39px;padding:0 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;font-size:11px;outline:none}
+.post-comment-form input:focus,.post-reply-form input:focus{border-color:var(--accent)}
+.post-comment-form input::placeholder,.post-reply-form input::placeholder{color:var(--subtle)}
+.post-send-button{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 11px;border:1px solid var(--border);border-radius:10px;background:var(--surface-raised);color:var(--text);font-size:10px;font-weight:700;cursor:pointer}
+.post-send-button:hover{border-color:var(--border-strong)}
+.post-send-button:disabled{opacity:.45;cursor:not-allowed}
+.post-comment{display:flex;align-items:flex-start;gap:9px;padding-top:12px;border-top:1px solid var(--border)}
+.post-comment-avatar{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;border-radius:10px;background:linear-gradient(140deg,#554c94,#245b55);color:#f1edff;font-size:11px;font-weight:800}
+.post-comment-content{flex:1;min-width:0}
+.post-comment-heading{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.post-comment-heading strong{font-size:10px;color:var(--text)}
+.post-comment-heading span,.post-comment-heading time{font-size:9px;color:var(--subtle)}
+.post-comment-heading time{margin-left:auto}
+.post-comment-content>p{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.post-comment-actions{display:flex;align-items:center;gap:12px;margin-top:6px}
+.post-comment-actions button{display:inline-flex;align-items:center;gap:4px;padding:3px 0;border:0;background:transparent;color:var(--subtle);font-size:9px;cursor:pointer}
+.post-comment-actions button:hover{color:var(--accent)}
+.post-reply-form{margin-top:8px}
+.post-reply-form input{height:34px}
+.post-reply-form .post-send-button{min-height:33px;padding:0 9px}
+.post-replies{display:grid;gap:8px;margin-top:10px;padding-left:10px;border-left:2px solid var(--border-strong)}
+.post-comment-reply{padding-top:5px;border-top:0}
+.post-comment-reply .post-comment-avatar{width:25px;height:25px;flex-basis:25px;border-radius:8px;font-size:10px}
+.post-comments-hint{margin:0;color:var(--subtle);font-size:10px;line-height:1.5}
+@media(max-width:520px){
+  .post-action-row{gap:4px}
+  .post-action-button{padding:0 8px;font-size:10px}
+  .post-comments-panel{padding:10px}
+  .post-comment-form .post-send-button span{display:none}
+  .post-comment-form .post-send-button{width:36px;padding:0}
+}
