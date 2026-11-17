@@ -18,7 +18,7 @@ The existing production application remains on `main`. The Next.js v2 work is is
 - Responsive dark/light UI with persisted theme choice.
 - Public feed UI with latest/popular tabs, refresh, cursor pagination, loading, empty and error states.
 - Registration and key-recovery UI using the existing P-256 device identity flow. The private key stays in browser storage; the signed guest session is held in an HttpOnly cookie. This is not password, email or Telegram authentication.
-- Authenticated text-only post composer with input validation, character counter, submission state and server-confirmed feed refresh.
+- Authenticated post composer supports text and up to four JPEG/PNG/WebP photos, with file count/type/size checks and server-confirmed feed refresh. The Next.js proxy caps the aggregate upload at 4 MiB to stay within serverless request limits.
 - Per-post like, bookmark and comment UI wired to the existing authenticated API. Comment threads support first-level comments and replies; reply lists load on demand.
 - Authenticated personal-state lookup for liked and saved posts, fetched in batches from the existing API.
 - User profile pages with authenticated profile reads, follower/following counts, follow/unfollow, and self-service display-name/bio editing through validated server routes.
@@ -26,8 +26,8 @@ The existing production application remains on `main`. The Next.js v2 work is is
 - Clan discovery, creation, joining and leaving using the backend's one-clan-per-user rule; owner leave is blocked by the current backend contract.
 - Private bookmarks library with saved post cards and server-confirmed removal.
 - Per-post reporting form and authenticated report adapter; reports are saved to the existing reports table.
-- Server Route Handlers proxy the social mutations to the existing Edge Function; the browser does not connect to PostgreSQL with service credentials.
-- Zod schemas validate text posts (1–500 characters), comments (1–1000 characters), profile updates, clan creation and bookmark IDs; unknown fields are rejected where strict schemas are used.
+- Server Route Handlers proxy social mutations and multipart image uploads to the existing Edge Function; the browser does not connect to PostgreSQL or storage with service credentials.
+- Zod schemas validate text posts, uploaded media metadata, comments (1–1000 characters), profile updates, clan creation, report reasons and bookmark IDs; unknown fields are rejected where strict schemas are used.
 - Existing PWA source remains in the repository.
 
 ## Existing backend capabilities verified
@@ -39,7 +39,6 @@ The database currently contains 19 recorded migrations and the existing social t
 ## Still not implemented in Next.js v2
 
 - Profile photo upload and a dedicated account settings screen.
-- Media upload and media post composer; current v2 composer is text-only.
 - Stories UI and story media upload.
 - Direct messages and conversation list (held until block/report controls and privacy safeguards are in place).
 - Clan ranking based on the product's full planned scoring formula.
@@ -63,13 +62,12 @@ Direct dependency versions are pinned (Next.js 16.4.6, React 19.3.1, TypeScript 
 
 ## Verification status
 
-- The previous Next.js v2 CI run completed successfully: dependency install, lint, TypeScript check, tests and production build.
-- The Vercel preview for commit `03bb93d` completed with state `READY`. This was before the latest post-interaction UI commits; a fresh preview and CI run are required to validate the new changes.
+- The previous Next.js v2 GitHub verification run completed successfully; the newest media/report/bookmark commits still require their own full CI and preview completion.
 - The branch CI checks lint, TypeScript, Vitest, legacy static regression tests and production build.
-- Profile, follow, like, bookmark, comments, notifications, clan and report adapters have unit tests added. The latest full-suite result must be checked after the newest bookmarks/report commits. The v2 UI has not yet been tested in a real browser with a real account; browser verification is still required for registration, recovery, publishing, social actions, profile updates, notifications and clan membership.
+- Profile, follow, like, bookmark, comments, notifications, clan, report and media-upload adapters have unit tests. The latest full-suite result must be checked against the latest branch head. The v2 UI has not yet been tested in a real browser with a real account; browser verification is still required for registration, recovery, publishing, uploads, social actions, profile updates, notifications and clan membership.
 - No load test has been run. No claim is made that the current free-tier deployment supports 100,000 concurrent users.
 - Supabase Edge Function v55 was inspected through the connector, but its Deno source has not been independently type-checked or load-tested in this stage.
 
 ## Next engineering stages
 
-Complete a browser end-to-end test pass against the preview and active backend; add a committed lockfile; then implement profile/follow, media upload, stories, messages, notifications, clans and search incrementally. Review migration drift and security-advisor findings before any database schema change. Keep production isolated until a release review is complete.
+Complete a browser end-to-end test pass against the preview and active backend; add a committed lockfile; then implement stories, message safeguards and inbox, search, ranking and moderator tooling incrementally. Review migration drift and security-advisor findings before any database schema change. Keep production isolated until a release review is complete.
