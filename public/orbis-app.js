@@ -284,9 +284,11 @@ async function addCachedCommentReplies(postId,updatedComment){
  if(parent){parent.replies=updatedComment.replies||[];parent.repliesCount=parent.replies.length;await saveCommentsCache(postId,comments)}
 }
 function commentNode(comment,postId){
- const wrap=document.createElement("div");wrap.className="comment-item";const text=document.createElement("div");text.className="comment-text";
+ const wrap=document.createElement("div");wrap.className="comment-item";wrap.dataset.commentId=String(comment.id);const text=document.createElement("div");text.className="comment-text";
  const name=document.createElement("button");name.className="comment-author";name.textContent=comment.author?.displayName||comment.author?.username||"Member";name.onclick=()=>openProfile(comment.author?.username);
  const body=document.createElement("p");body.textContent=comment.body;const time=document.createElement("small");time.textContent=age(comment.createdAt);text.append(name,body,time);wrap.append(text);
+ if(comment.syncStatus==="pending"||String(comment.id).startsWith("local-")){const status=document.createElement("small");status.className="comment-sync-status";status.textContent="Ожидает синхронизации";wrap.append(status)}
+ if(comment.syncStatus==="failed"){const status=document.createElement("small");status.className="comment-sync-status";status.textContent="Не удалось синхронизировать: "+(comment.syncError||"ошибка");wrap.append(status)}
  if(comment.repliesCount){const btn=document.createElement("button");btn.className="reply-toggle";btn.textContent=t("reply")+" · "+comment.repliesCount;btn.onclick=async()=>{btn.disabled=true;try{
   if(!navigator.onLine){if(Array.isArray(comment.replies)&&comment.replies.length)comment.replies.forEach(x=>wrap.append(commentNode(x,postId)));else toast(t("offline"));return}
   const r=await api("/api/comments/"+comment.id+"/replies");comment.replies=r.replies||[];
@@ -410,6 +412,61 @@ function updateLocalPostStatus(operationId,status,error){
  if(currentView==="home")renderPosts($("feedList"),feeds.home.items);
  saveFeedCache("home").catch(()=>{});
 }
+async function reconcileLocalComment(operationId,serverComment){
+ const localId="local-"+operationId;
+ const cached=await get("cache",commentsCacheKey(serverComment.postId));
+ if(cached?.data&&Array.isArray(cached.data.comments)){
+  const visit=(items)=>{
+   for(let i=0;i<items.length;i++){
+    const item=items[i];
+    if(item.id===localId){
+     items[i]={...serverComment,replies:Array.isArray(item.replies)?item.replies:[],repliesCount:item.repliesCount||0};
+     return true;
+    }
+    if(Array.isArray(item.replies)&&visit(item.replies))return true;
+   }
+   return false;
+  };
+  const found=visit(cached.data.comments);
+  if(!found&&!serverComment.parentId)cached.data.comments.push(serverComment);
+  await saveCommentsCache(serverComment.postId,cached.data.comments.slice(-60));
+ }
+ document.querySelectorAll(".comment-item").forEach(node=>{
+  if(node.dataset.commentId!==localId)return;
+  node.dataset.commentId=String(serverComment.id);
+  const replyInput=node.querySelector(".reply-form input");
+  const replyButton=node.querySelector(".reply-form button");
+  if(replyInput){replyInput.disabled=false;replyInput.placeholder=t("reply")+"…"}
+  if(replyButton)replyButton.disabled=false;
+  const status=node.querySelector(".comment-sync-status");
+  if(status)status.remove();
+ });
+}
+async function setLocalCommentSyncStatus(operationId,status,error){
+ const localId="local-"+operationId;
+ const outboxItem=(await get("outbox",operationId));
+ const postId=outboxItem?.payload?.postId;
+ if(postId){
+  const cached=await get("cache",commentsCacheKey(postId));
+  if(cached?.data?.comments){
+   const visit=(items)=>{
+    for(const item of items){
+     if(item.id===localId){item.syncStatus=status;item.syncError=error||null;return true}
+     if(Array.isArray(item.replies)&&visit(item.replies))return true;
+    }
+    return false;
+   };
+   visit(cached.data.comments);
+   await saveCommentsCache(postId,cached.data.comments);
+  }
+ }
+ document.querySelectorAll(".comment-item").forEach(node=>{
+  if(node.dataset.commentId!==localId)return;
+  let badge=node.querySelector(".comment-sync-status");
+  if(!badge){badge=document.createElement("small");badge.className="comment-sync-status";node.append(badge)}
+  badge.textContent=status==="failed"?"Не удалось синхронизировать: "+(error||"ошибка"):"Ожидает синхронизации";
+ });
+}
 async function applySyncedOperation(type,payload,result,operationId){
  if(type==="post.create"&&result?.post){
   pendingPosts=pendingPosts.filter(p=>p.id!=="local-"+operationId);
@@ -418,6 +475,9 @@ async function applySyncedOperation(type,payload,result,operationId){
   feeds.home.items=feeds.home.items.slice(0,60);
   if(currentView==="home")renderPosts($("feedList"),feeds.home.items);
   await saveFeedCache("home");
+ }
+ if(type==="comment.create"&&result?.comment){
+  await reconcileLocalComment(operationId,result.comment);
  }
  if(type==="like.set"&&result){
   for(const feed of Object.values(feeds))for(const post of feed.items)if(post.id===result.postId){post.liked=result.liked;post.likes=result.likes}
@@ -439,6 +499,7 @@ async function markRetry(item,error){
  const updated={...item,attempts,nextAttemptAt:Date.now()+delay,status:"retry",lastError:String(error||"Sync failed").slice(0,300)};
  await put("outbox",updated);
  if(item.type==="post.create")updateLocalPostStatus(item.id,"retry",updated.lastError);
+ if(item.type==="comment.create")await setLocalCommentSyncStatus(item.id,"retry",updated.lastError);
  if(syncRetryTimer)clearTimeout(syncRetryTimer);
  syncRetryTimer=setTimeout(()=>{if(navigator.onLine)flushSyncQueue()},delay+100);
 }
@@ -477,6 +538,7 @@ async function flushSyncQueue(){
     const failed={...item,status:"failed",lastError:outcome.error||"Operation rejected"};
     await put("outbox",failed);
     if(item.type==="post.create")updateLocalPostStatus(item.id,"failed",failed.lastError);
+    if(item.type==="comment.create")await setLocalCommentSyncStatus(item.id,"failed",failed.lastError);
     toast(failed.lastError);
    }else await markRetry(item,outcome?.error||"Операция не подтверждена сервером.");
   }
