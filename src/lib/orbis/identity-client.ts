@@ -116,6 +116,12 @@ function base64UrlToBytes(value:string):Uint8Array {
   return Uint8Array.from(binary,char=>char.charCodeAt(0));
 }
 
+function toArrayBuffer(bytes:Uint8Array):ArrayBuffer {
+  const buffer=new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return buffer;
+}
+
 function randomHex(byteLength:number):string {
   return Array.from(crypto.getRandomValues(new Uint8Array(byteLength)),
     byte=>byte.toString(16).padStart(2,"0")).join("");
@@ -161,11 +167,11 @@ export async function decryptRecoveryBundle(bundle:RecoveryBundle,code:string):P
   if(!/^[a-f0-9]{48}$/i.test(code)) throw new Error("Проверь секретный код восстановления.");
   const material=await crypto.subtle.importKey("raw",new TextEncoder().encode(code),"PBKDF2",false,["deriveKey"]);
   const key=await crypto.subtle.deriveKey(
-    {name:"PBKDF2",salt:base64UrlToBytes(bundle.salt),iterations:bundle.iterations,hash:"SHA-256"},
+    {name:"PBKDF2",salt:toArrayBuffer(base64UrlToBytes(bundle.salt)),iterations:bundle.iterations,hash:"SHA-256"},
     material,{name:"AES-GCM",length:256},false,["decrypt"]
   );
   const plaintext=await crypto.subtle.decrypt(
-    {name:"AES-GCM",iv:base64UrlToBytes(bundle.iv)},key,base64UrlToBytes(bundle.ciphertext)
+    {name:"AES-GCM",iv:toArrayBuffer(base64UrlToBytes(bundle.iv))},key,toArrayBuffer(base64UrlToBytes(bundle.ciphertext))
   );
   const parsed:unknown=JSON.parse(new TextDecoder().decode(plaintext));
   if(typeof parsed!=="object" || parsed===null || !("kty" in parsed) ||
