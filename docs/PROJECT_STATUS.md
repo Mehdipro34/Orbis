@@ -38,7 +38,7 @@ The existing production application remains the static PWA on main. The Next.js 
 - Tailwind CSS and PostCSS adapter 4.3.5.
 - Zod 4.6.7.
 - Vitest 5.1.0.
-- ESLint 10.15.0 and eslint-config-next 16.4.6.
+- ESLint 9.39.5 and eslint-config-next 16.4.6.
 - Lucide React 1.74.0.
 
 Direct dependencies are pinned. The npm lockfile still needs to be generated and committed before installs can be considered fully reproducible.
@@ -69,6 +69,7 @@ Direct dependencies are pinned. The npm lockfile still needs to be generated and
 - The same run then exposed that the root TypeScript config was also including Supabase's Deno Edge Function source. The Next.js TypeScript project now scopes its checks to src/, Next.js config and test files. The Edge Function is a separate Deno target and needs its own Deno type-check/test task; it is not silently represented as type-checked by tsc.
 - The second run result: lint passed and tsc started; the diagnostics showed only Deno/remote-import scope mismatch, before the project boundary was corrected.
 - A branch-specific workflow runs lint, app TypeScript, Vitest, legacy static regression tests and production build. The latest Vercel preview (`nextjs-v2`, commit `d12142a`) completed production compilation and TypeScript successfully and lists the auth, post, like, comment, reply and bookmark routes. GitHub Actions full-suite validation is still pending after the npm-cache workflow correction; the earlier failing run did not reach install/lint/tests.
+- The latest GitHub static regression workflow completed successfully on commit `3510871`; the two Next.js full-suite workflow runs were still in progress at the time of this update.
 - Browser E2E and cross-device auth recovery are not yet proven.
 
 ## Next stage
