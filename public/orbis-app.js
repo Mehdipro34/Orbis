@@ -226,7 +226,17 @@ function postCard(post,index){
  const like=document.createElement("button");like.className="action-btn"+(post.liked?" active":"");const updateLike=()=>like.innerHTML=(post.liked?"♥":"♡")+" <span>"+Number(post.likes||0)+"</span>";updateLike();like.disabled=String(post.id).startsWith("local-");like.onclick=async()=>{const desired=!post.liked;post.liked=desired;post.likes=Math.max(0,Number(post.likes||0)+(desired?1:-1));like.classList.toggle("active",desired);updateLike();try{await enqueueSync("like.set",{postId:post.id,liked:desired})}catch(e){post.liked=!desired;post.likes=Math.max(0,Number(post.likes||0)+(desired?-1:1));like.classList.toggle("active",post.liked);updateLike();toast(e.message)}};
  const comments=document.createElement("button");comments.className="action-btn";comments.textContent="▱ "+t("comment");comments.disabled=String(post.id).startsWith("local-");comments.onclick=()=>toggleComments(card,post);
  const spacer=document.createElement("span");spacer.className="action-spacer";
- const save=document.createElement("button");save.className="action-btn"+(post.saved?" saved":"");save.textContent=(post.saved?"◆ ":"◇ ")+t("save");save.onclick=async()=>{save.disabled=true;try{const r=await api("/api/bookmarks",{method:"POST",body:{postId:post.id}});post.saved=r.saved;save.classList.toggle("saved",post.saved);save.textContent=(post.saved?"◆ ":"◇ ")+t("save")}catch(e){toast(e.message)}finally{save.disabled=false}};
+ const save=document.createElement("button");save.className="action-btn"+(post.saved?" saved":"");save.textContent=(post.saved?"◆ ":"◇ ")+t("save");save.disabled=String(post.id).startsWith("local-");save.onclick=async()=>{
+  if(save.disabled)return;
+  const desired=!post.saved,previous=post.saved;
+  post.saved=desired;save.classList.toggle("saved",desired);save.textContent=(desired?"◆ ":"◇ ")+t("save");
+  try{
+   await enqueueSync("bookmark.set",{postId:post.id,saved:desired});
+   await saveFeedCache(currentView==="profile"?"home":currentView);
+  }catch(e){
+   post.saved=previous;save.classList.toggle("saved",previous);save.textContent=(previous?"◆ ":"◇ ")+t("save");toast(e.message);
+  }
+ };
  actions.append(like,comments,spacer,save);
  if(post.username===me?.username){const more=document.createElement("button");more.className="action-btn";more.textContent="···";more.onclick=()=>postMenu(post,card);actions.append(more)}
  card.append(actions);return card;
@@ -375,11 +385,17 @@ async function refreshUnread(){try{const d=await api("/api/notifications");$("un
 async function go(view){if(view==="profile"){await openProfile(me?.username);return}if(view==="notifications"){await loadNotifications();return}await openFeed(view,false)}
 async function compressImage(file){
  if(!file.type.startsWith("image/")||file.size>20*1024*1024)throw new Error(t("photoTooLarge"));
+ if(typeof createImageBitmap!=="function")throw new Error("Этот браузер не поддерживает обработку фотографий.");
  const bitmap=await createImageBitmap(file),scale=Math.min(1,1800/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement("canvas");
  canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
- canvas.getContext("2d",{alpha:false}).drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
- const blob=await new Promise(r=>canvas.toBlob(r,"image/webp",.82));if(!blob)throw new Error(t("photoTooLarge"));
- return new File([blob],file.name.replace(/\.[^.]+$/,"")+".webp",{type:"image/webp"});
+ const context=canvas.getContext("2d",{alpha:false});
+ if(!context){bitmap.close?.();throw new Error(t("photoTooLarge"))}
+ context.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+ let blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",.82));
+ if(!blob||blob.type!=="image/webp")blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.84));
+ if(!blob||!["image/webp","image/jpeg"].includes(blob.type))throw new Error(t("photoTooLarge"));
+ const ext=blob.type==="image/webp"?"webp":"jpg";
+ return new File([blob],file.name.replace(/\.[^.]+$/,"")+"."+ext,{type:blob.type,lastModified:Date.now()});
 }
 async function uploadSelectedFiles(){
  const form=new FormData();for(const f of selectedFiles)form.append("files",await compressImage(f));
@@ -495,6 +511,11 @@ async function applySyncedOperation(type,payload,result,operationId){
   for(const feed of Object.values(feeds))for(const post of feed.items)if(post.id===result.postId){post.liked=result.liked;post.likes=result.likes}
   if(["home","following","popular"].includes(currentView))renderPosts($("feedList"),feeds[currentView].items);
  }
+ if(type==="bookmark.set"&&result){
+  for(const feed of Object.values(feeds))for(const post of feed.items)if(post.id===result.postId)post.saved=result.saved;
+  for(const view of ["home","following","popular"])await saveFeedCache(view);
+  if(["home","following","popular"].includes(currentView))renderPosts($("feedList"),feeds[currentView].items);
+ }
  if(type==="follow.set"&&result){
   for(const feed of Object.values(feeds))for(const post of feed.items)if(post.username===result.username)post.isFollowing=result.following;
   if(["home","following","popular"].includes(currentView))renderPosts($("feedList"),feeds[currentView].items);
@@ -567,6 +588,10 @@ async function flushSyncQueue(){
     }
     if(item.type==="follow.set"){
      for(const feed of Object.values(feeds))for(const post of feed.items)if(post.username===item.payload.username)post.isFollowing=!item.payload.following;
+     if(["home","following","popular"].includes(currentView))renderPosts($("feedList"),feeds[currentView].items);
+    }
+    if(item.type==="bookmark.set"){
+     for(const feed of Object.values(feeds))for(const post of feed.items)if(post.id===item.payload.postId)post.saved=!item.payload.saved;
      if(["home","following","popular"].includes(currentView))renderPosts($("feedList"),feeds[currentView].items);
     }
     if(item.type==="profile.update"){
