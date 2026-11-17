@@ -57,7 +57,11 @@ Direct dependencies are pinned. The npm lockfile still needs to be generated and
 
 ## Tests and outstanding verification
 
-The first Next.js v2 CI run installed dependencies and found one lint error in theme persistence (synchronous state update inside an effect) plus a lint warning from the standalone k6 scenario. Both sources have been corrected without disabling lint rules. The workflow is rerun on the corrected commit; TypeScript, unit tests, legacy static tests and production build remain unverified until that run finishes. Browser E2E and cross-device auth recovery are not yet proven.
+- The first CI run installed dependencies and found a theme-toggle lint violation. It was corrected by using React's external-store API instead of updating component state synchronously from an effect.
+- The same run then exposed that the root TypeScript config was also including Supabase's Deno Edge Function source. The Next.js TypeScript project now scopes its checks to src/, Next.js config and test files. The Edge Function is a separate Deno target and needs its own Deno type-check/test task; it is not silently represented as type-checked by tsc.
+- The second run result: lint passed and tsc started; the diagnostics showed only Deno/remote-import scope mismatch, before the project boundary was corrected.
+- The next CI run must confirm lint, app TypeScript, Vitest, existing legacy static tests and production build.
+- Browser E2E and cross-device auth recovery are not yet proven.
 
 ## Next stage
 
