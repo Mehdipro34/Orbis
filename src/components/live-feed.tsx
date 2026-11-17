@@ -3,7 +3,7 @@
 import Image from "next/image";
 import {useCallback,useEffect,useState} from "react";
 import {ChevronDown,Flame,RefreshCw} from "lucide-react";
-import type {FeedMode,PublicFeedResponse,PublicPost} from "@/lib/orbis/public-feed";
+import {PublicPostSchema,type FeedMode,type PublicFeedResponse,type PublicPost} from "@/lib/orbis/public-feed";
 
 type FeedState="loading"|"ready"|"error";
 
@@ -105,10 +105,22 @@ export function LiveFeed() {
   },[cursor,hasMore,loadingMore,mode]);
 
   useEffect(()=>{
-    const onPostCreated=()=>setRefreshVersion(value=>value+1);
+    const onPostCreated=(event:Event)=>{
+      const parsed=PublicPostSchema.safeParse((event as CustomEvent<unknown>).detail);
+      if(!parsed.success) {
+        setRefreshVersion(value=>value+1);
+        return;
+      }
+      if(mode==="latest") {
+        setPosts(current=>[parsed.data,...current.filter(post=>post.id!==parsed.data.id)].slice(0,30));
+        setState("ready");
+      } else {
+        setRefreshVersion(value=>value+1);
+      }
+    };
     window.addEventListener("orbis-post-created",onPostCreated);
     return ()=>window.removeEventListener("orbis-post-created",onPostCreated);
-  },[]);
+  },[mode]);
 
   return <section className="feed-section" aria-label="Публичная лента ORBIS">
     <div className="feed-toolbar">
