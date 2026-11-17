@@ -2,6 +2,7 @@ import Link from "next/link";
 import {ArrowUpRight,Globe2,Orbit,ShieldCheck,Sparkles} from "lucide-react";
 import {LiveFeed} from "@/components/live-feed";
 import {ThemeToggle} from "@/components/theme-toggle";
+import {AuthNavigation} from "@/components/auth-navigation";
 import {currentProductionUrl} from "@/lib/orbis/config";
 
 export default function HomePage() {
@@ -15,6 +16,7 @@ export default function HomePage() {
         <a href="#about" className="top-navigation-link">О проекте</a>
       </nav>
       <div className="topbar-actions">
+        <AuthNavigation/>
         <ThemeToggle/>
         <a className="primary-button topbar-legacy-link" href={currentProductionUrl} target="_blank" rel="noreferrer">
           Действующая версия <ArrowUpRight size={16} aria-hidden="true"/>

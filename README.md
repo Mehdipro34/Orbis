@@ -7,17 +7,19 @@ ORBIS is an international social network. The current production PWA remains ava
 - Live application: https://orbis-mehdipro34.vercel.app
 - Existing PWA: public/index.html, public/orbis-app.js and public/orbis.css.
 - Persistent data and write API: Supabase PostgreSQL and the orbis-api Edge Function.
-- Existing accounts use P-256 key-based login and an encrypted recovery file. Do not delete local recovery data.
+- Existing accounts use P-256 key-based login and an encrypted ORBIS-KEY-1 recovery file. Keep the file and secret code separately.
 
-## Next.js v2 branch
+## Next.js v2 preview
 
+- Preview: https://orbis-git-nextjs-v2-mehdipro34.vercel.app
 - Next.js 16, React 19 and strict TypeScript.
 - Tailwind CSS 4, ESLint flat config and Vitest.
-- Live read-only public feed through a validated server-side adapter.
-- Public feed caching, keyset pagination, loading/error states and a persistent dark/light theme.
-- Shared security headers.
+- Live public feed through a validated server-side Supabase adapter.
+- P-256 registration and recovery bridge to the existing guest identity backend.
+- Guest session token held in an HttpOnly cookie; the token is not returned to browser JavaScript.
+- Dark/light theme, responsive interface, loading/error handling and keyset pagination.
 
-The new UI reads the existing public feed. Authentication and write actions will be migrated separately; they are not presented as complete in the new UI.
+The auth bridge deliberately preserves existing accounts. Username/password auth and revocable database sessions are not added yet; they require an additive schema migration and a tested dual-auth transition.
 
 ## Development
 
@@ -36,9 +38,9 @@ Quality checks:
 ## Documentation
 
 - docs/ARCHITECTURE.md — current system architecture.
-- docs/MASTER_PROMPT_ALIGNMENT.md — requirements mapping and staged plan.
-- docs/NEXTJS_MIGRATION.md — transition and auth compatibility.
+- docs/MASTER_PROMPT_ALIGNMENT.md — requirement mapping and staged plan.
+- docs/NEXTJS_MIGRATION.md — migration, trust boundaries and auth compatibility.
 - docs/PROJECT_STATUS.md — implementation status and remaining work.
 - docs/SUPABASE_SETUP.md — database and secret boundaries.
 
-Do not change the production alias until the new app passes account recovery, social writes, media, moderation, security and browser E2E checks. The service-role key and guest HMAC secret stay server-only.
+The production alias remains on main. Do not switch it until account recovery, authenticated social actions, media, moderation, security and browser E2E checks pass. The service-role key and guest HMAC signing secret stay server-side.
