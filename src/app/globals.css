@@ -368,3 +368,15 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
   .bookmark-remove{padding:6px}
   .bookmarks-page .community-title-row h1{font-size:25px}
 }
+
+.composer-attachments{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.composer-attach-button{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-soft);color:var(--muted);font-size:10px;font-weight:700;cursor:pointer}
+.composer-attach-button:hover{border-color:var(--border-strong);color:var(--text)}
+.composer-file-list{display:grid;gap:6px;margin-top:9px}
+.composer-file{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-soft)}
+.composer-file>span{display:flex;align-items:center;gap:7px;min-width:0;color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+.composer-file small{color:var(--subtle);white-space:nowrap;font-size:9px}
+.composer-file button{display:grid;place-items:center;flex:0 0 25px;width:25px;height:25px;border:0;border-radius:7px;background:transparent;color:var(--subtle);cursor:pointer}
+.composer-file button:hover{background:rgba(229,138,145,.1);color:#e58a91}
+.composer-file button:disabled{opacity:.5;cursor:not-allowed}
+.composer-upload-hint{margin:8px 0 0;color:var(--subtle);font-size:9px}
