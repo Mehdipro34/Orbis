@@ -338,3 +338,33 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
   .clan-card-action .primary-button,.clan-card-action .secondary-button{padding:0 8px}
   .profile-topbar .community-top-link{font-size:10px}
 }
+
+
+/* Bookmarks and post reporting */
+.bookmarks-page{max-width:900px;min-height:100vh;padding-bottom:55px}
+.bookmark-list{display:grid;gap:11px;margin-top:14px}
+.bookmark-card{padding:17px 18px;border:1px solid var(--border);border-radius:15px;background:var(--surface)}
+.bookmark-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--subtle);font-size:10px}
+.bookmark-topic{padding:3px 8px;border:1px solid var(--border);border-radius:99px}
+.bookmark-card h2{margin:12px 0 0;font-size:15px}
+.bookmark-body{margin:8px 0 13px;color:var(--muted);font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.bookmark-card-footer{display:flex;align-items:center;gap:14px;padding-top:10px;border-top:1px solid var(--border);color:var(--subtle);font-size:10px}
+.bookmark-author{min-width:0;flex:1}
+.bookmark-author a{display:inline-flex;align-items:center;gap:5px;color:var(--accent);font-weight:700}
+.bookmark-likes{white-space:nowrap}
+.bookmark-remove{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-soft);color:var(--muted);font-size:10px;cursor:pointer}
+.bookmark-remove:hover{border-color:var(--border-strong);color:var(--text)}
+.bookmark-remove:disabled{opacity:.5;cursor:not-allowed}
+.post-report-form{display:grid;gap:8px;margin-top:9px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft)}
+.post-report-form label{color:var(--muted);font-size:10px;font-weight:750}
+.post-report-form select{width:100%;min-height:37px;padding:0 10px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--text);font:inherit;font-size:11px;outline:none}
+.post-report-form select:focus{border-color:var(--accent)}
+.post-report-actions{display:flex;justify-content:flex-end;gap:7px}
+.post-report-actions .secondary-button,.post-report-actions .post-send-button{min-height:34px;font-size:10px}
+.post-report-notice{margin:9px 0 0;color:var(--mint);font-size:10px;line-height:1.5}
+@media(max-width:520px){
+  .bookmark-card{padding:14px}
+  .bookmark-card-footer{gap:8px}
+  .bookmark-remove{padding:6px}
+  .bookmarks-page .community-title-row h1{font-size:25px}
+}
