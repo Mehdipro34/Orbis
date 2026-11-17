@@ -151,3 +151,25 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
 @media(max-width:560px){.auth-card{padding:24px 20px}.auth-page{padding-top:24px}.auth-page-brand span{display:none}}
 @media(max-width:440px){.brand{font-size:17px}.brand-mark{width:34px;height:34px}.topbar-actions{gap:7px}.topbar-legacy-link{font-size:0;gap:0;width:40px;padding:0}.topbar-legacy-link svg{width:18px;height:18px}.hero-actions{gap:12px}.hero-note{width:100%}.post-author-row time{font-size:9px}.auth-nav-register{font-size:0;width:36px;padding:0}.auth-nav-register::after{content:"+";font-size:18px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+
+/* Authenticated text composer */
+.composer-panel{margin:0 0 25px;padding:20px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow)}
+.composer-heading{display:flex;align-items:center;gap:11px;margin-bottom:15px}
+.composer-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;color:var(--accent);background:rgba(137,119,237,.12)}
+.composer-heading h2{margin:0;font-size:14px;letter-spacing:-.015em}
+.composer-heading p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.composer-account{margin-left:auto;color:var(--subtle);font-size:11px}
+.composer-panel textarea{display:block;width:100%;min-height:100px;resize:vertical;padding:13px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft);color:var(--text);font:inherit;font-size:13px;line-height:1.6;outline:none}
+.composer-panel textarea:focus{border-color:color-mix(in srgb,var(--accent) 65%,var(--border))}
+.composer-panel textarea:disabled{opacity:.7}
+.composer-panel textarea::placeholder{color:var(--subtle)}
+.composer-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.composer-counter{color:var(--subtle);font-size:11px;font-variant-numeric:tabular-nums}
+.composer-submit{min-height:38px;padding:0 14px}
+.composer-submit:disabled{opacity:.48}
+.composer-message{margin:11px 0 0;font-size:12px}
+.composer-message.error{color:#e58a91}
+.composer-message.success{color:var(--mint)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:520px){.composer-panel{padding:15px}.composer-account{font-size:10px}.composer-heading{gap:9px}.composer-submit{padding:0 11px}}
