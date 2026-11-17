@@ -1,4 +1,4 @@
-const CACHE_NAME="orbis-shell-v5";
+const CACHE_NAME="orbis-shell-v6";
 const APP_SHELL=["/","/manifest.webmanifest","/orbis-icon.svg","/orbis.css","/orbis-app.js"];
 self.addEventListener("install",event=>{
  event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()));
