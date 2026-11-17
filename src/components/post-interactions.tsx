@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import {
   Bookmark,ChevronDown,ChevronUp,CornerDownRight,Heart,LoaderCircle,
   MessageCircle,Send
@@ -104,6 +104,9 @@ export function PostInteractions({
   const [expandedReplies,setExpandedReplies]=useState<Set<string>>(()=>new Set());
   const [loadingReplies,setLoadingReplies]=useState<string|null>(null);
   const [error,setError]=useState("");
+
+  useEffect(()=>{setLiked(initialLiked);},[initialLiked]);
+  useEffect(()=>{setSaved(initialSaved);},[initialSaved]);
 
   async function toggleLike() {
     if(!authenticated||likeBusy) return;
