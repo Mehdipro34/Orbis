@@ -350,69 +350,94 @@ Deno.serve(async (req: Request) => {
     return out({ok:true,saved:true});
   }
   
-  if (req.method==="POST" && path==="/api/media") {
-    if(req.method==="GET"&&path==="/api/public/posts"){
-    const ip=(req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||req.headers.get("x-forwarded-for")||"").split(",")[0].trim()||"unknown";
-    if(await isRateLimited(admin,"public-feed:"+ip,"public_feed",120,60))return out({error:"Слишком много запросов к ленте."},429);
-    const rawLimit=Number(u.searchParams.get("limit")||20),limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
-    const mode=String(u.searchParams.get("mode")||"for-you"),ranked=mode==="popular";
-    const cursorRaw=u.searchParams.get("cursor")||"";let cursor:any=null;
-    if(cursorRaw){try{cursor=JSON.parse(new TextDecoder().decode(base64UrlToBytes(cursorRaw)))}catch{return out({error:"Некорректный курсор ленты."},400)}
-      if(!cursor||typeof cursor.createdAt!=="string"||!Number.isFinite(Date.parse(cursor.createdAt))||typeof cursor.id!=="string"||! /^[0-9a-f-]{36}$/i.test(cursor.id)||(ranked&&!Number.isInteger(cursor.score)))return out({error:"Некорректный курсор ленты."},400)}
-    let q=admin.from("posts").select("id,title,topic,body,media,created_at,post_number,author_id,engagement_score,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
-      .eq("status","published").is("reply_to",null);
-    if(ranked)q=q.order("engagement_score",{ascending:false});
-    q=q.order("created_at",{ascending:false}).order("id",{ascending:false});
-    if(cursor){if(ranked)q=q.or("engagement_score.lt."+cursor.score+",and(engagement_score.eq."+cursor.score+",created_at.lt."+cursor.createdAt+"),and(engagement_score.eq."+cursor.score+",created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");else q=q.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")")}
-    const {data,error}=await q.limit(limit+1);
-    if(error)return out({error:"Не удалось загрузить ленту ORBIS."},503);
-    let rows=data||[];const hasMore=rows.length>limit;if(hasMore)rows=rows.slice(0,limit);
-    const ids=rows.map((p:any)=>p.id);
-    const {data:likes,error:likeError}=ids.length?await admin.from("post_like_counts").select("post_id,like_count").in("post_id",ids):{data:[],error:null};
-    if(likeError)return out({error:"Не удалось загрузить статистику публикаций."},503);
-    const likeMap=new Map((likes||[]).map((x:any)=>[x.post_id,Number(x.like_count)||0]));
-    const posts=rows.map((p:any)=>({id:p.id,postNumber:String(p.post_number),title:p.title,topic:p.topic,body:p.body,username:p.profiles?.username,author:p.profiles?.display_name,authorNumber:p.profiles?.public_number==null?null:String(p.profiles.public_number),avatar_url:p.profiles?.avatar_url,createdAt:p.created_at,media:p.media||[],likes:likeMap.get(p.id)||0,liked:false,saved:false}));
-    const last=rows[rows.length-1],nextCursor=last?bytesToBase64Url(encoder.encode(JSON.stringify({createdAt:last.created_at,id:last.id,...(ranked?{score:Number(last.engagement_score)||0}:{})}))):null;
-    return out({posts,hasMore,nextCursor,public:true});
-  }
-  if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
+  if(req.method==="POST"&&path==="/api/media"){
+    if(!uid)return out({error:"Сначала войди в ORBIS."},401);
     if(await isRateLimited(admin,uid,"media",10,60))return out({error:"Слишком много загрузок. Подожди минуту."},429);
-    const files=(form?.getAll("files")||[]).filter((f:any)=>f && typeof f.size==="number") as File[];
-    if (!files.length || files.length>4) return out({error:"Выбери от 1 до 4 файлов."},400);
-    const extensions:Record<string,string>={"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","video/mp4":"mp4","video/webm":"webm"};
+    const rawFiles=form?.getAll("files")||[];
+    const files=rawFiles.filter((file:any)=>file instanceof File) as File[];
+    if(files.length!==rawFiles.length||files.length<1||files.length>4)
+      return out({error:"Выбери от 1 до 4 фотографий."},400);
+    const totalBytes=files.reduce((sum,file)=>sum+file.size,0);
+    if(totalBytes>20*1024*1024||files.some(file=>file.size<1||file.size>8*1024*1024))
+      return out({error:"Каждая фотография должна быть не больше 8 МБ, общий пакет — не больше 20 МБ."},413);
+
+    const extensions:Record<string,string>={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"};
     const prepared:any[]=[];
-    // Validate the entire batch before uploading anything, including the actual file signature.
     for(const file of files){
-      if(!extensions[file.type])return out({error:"Формат файла не поддерживается."},415);
-      const isVideo=file.type.startsWith("video/");
-      if(!file.size||file.size>(isVideo?50:12)*1024*1024)
-        return out({error:isVideo?"Видео должно быть не больше 50 МБ.":"Фото должно быть не больше 12 МБ."},413);
+      const mime=String(file.type||"").toLowerCase(),ext=extensions[mime];
+      if(!ext)return out({error:"Разрешены только JPEG, PNG и WebP фотографии."},415);
       const bytes=new Uint8Array(await file.slice(0,16).arrayBuffer());
       const ascii=(offset:number,length:number)=>String.fromCharCode(...bytes.slice(offset,offset+length));
-      let valid=false;
-      if(file.type==="image/jpeg")valid=bytes.length>=3&&bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff;
-      else if(file.type==="image/png")valid=bytes.length>=8&&bytes[0]===0x89&&ascii(1,3)==="PNG"&&bytes[4]===0x0d&&bytes[5]===0x0a&&bytes[6]===0x1a&&bytes[7]===0x0a;
-      else if(file.type==="image/webp")valid=bytes.length>=12&&ascii(0,4)==="RIFF"&&ascii(8,4)==="WEBP";
-      else if(file.type==="image/gif")valid=bytes.length>=6&&(ascii(0,6)==="GIF87a"||ascii(0,6)==="GIF89a");
-      else if(file.type==="video/mp4")valid=bytes.length>=12&&ascii(4,4)==="ftyp";
-      else if(file.type==="video/webm")valid=bytes.length>=4&&bytes[0]===0x1a&&bytes[1]===0x45&&bytes[2]===0xdf&&bytes[3]===0xa3;
-      if(!valid)return out({error:"Содержимое файла не соответствует заявленному формату."},415);
-      prepared.push({file,ext:extensions[file.type]});
+      const jpeg=mime==="image/jpeg"&&bytes.length>=3&&bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff;
+      const png=mime==="image/png"&&bytes.length>=8&&bytes[0]===0x89&&ascii(1,3)==="PNG"&&bytes[4]===0x0d&&bytes[5]===0x0a&&bytes[6]===0x1a&&bytes[7]===0x0a;
+      const webp=mime==="image/webp"&&bytes.length>=12&&ascii(0,4)==="RIFF"&&ascii(8,4)==="WEBP";
+      if(!jpeg&&!png&&!webp)return out({error:"Содержимое файла не соответствует заявленному формату."},415);
+      prepared.push({file,ext});
     }
+
     const uploaded:any[]=[];
     for(const item of prepared){
-      const {file,ext}=item;
-      const key=uid+"/"+crypto.randomUUID()+"."+ext;
-      const {error}=await admin.storage.from("orbis-media").upload(key,file,{contentType:file.type,upsert:false});
+      const key=uid+"/"+crypto.randomUUID()+"."+item.ext;
+      const {error}=await admin.storage.from("orbis-media").upload(key,item.file,{
+        contentType:item.file.type,cacheControl:"31536000",upsert:false
+      });
       if(error){
         if(uploaded.length)await admin.storage.from("orbis-media").remove(uploaded.map(x=>x.key));
-        return out({error:"Не удалось сохранить пакет файлов: "+error.message},500);
+        return out({error:"Не удалось сохранить фотографии. Попробуй ещё раз."},503);
       }
       const {data:publicData}=admin.storage.from("orbis-media").getPublicUrl(key);
-      uploaded.push({key,url:publicData.publicUrl,type:file.type,size:file.size});
+      uploaded.push({key,url:publicData.publicUrl,type:item.file.type,size:item.file.size});
     }
     return out({ok:true,media:uploaded},201);
   }
+
+  if(req.method==="GET"&&path==="/api/public/posts"){
+    const ip=(req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||req.headers.get("x-forwarded-for")||"").split(",")[0].trim()||"unknown";
+    if(await isRateLimited(admin,"public-feed:"+ip,"public_feed",120,60))
+      return out({error:"Слишком много запросов к ленте."},429);
+    const rawLimit=Number(u.searchParams.get("limit")||20),limit=Number.isSafeInteger(rawLimit)?Math.max(1,Math.min(rawLimit,30)):20;
+    const mode=String(u.searchParams.get("mode")||"latest");
+    if(!["latest","popular"].includes(mode))return out({error:"Некорректный режим ленты."},400);
+    const ranked=mode==="popular",cursorRaw=u.searchParams.get("cursor")||"";
+    let cursor:any=null;
+    if(cursorRaw){
+      try{cursor=JSON.parse(new TextDecoder().decode(base64UrlToBytes(cursorRaw)))}catch{return out({error:"Некорректный курсор ленты."},400)}
+      if(!cursor||typeof cursor.createdAt!=="string"||!Number.isFinite(Date.parse(cursor.createdAt))||typeof cursor.id!=="string"||!/^[0-9a-f-]{36}$/i.test(cursor.id)||(ranked&&!Number.isInteger(cursor.score)))
+        return out({error:"Некорректный курсор ленты."},400);
+    }
+    let query=admin.from("posts").select("id,title,topic,body,media,created_at,post_number,author_id,engagement_score,profiles!posts_author_id_fkey(username,display_name,avatar_url,public_number)")
+      .eq("status","published").is("reply_to",null);
+    if(ranked)query=query.order("engagement_score",{ascending:false});
+    query=query.order("created_at",{ascending:false}).order("id",{ascending:false});
+    if(cursor){
+      if(ranked)query=query.or("engagement_score.lt."+cursor.score+",and(engagement_score.eq."+cursor.score+",created_at.lt."+cursor.createdAt+"),and(engagement_score.eq."+cursor.score+",created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");
+      else query=query.or("created_at.lt."+cursor.createdAt+",and(created_at.eq."+cursor.createdAt+",id.lt."+cursor.id+")");
+    }
+    const {data,error}=await query.limit(limit+1);
+    if(error)return out({error:"Не удалось загрузить ленту ORBIS."},503);
+    let rows=data||[];
+    const hasMore=rows.length>limit;
+    if(hasMore)rows=rows.slice(0,limit);
+    const ids=rows.map((post:any)=>post.id);
+    const {data:likes,error:likesError}=ids.length
+      ?await admin.from("post_like_counts").select("post_id,like_count").in("post_id",ids)
+      :{data:[],error:null};
+    if(likesError)return out({error:"Не удалось загрузить статистику публикаций."},503);
+    const countMap=new Map((likes||[]).map((row:any)=>[row.post_id,Number(row.like_count)||0]));
+    const posts=rows.map((post:any)=>({
+      id:post.id,postNumber:String(post.post_number),title:post.title,topic:post.topic,body:post.body,
+      username:post.profiles?.username,author:post.profiles?.display_name,
+      authorNumber:post.profiles?.public_number==null?null:String(post.profiles.public_number),
+      avatar_url:post.profiles?.avatar_url,createdAt:post.created_at,media:post.media||[],
+      likes:countMap.get(post.id)||0,liked:false,saved:false
+    }));
+    const last=rows[rows.length-1];
+    const nextCursor=last?bytesToBase64Url(encoder.encode(JSON.stringify({
+      createdAt:last.created_at,id:last.id,...(ranked?{score:Number(last.engagement_score)||0}:{})
+    }))):null;
+    return out({posts,hasMore,nextCursor,public:true});
+  }
+
   if (!uid) return out({error:"Гостевая сессия не найдена. Обнови страницу."},401);
   const {data:me}=await admin.from("profiles").select("*").eq("id",uid).maybeSingle();
   if (!me) return out({error:"Профиль ORBIS не найден. Обнови страницу, чтобы восстановить гостевую сессию."},401);
@@ -428,7 +453,7 @@ Deno.serve(async (req: Request) => {
       const type=String(raw?.type||"");
       const payload=raw?.payload&&typeof raw.payload==="object"&&!Array.isArray(raw.payload)?raw.payload:{};
       if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(operationId)||
-         !["post.create","like.set","comment.create","follow.set","profile.update"].includes(type)){
+         !["post.create","like.set","comment.create","follow.set","profile.update","bookmark.set"].includes(type)){
         results.push({id:operationId||null,status:"failed",error:"Операция имеет неверный ID или неизвестный тип."});
         continue;
       }
@@ -572,7 +597,7 @@ Deno.serve(async (req: Request) => {
             }
           }
           if(commentError||!comment)throw new Error("Не удалось сохранить комментарий.");
-          if(createdNow)await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"comment_reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
+          if(createdNow)await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
           result={comment:{
             id:comment.id,postId:comment.post_id,parentId:comment.parent_id,body:comment.body,
             createdAt:comment.created_at,own:true,
@@ -601,6 +626,24 @@ Deno.serve(async (req: Request) => {
             if(error)throw new Error("Не удалось отписаться.");
           }
           result={username,following};
+        }
+
+        if(type==="bookmark.set"){
+          if(await isRateLimited(admin,uid,"bookmark",90,60))throw new Error("Слишком много действий с закладками. Попробуй позже.");
+          const postId=String(payload.postId||"").trim(),saved=payload.saved;
+          if(!/^[0-9a-f-]{36}$/i.test(postId)||typeof saved!=="boolean")throw new Error("Некорректное сохранение публикации.");
+          const {data:target,error:targetError}=await admin.from("posts").select("id").eq("id",postId).eq("status","published").maybeSingle();
+          if(targetError||!target)throw new Error("Публикация не найдена.");
+          const {data:existing,error:existingError}=await admin.from("bookmarks").select("post_id").eq("user_id",uid).eq("post_id",postId).maybeSingle();
+          if(existingError)throw new Error("Не удалось проверить сохранение.");
+          if(saved&&!existing){
+            const {error}=await admin.from("bookmarks").upsert({user_id:uid,post_id:postId},{onConflict:"user_id,post_id",ignoreDuplicates:true});
+            if(error)throw new Error("Не удалось сохранить публикацию.");
+          }else if(!saved&&existing){
+            const {error}=await admin.from("bookmarks").delete().eq("user_id",uid).eq("post_id",postId);
+            if(error)throw new Error("Не удалось убрать публикацию из сохранённого.");
+          }
+          result={postId,saved};
         }
 
         if(type==="profile.update"){
@@ -836,7 +879,7 @@ Deno.serve(async (req: Request) => {
     const {data:row,error}=await admin.from("post_comments").insert({post_id:postId,author_id:uid,body:text,parent_id:parentId})
       .select("id,post_id,author_id,body,created_at,parent_id").single();
     if(error)return out({error:"Не удалось сохранить комментарий."},400);
-    await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"comment_reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
+    await notifyUser(admin,parent?.author_id||post.author_id,uid,parentId?"reply":"comment",postId,parentId?"Новый ответ на твой комментарий.":"Новый комментарий к твоей публикации.");
     return out({ok:true,comment:{id:row.id,postId:row.post_id,parentId:row.parent_id,body:row.body,createdAt:row.created_at,own:true,
       author:{username:me.username,displayName:me.display_name,avatarUrl:me.avatar_url||null},repliesCount:0}},201);
   }
