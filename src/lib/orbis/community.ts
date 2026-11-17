@@ -10,3 +10,8 @@ export const ReadNotificationSchema=z.object({
 }).strict();
 
 export type CreateClanInput=z.infer<typeof CreateClanSchema>;
+
+export const CreateReportSchema=z.object({
+  postId:z.string().uuid(),
+  reason:z.string().trim().min(1,"Укажи причину жалобы.").max(300,"Причина слишком длинная.")
+}).strict();
