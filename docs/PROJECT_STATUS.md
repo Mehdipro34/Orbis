@@ -21,6 +21,11 @@ The existing production application remains the static PWA on main. The Next.js 
 - GET /api/health checks the Supabase Edge Function health endpoint.
 - Responsive dark/light UI and a persisted theme toggle synchronized through React's external-store API.
 - Public feed UI with latest/popular tabs, refresh, cursor pagination, loading, empty and error states.
+- Authenticated text-post creation through `POST /api/posts`, reusing the existing P-256 guest session in an HttpOnly cookie and forwarding it server-side to the active Supabase Edge Function.
+- Strict Zod input validation for new text posts (1–500 characters); unknown fields are rejected, and server-side rate limits/moderation remain authoritative in the existing API.
+- Signed-in-only post composer with character counter, pending/error/success states; it refreshes the real feed only after the server confirms the saved post.
+- Six unit cases for post input validation and unknown-field rejection.
+- Branch-specific GitHub Actions workflow for lint, TypeScript, unit + legacy regression tests, and production build.
 - Existing PWA source and entry file remain in the repository; main stays unchanged.
 
 ## Pinned direct dependencies
@@ -39,7 +44,7 @@ Direct dependencies are pinned. The npm lockfile still needs to be generated and
 ## Deliberately not implemented yet
 
 - Password + HttpOnly session authentication. The current system uses a P-256 key pair and signed guest token. Existing accounts must prove key ownership before credential migration.
-- Post creation, likes, comments, follows, bookmarks and messages from the Next.js UI. Existing backend and legacy PWA support these; they must be ported with authenticated request flows and tests.
+- Likes, comments, follows, bookmarks and messages from the Next.js UI. Existing backend and legacy PWA support these; they still need authenticated v2 flows and tests. Media attachments are not yet part of the new composer.
 - Admin roles and admin routes.
 - Search, reposts, mentions, blocks and mutes.
 - Post expiry, cleanup cron and automatic report threshold.
@@ -50,7 +55,7 @@ Direct dependencies are pinned. The npm lockfile still needs to be generated and
 ## Database and deployment safety
 
 - This stage makes no Supabase schema changes and applies no migration.
-- The new app reads only public feed data and the health endpoint.
+- The new app reads public feed data and health, and creates authenticated text posts through the existing active `orbis-api` Edge Function (version 55).
 - Service-role credentials and the guest HMAC secret are not included in the browser bundle or environment example.
 - The live database has 19 recorded migrations while the main repository contains 9 migration SQL files. Reconstruct and verify migration history before applying new DDL.
 - Vercel production remains on main. Cloudflare deployment remains optional and is not assumed active.
@@ -60,9 +65,9 @@ Direct dependencies are pinned. The npm lockfile still needs to be generated and
 - The first CI run installed dependencies and found a theme-toggle lint violation. It was corrected by using React's external-store API instead of updating component state synchronously from an effect.
 - The same run then exposed that the root TypeScript config was also including Supabase's Deno Edge Function source. The Next.js TypeScript project now scopes its checks to src/, Next.js config and test files. The Edge Function is a separate Deno target and needs its own Deno type-check/test task; it is not silently represented as type-checked by tsc.
 - The second run result: lint passed and tsc started; the diagnostics showed only Deno/remote-import scope mismatch, before the project boundary was corrected.
-- The next CI run must confirm lint, app TypeScript, Vitest, existing legacy static tests and production build.
+- A branch-specific workflow has been added to run lint, app TypeScript, Vitest, legacy static regression tests and production build. The first complete result for the latest branch head is still pending; Vercel previews for earlier intermediate commits built successfully, but that does not replace the full test suite.
 - Browser E2E and cross-device auth recovery are not yet proven.
 
 ## Next stage
 
-Recover a reproducible migration baseline and document the trust boundary around custom P-256 guest sessions. Then implement auth compatibility in the Next.js client and server route layer, followed by profile and social write actions.
+Run and fix the new branch CI on the latest commit. Next, implement authenticated profile reads/updates, then likes/comments/bookmarks with integration tests. Recover the reproducible migration baseline before any new DDL. Keep the current P-256 key recovery flow until a safe credential migration is explicitly built.
