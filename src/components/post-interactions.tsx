@@ -1,9 +1,9 @@
 "use client";
 
-import {useEffect,useState} from "react";
+import {useEffect,useState,type FormEvent} from "react";
 import {
   Bookmark,ChevronDown,ChevronUp,CornerDownRight,Heart,LoaderCircle,
-  MessageCircle,Send
+  Flag,MessageCircle,Send
 } from "lucide-react";
 
 type CommentAuthor = {
@@ -104,6 +104,10 @@ export function PostInteractions({
   const [expandedReplies,setExpandedReplies]=useState<Set<string>>(()=>new Set());
   const [loadingReplies,setLoadingReplies]=useState<string|null>(null);
   const [error,setError]=useState("");
+  const [reportOpen,setReportOpen]=useState(false);
+  const [reportReason,setReportReason]=useState("Спам или мошенничество");
+  const [reportSending,setReportSending]=useState(false);
+  const [reportNotice,setReportNotice]=useState("");
 
   useEffect(()=>{setLiked(initialLiked);},[initialLiked]);
   useEffect(()=>{setSaved(initialSaved);},[initialSaved]);
@@ -132,6 +136,20 @@ export function PostInteractions({
     } catch(value) {
       setError(value instanceof Error?value.message:"Не удалось изменить закладку.");
     } finally {setSaveBusy(false);}
+  }
+
+  async function submitReport(event:FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if(!authenticated||reportSending)return;
+    setReportSending(true);setError("");setReportNotice("");
+    try {
+      const payload=await requestJson("/api/reports","POST",{postId,reason:reportReason});
+      if(payload.ok!==true)throw new Error("Сервер не подтвердил отправку жалобы.");
+      setReportOpen(false);
+      setReportNotice("Жалоба отправлена. Спасибо, что помогаешь сохранять ORBIS безопасным.");
+    } catch(value) {
+      setError(value instanceof Error?value.message:"Не удалось отправить жалобу.");
+    } finally {setReportSending(false);}
   }
 
   async function loadComments() {
@@ -259,9 +277,32 @@ export function PostInteractions({
         {saveBusy?<LoaderCircle size={16} className="spin"/>:<Bookmark size={16} fill={saved?"currentColor":"none"}/>}
         <span>{saved?"Сохранено":"Сохранить"}</span>
       </button>
+      {authenticated&&<button type="button" className={reportOpen?"post-action-button active":"post-action-button"}
+        onClick={()=>{setReportOpen(value=>!value);setError("");setReportNotice("");}}
+        aria-expanded={reportOpen} title="Пожаловаться на публикацию">
+        <Flag size={15}/><span>Пожаловаться</span>
+      </button>}
     </div>
     {!authenticated&&<p className="post-login-hint"><a href="/login">Войди в ORBIS</a>, чтобы ставить реакции, сохранять посты и участвовать в обсуждениях.</p>}
     {error&&<p className="post-interaction-error" role="alert">{error}</p>}
+    {reportNotice&&<p className="post-report-notice" role="status">{reportNotice}</p>}
+    {reportOpen&&<form className="post-report-form" onSubmit={event=>void submitReport(event)}>
+      <label htmlFor={"report-reason-"+postId}>Причина жалобы</label>
+      <select id={"report-reason-"+postId} value={reportReason}
+        onChange={event=>setReportReason(event.target.value)} disabled={reportSending}>
+        <option>Спам или мошенничество</option>
+        <option>Оскорбления или травля</option>
+        <option>Неподходящий контент</option>
+        <option>Опасная или вводящая в заблуждение информация</option>
+        <option>Другое</option>
+      </select>
+      <div className="post-report-actions">
+        <button className="secondary-button" type="button" onClick={()=>setReportOpen(false)} disabled={reportSending}>Отмена</button>
+        <button className="post-send-button" type="submit" disabled={reportSending}>
+          {reportSending?<LoaderCircle size={14} className="spin"/>:<Flag size={14}/>} Отправить жалобу
+        </button>
+      </div>
+    </form>}
     {commentsOpen&&<section className="post-comments-panel" aria-label="Обсуждение публикации">
       <form className="post-comment-form" onSubmit={event=>{event.preventDefault();void sendComment(null);}}>
         <input value={newComment} onChange={event=>setNewComment(event.target.value)}
