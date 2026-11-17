@@ -1,6 +1,6 @@
 "use client";
 
-import {FormEvent,useEffect,useState} from "react";
+import {FormEvent,useEffect,useState,type ChangeEvent} from "react";
 import {ArrowUpRight,ImagePlus,LoaderCircle,Paperclip,PenLine,Trash2} from "lucide-react";
 
 type AuthUser={username:string;name?:string};
@@ -44,7 +44,7 @@ export function PostComposer() {
     return ()=>{active=false;};
   },[]);
 
-  function chooseFiles(event:React.ChangeEvent<HTMLInputElement>) {
+  function chooseFiles(event:ChangeEvent<HTMLInputElement>) {
     const chosen=Array.from(event.currentTarget.files||[]);
     setError("");setSuccess("");
     if(chosen.length>MAX_FILES){setError("Можно выбрать не более четырёх фотографий.");return;}
