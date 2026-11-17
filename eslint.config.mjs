@@ -7,6 +7,7 @@ export default defineConfig([
   ...nextTs,
   globalIgnores([
     ".next/**","out/**","build/**","next-env.d.ts","node_modules/**",
-    "api/**","public/**","src/index.js","supabase/**","tests/orbis-static.test.mjs"
+    "api/**","public/**","src/index.js","supabase/**",
+    "tests/orbis-static.test.mjs","tests/orbis-public-feed.k6.js"
   ])
 ]);

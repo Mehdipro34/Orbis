@@ -7,19 +7,19 @@
 
 ## Release boundaries
 
-The existing production application remains the static PWA on main. The Next.js implementation is being built on nextjs-v2. No production alias has been switched, and no existing account or post has been migrated or deleted.
+The existing production application remains the static PWA on main. The Next.js implementation is developed on nextjs-v2. No production alias has been switched, and no existing account or post has been migrated or deleted.
 
 ## Implemented in nextjs-v2
 
 - Next.js App Router foundation with strict TypeScript settings.
 - Tailwind CSS 4 PostCSS integration.
-- ESLint flat configuration using matching Next.js 16 rules.
+- ESLint flat configuration using Next.js 16 rules.
 - Vitest tests for feed query validation and backend response handling.
 - Shared security headers and a Content Security Policy.
-- A real server-side public-feed adapter to the existing Supabase Edge Function.
+- Server-side public-feed adapter to the existing Supabase Edge Function.
 - GET /api/posts with validation, public-only 60-second CDN caching, cursor pagination and explicit error handling.
-- GET /api/health checks the live Supabase Edge Function health endpoint.
-- Responsive dark/light UI and a working persisted theme toggle.
+- GET /api/health checks the Supabase Edge Function health endpoint.
+- Responsive dark/light UI and a persisted theme toggle synchronized through React's external-store API.
 - Public feed UI with latest/popular tabs, refresh, cursor pagination, loading, empty and error states.
 - Existing PWA source and entry file remain in the repository; main stays unchanged.
 
@@ -31,10 +31,10 @@ The existing production application remains the static PWA on main. The Next.js 
 - Tailwind CSS and PostCSS adapter 4.3.5.
 - Zod 4.6.7.
 - Vitest 5.1.0.
-- ESLint 9.39.2 and eslint-config-next 16.4.6.
+- ESLint 10.15.0 and eslint-config-next 16.4.6.
 - Lucide React 1.74.0.
 
-Direct package versions are pinned. The npm lockfile still needs to be generated and committed before installations can be considered fully reproducible.
+Direct dependencies are pinned. The npm lockfile still needs to be generated and committed before installs can be considered fully reproducible.
 
 ## Deliberately not implemented yet
 
@@ -57,7 +57,7 @@ Direct package versions are pinned. The npm lockfile still needs to be generated
 
 ## Tests and outstanding verification
 
-The nextjs-v2 workflow runs lint, TypeScript, Vitest, existing legacy static tests and the Next.js production build. Record actual results after the first workflow run. Browser E2E and cross-device auth recovery are not yet proven.
+The first Next.js v2 CI run installed dependencies and found one lint error in theme persistence (synchronous state update inside an effect) plus a lint warning from the standalone k6 scenario. Both sources have been corrected without disabling lint rules. The workflow is rerun on the corrected commit; TypeScript, unit tests, legacy static tests and production build remain unverified until that run finishes. Browser E2E and cross-device auth recovery are not yet proven.
 
 ## Next stage
 
