@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useEffect,useState,type FormEvent} from "react";
 import {
   ArrowLeft,Check,LoaderCircle,RefreshCw,Save,UserRound,UserRoundPlus,Users
 } from "lucide-react";
@@ -133,7 +133,7 @@ export function ProfileView({username}:{username:string}) {
     } finally {setBusy(false);}
   }
 
-  async function saveProfile(event:React.FormEvent<HTMLFormElement>) {
+  async function saveProfile(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if(busy)return;
     setBusy(true);setError("");setNotice("");
