@@ -26,14 +26,14 @@ export async function POST(request:Request) {
     return jsonNoStore({error:"Сервис входа вернул неполную сессию."},502);
   }
 
-  const response=Response.json({ok:true,user},{
-    status:200,headers:{"Cache-Control":"no-store"}
-  });
-  const nextResponse=new NextResponse(response.body,response);
-  nextResponse.cookies.set({
+  const response=NextResponse.json(
+    {ok:true,user},
+    {status:200,headers:{"Cache-Control":"no-store"}}
+  );
+  response.cookies.set({
     name:GUEST_SESSION_COOKIE,value:token,httpOnly:true,
     secure:process.env.NODE_ENV==="production",sameSite:"lax",
     path:"/",maxAge:GUEST_SESSION_MAX_AGE
   });
-  return nextResponse;
+  return response;
 }
