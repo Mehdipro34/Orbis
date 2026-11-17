@@ -145,11 +145,12 @@ export function ProfileView({username}:{username:string}) {
       });
       const payload:unknown=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(isRecord(payload)&&typeof payload.error==="string"?payload.error:"Не удалось сохранить профиль.");
-      if(!isRecord(payload)||payload.ok!==true||!isRecord(payload.user))throw new Error("Сервер не подтвердил сохранение профиля.");
+      const savedUser=isRecord(payload)&&isRecord(payload.user)?payload.user:null;
+      if(!isRecord(payload)||payload.ok!==true||!savedUser)throw new Error("Сервер не подтвердил сохранение профиля.");
       setData(current=>current?{...current,user:{
         ...current.user,
-        name:typeof payload.user.name==="string"?payload.user.name:name,
-        bio:typeof payload.user.bio==="string"?payload.user.bio:bio
+        name:typeof savedUser.name==="string"?savedUser.name:name,
+        bio:typeof savedUser.bio==="string"?savedUser.bio:bio
       }}:current);
       setEditing(false);setNotice("Профиль обновлён.");
     } catch(value) {
