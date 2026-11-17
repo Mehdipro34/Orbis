@@ -83,7 +83,7 @@ function getClientIp(request?:Request):string|undefined {
 }
 
 export async function callGuestApi(
-  path:string,method:"GET"|"POST",body?:unknown,bearerToken?:string,request?:Request
+  path:string,method:"GET"|"POST"|"PUT",body?:unknown,bearerToken?:string,request?:Request
 ):Promise<{status:number;payload:unknown}> {
   const headers=new Headers({apikey:supabasePublishableKey,accept:"application/json"});
   if(body!==undefined) headers.set("Content-Type","application/json");
