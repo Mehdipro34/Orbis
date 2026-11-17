@@ -24,6 +24,8 @@ The existing production application remains the static PWA on main. The Next.js 
 - Authenticated text-post creation through `POST /api/posts`, reusing the existing P-256 guest session in an HttpOnly cookie and forwarding it server-side to the active Supabase Edge Function.
 - Strict Zod input validation for new text posts (1–500 characters); unknown fields are rejected, and server-side rate limits/moderation remain authoritative in the existing API.
 - Signed-in-only post composer with character counter, pending/error/success states; it refreshes the real feed only after the server confirms the saved post.
+- Authenticated per-post like and comment Route Handlers, comment reply Route Handler, bookmark list/create Route Handlers, and a batched personal-state endpoint for liked/saved/followed state. These proxy to the existing API and do not write directly to PostgreSQL from the browser.
+- Login/register UI and challenge/verify/me/logout Route Handlers are present in the v2 build; they preserve the existing P-256 identity flow rather than claiming password auth is complete.
 - Six unit cases for post input validation and unknown-field rejection.
 - Branch-specific GitHub Actions workflow for lint, TypeScript, unit + legacy regression tests, and production build.
 - Existing PWA source and entry file remain in the repository; main stays unchanged.
@@ -63,11 +65,12 @@ Direct dependencies are pinned. The npm lockfile still needs to be generated and
 ## Tests and outstanding verification
 
 - The first CI run installed dependencies and found a theme-toggle lint violation. It was corrected by using React's external-store API instead of updating component state synchronously from an effect.
+- A later PR CI run stopped before dependency installation because `actions/setup-node` was configured to cache npm while no `package-lock.json` exists yet. The workflow was corrected to omit npm caching until the lockfile is committed; no lint/type/test/build result can be inferred from that failed run.
 - The same run then exposed that the root TypeScript config was also including Supabase's Deno Edge Function source. The Next.js TypeScript project now scopes its checks to src/, Next.js config and test files. The Edge Function is a separate Deno target and needs its own Deno type-check/test task; it is not silently represented as type-checked by tsc.
 - The second run result: lint passed and tsc started; the diagnostics showed only Deno/remote-import scope mismatch, before the project boundary was corrected.
-- A branch-specific workflow has been added to run lint, app TypeScript, Vitest, legacy static regression tests and production build. The first complete result for the latest branch head is still pending; Vercel previews for earlier intermediate commits built successfully, but that does not replace the full test suite.
+- A branch-specific workflow runs lint, app TypeScript, Vitest, legacy static regression tests and production build. The latest Vercel preview (`nextjs-v2`, commit `d12142a`) completed production compilation and TypeScript successfully and lists the auth, post, like, comment, reply and bookmark routes. GitHub Actions full-suite validation is still pending after the npm-cache workflow correction; the earlier failing run did not reach install/lint/tests.
 - Browser E2E and cross-device auth recovery are not yet proven.
 
 ## Next stage
 
-Run and fix the new branch CI on the latest commit. Next, implement authenticated profile reads/updates, then likes/comments/bookmarks with integration tests. Recover the reproducible migration baseline before any new DDL. Keep the current P-256 key recovery flow until a safe credential migration is explicitly built.
+Rerun branch CI after the npm-cache correction and commit a reproducible lockfile. Add integration tests for likes/comments/replies/bookmarks against the active Edge Function, then implement authenticated profile reads/updates. Recover the reproducible migration baseline before any new DDL. Keep the current P-256 key recovery flow until a safe credential migration is explicitly built.
