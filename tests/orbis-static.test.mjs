@@ -13,7 +13,7 @@ test("frontend JavaScript parses", async () => {
 test("service worker parses and only caches app-shell requests", async () => {
   const source = await read("public/sw.js");
   assert.doesNotThrow(() => new vm.Script(source, { filename: "public/sw.js" }));
-  assert.match(source, /const CACHE_NAME="orbis-shell-v5"/);
+  assert.match(source, /const CACHE_NAME="orbis-shell-v6"/);
   assert.match(source, /url\.pathname\.startsWith\("\/api\/"\)\)return/);
   assert.match(source, /APP_SHELL=\[/);
 });
