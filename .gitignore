@@ -1,6 +1,14 @@
 .dev.vars
 .env
 .env.*
+!.env.example
 node_modules/
+.next/
+out/
+build/
+coverage/
+.vercel/
+.turbo/
+*.tsbuildinfo
 .wrangler/
 .DS_Store
