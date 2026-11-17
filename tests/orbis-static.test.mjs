@@ -13,7 +13,7 @@ test("frontend JavaScript parses", async () => {
 test("service worker parses and only caches app-shell requests", async () => {
   const source = await read("public/sw.js");
   assert.doesNotThrow(() => new vm.Script(source, { filename: "public/sw.js" }));
-  assert.match(source, /const CACHE_NAME="orbis-shell-v6"/);
+  assert.match(source, /const CACHE_NAME="orbis-shell-v7"/);
   assert.match(source, /url\.pathname\.startsWith\("\/api\/"\)\)return/);
   assert.match(source, /APP_SHELL=\[/);
 });
@@ -96,4 +96,14 @@ test("image compression preserves the actual output MIME type", async () => {
   const js = await read("public/orbis-app.js");
   assert.ok(js.includes('toBlob(resolve,"image/jpeg",.84)'));
   assert.ok(js.includes('blob.type==="image/webp"?"webp":"jpg"'));
+});
+
+test("offline queue, legacy login and recovery data are scoped to the signed-in account", async () => {
+  const js = await read("public/orbis-app.js");
+  assert.ok(js.includes("userId:auth.deviceId"));
+  assert.ok(js.includes("x.userId===auth.deviceId"));
+  assert.ok(js.includes("item.userId!==auth?.deviceId"));
+  assert.ok(js.includes('localStorage.removeItem(OLD_DEVICE)'));
+  assert.ok(js.includes('localStorage.removeItem(OLD_TOKEN)'));
+  assert.ok(js.includes('id:"recoveryBundle:"+deviceId'));
 });
