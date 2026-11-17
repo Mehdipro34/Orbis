@@ -38,7 +38,7 @@ async function backupEncrypt(deviceId,username,privateJwk){
  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"},material,{name:"AES-GCM",length:256},false,["encrypt"]);
  const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,encoder.encode(JSON.stringify(privateJwk)));
  pendingCode=code;pendingBackup={format:"ORBIS-KEY-1",deviceId,username,salt:b64u(salt),iv:b64u(iv),iterations:310000,ciphertext:b64u(new Uint8Array(cipher)),createdAt:new Date().toISOString()};
- await put("kv",{id:"recoveryBundle",bundle:pendingBackup});
+ await put("kv",{id:"recoveryBundle:"+deviceId,bundle:pendingBackup});
  $("backupSecret").textContent=code;$("backupConfirmed").checked=false;$("finishRegistration").disabled=true;$("backupModal").hidden=false;
 }
 async function backupDecrypt(bundle,code){
@@ -139,7 +139,9 @@ async function showApp(){
  setAvatarNode($("rightAvatar"),me?.avatar_url,me?.name||me?.username);
  $("rightName").textContent=me?.name||me?.username;
  $("rightHandle").textContent="@"+(me?.username||"member");$("cacheStatus").textContent=t("cacheReady");
- const queued=await getAll("outbox");
+ const allQueued=await getAll("outbox");
+ for(const item of allQueued){if(!item.userId){item.userId=auth.deviceId;await put("outbox",item)}}
+ const queued=allQueued.filter(x=>x.userId===auth.deviceId);
  pendingPosts=queued.filter(x=>x.type==="post.create").map(x=>({
   id:"local-"+x.id,body:x.payload.body||"",title:x.payload.title||"",topic:x.payload.topic||"Global",
   username:me?.username,author:me?.name||me?.username,createdAt:x.createdAt,
@@ -422,8 +424,9 @@ async function saveFeedCache(view){
  await put("cache",{key:cacheKey(view),data:{posts:feeds[view].items,nextCursor:feeds[view].cursor,hasMore:feeds[view].hasMore},savedAt:Date.now()});
 }
 async function enqueueSync(type,payload){
+ if(!auth?.deviceId)throw new Error("Сначала войди в ORBIS.");
  const id=crypto.randomUUID();
- await put("outbox",{id,type,payload,createdAt:new Date().toISOString(),attempts:0,nextAttemptAt:0,status:"pending",lastError:null});
+ await put("outbox",{id,userId:auth.deviceId,type,payload,createdAt:new Date().toISOString(),attempts:0,nextAttemptAt:0,status:"pending",lastError:null});
  if(navigator.onLine)setTimeout(()=>flushSyncQueue(),0);
  return id;
 }
@@ -538,7 +541,7 @@ async function markRetry(item,error){
 }
 async function retrySyncOperation(operationId){
  const item=await get("outbox",operationId);
- if(!item)return;
+ if(!item||item.userId!==auth?.deviceId)return;
  await put("outbox",{...item,status:"pending",attempts:0,nextAttemptAt:0,lastError:null});
  if(item.type==="post.create")updateLocalPostStatus(operationId,"pending",null);
  if(item.type==="comment.create")await setLocalCommentSyncStatus(operationId,"pending",null);
@@ -549,7 +552,7 @@ async function flushSyncQueue(){
  if(!auth?.token||!navigator.onLine)return;
  outboxBusy=true;outboxRequested=false;
  try{
-  let items=(await getAll("outbox")).filter(x=>x.status!=="failed"&&Number(x.nextAttemptAt||0)<=Date.now())
+  let items=(await getAll("outbox")).filter(x=>x.userId===auth.deviceId&&x.status!=="failed"&&Number(x.nextAttemptAt||0)<=Date.now())
    .sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt)).slice(0,20);
   if(!items.length)return;
   const ready=[];
@@ -603,7 +606,7 @@ async function flushSyncQueue(){
    }else await markRetry(item,outcome?.error||"Операция не подтверждена сервером.");
   }
  }catch(error){
-  const pending=(await getAll("outbox")).filter(x=>x.status!=="failed").slice(0,20);
+  const pending=(await getAll("outbox")).filter(x=>x.userId===auth.deviceId&&x.status!=="failed").slice(0,20);
   for(const item of pending)await markRetry(item,error.message);
  }finally{
   outboxBusy=false;
@@ -643,7 +646,7 @@ async function editProfile(){
  }catch(e){toast(e.message)}
 }
 async function downloadBackupAgain(){
- const saved=await get("kv","recoveryBundle");if(saved?.bundle){downloadBundle(saved.bundle);showToast(t("backupWarning"));return}
+ const saved=auth?.deviceId?await get("kv","recoveryBundle:"+auth.deviceId):null;if(saved?.bundle&&saved.bundle.deviceId===auth.deviceId){downloadBundle(saved.bundle);showToast(t("backupWarning"));return}
  toast("Сохрани исходный файл восстановления и секретный код.");
 }
 function showToast(s){toast(s)}
@@ -657,7 +660,22 @@ function bind(){
  $("languageSelect").onchange=e=>{lang=e.target.value;applyLanguage()};$("settingsLanguage").onchange=e=>{lang=e.target.value;applyLanguage()};
  $("settingsBtn").onclick=()=>$("settingsModal").hidden=false;
  $("downloadBackupAgain").onclick=downloadBackupAgain;
- $("logoutBtn").onclick=async()=>{if(!confirm(t("logoutWarning")))return;await del("kv","auth");auth=null;me=null;$("settingsModal").hidden=true;$("appShell").hidden=true;$("authScreen").hidden=false;toast(t("logout"))};
+ $("logoutBtn").onclick=async()=>{
+  if(!confirm(t("logoutWarning")))return;
+  const oldUserId=auth?.deviceId;
+  if(oldUserId){
+   const queued=await getAll("outbox");
+   for(const item of queued){if(!item.userId){item.userId=oldUserId;await put("outbox",item)}}
+  }
+  await del("kv","auth");
+  try{localStorage.removeItem(OLD_DEVICE);localStorage.removeItem(OLD_TOKEN)}catch{}
+  auth=null;me=null;pendingPosts=[];selectedFiles=[];localCommentObjects.clear();
+  for(const key of Object.keys(feeds))feeds[key]={items:[],cursor:null,hasMore:false,loading:false};
+  currentView="home";profileUsername=null;lastFeedRefresh=0;
+  $("settingsModal").hidden=true;$("composePanel").hidden=true;$("appShell").hidden=true;$("authScreen").hidden=false;
+  $("recoveryForm").reset();$("registerForm").reset();authMessage("");
+  toast(t("logout"));
+ };
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>$((b.dataset.close)).hidden=true);
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>go(b.dataset.view));
  $("sidebarProfile").onclick=()=>openProfile(me?.username);$("rightProfile").onclick=()=>openProfile(me?.username);
