@@ -1,77 +1,71 @@
 # ORBIS project status
 
-**Updated:** 2026-11-17  
-**Development branch:** nextjs-v2  
-**Production branch:** main  
-**Current production URL:** https://orbis-mehdipro34.vercel.app
+**Updated:** 2026-11-18  
+**Development branch:** `nextjs-v2`  
+**Production branch:** `main`  
+**Production URL:** https://orbis-mehdipro34.vercel.app
 
 ## Release boundaries
 
-The existing production application remains the static PWA on main. The Next.js implementation is developed on nextjs-v2. No production alias has been switched, and no existing account or post has been migrated or deleted.
+The existing production application remains on `main`. The Next.js v2 work is isolated on `nextjs-v2`; production aliases have not been switched and no existing account or post has been migrated or deleted.
 
-## Implemented in nextjs-v2
+## Implemented in Next.js v2
 
-- Next.js App Router foundation with strict TypeScript settings.
-- Tailwind CSS 4 PostCSS integration.
-- ESLint flat configuration using Next.js 16 rules.
-- Vitest tests for feed query validation and backend response handling.
-- Shared security headers and a Content Security Policy.
-- Server-side public-feed adapter to the existing Supabase Edge Function.
-- GET /api/posts with validation, public-only 60-second CDN caching, cursor pagination and explicit error handling.
-- GET /api/health checks the Supabase Edge Function health endpoint.
-- Responsive dark/light UI and a persisted theme toggle synchronized through React's external-store API.
+- Next.js App Router foundation with strict TypeScript, Tailwind CSS 4 and ESLint.
+- Server-side public feed adapter to the active Supabase Edge Function.
+- `GET /api/posts`: validated latest/popular feed, cursor pagination, public-only short CDN cache and explicit upstream errors.
+- `GET /api/health`: checks the active Supabase Edge Function health endpoint.
+- Responsive dark/light UI with persisted theme choice.
 - Public feed UI with latest/popular tabs, refresh, cursor pagination, loading, empty and error states.
-- Authenticated text-post creation through `POST /api/posts`, reusing the existing P-256 guest session in an HttpOnly cookie and forwarding it server-side to the active Supabase Edge Function.
-- Strict Zod input validation for new text posts (1–500 characters); unknown fields are rejected, and server-side rate limits/moderation remain authoritative in the existing API.
-- Signed-in-only post composer with character counter, pending/error/success states; it refreshes the real feed only after the server confirms the saved post.
-- Authenticated per-post like and comment Route Handlers, comment reply Route Handler, bookmark list/create Route Handlers, and a batched personal-state endpoint for liked/saved/followed state. These proxy to the existing API and do not write directly to PostgreSQL from the browser.
-- Login/register UI and challenge/verify/me/logout Route Handlers are present in the v2 build; they preserve the existing P-256 identity flow rather than claiming password auth is complete.
-- Six unit cases for post input validation and unknown-field rejection.
-- Branch-specific GitHub Actions workflow for lint, TypeScript, unit + legacy regression tests, and production build.
-- Existing PWA source and entry file remain in the repository; main stays unchanged.
+- Registration and key-recovery UI using the existing P-256 device identity flow. The private key stays in browser storage; the signed guest session is held in an HttpOnly cookie. This is not password, email or Telegram authentication.
+- Authenticated text-only post composer with input validation, character counter, submission state and server-confirmed feed refresh.
+- Per-post like, bookmark and comment UI wired to the existing authenticated API. Comment threads support first-level comments and replies; reply lists load on demand.
+- Authenticated personal-state lookup for liked and saved posts, fetched in batches from the existing API.
+- Server Route Handlers proxy the social mutations to the existing Edge Function; the browser does not connect to PostgreSQL with service credentials.
+- Zod schemas validate text posts (1–500 characters), comments (1–1000 characters), bookmark IDs, and unknown fields are rejected where strict schemas are used.
+- Existing PWA source remains in the repository.
 
-## Pinned direct dependencies
+## Existing backend capabilities verified
 
-- Next.js 16.4.6; CI Node.js 22.
-- React and React DOM 19.3.1.
-- TypeScript 5.9.3.
-- Tailwind CSS and PostCSS adapter 4.3.5.
-- Zod 4.6.7.
-- Vitest 5.1.0.
-- ESLint 9.39.5 and eslint-config-next 16.4.6.
-- Lucide React 1.74.0.
+The production Supabase project is healthy and the active `orbis-api` Edge Function is version 55. It contains routes for guest authentication, public posts, post creation and editing, likes, comments/replies, follows, profile reads/updates, bookmarks, media upload, stories, notifications, direct conversations/messages, ads and clans. The presence of backend routes does not mean all of these modules are implemented in the Next.js v2 interface.
 
-Direct dependencies are pinned. The npm lockfile still needs to be generated and committed before installs can be considered fully reproducible.
+The database currently contains 19 recorded migrations and the existing social tables, including profiles, posts, likes, follows, bookmarks, stories, comments, reports, conversations, messages, notifications and clans.
 
-## Deliberately not implemented yet
+## Still not implemented in Next.js v2
 
-- Password + HttpOnly session authentication. The current system uses a P-256 key pair and signed guest token. Existing accounts must prove key ownership before credential migration.
-- Likes, comments, follows, bookmarks and messages from the Next.js UI. Existing backend and legacy PWA support these; they still need authenticated v2 flows and tests. Media attachments are not yet part of the new composer.
-- Admin roles and admin routes.
+- Full profile pages, edit profile and follow/unfollow screens.
+- Media upload and media post composer; current v2 composer is text-only.
+- Stories UI.
+- Direct messages and conversation list.
+- Notifications UI.
+- Clan discovery, membership and ranking UI.
 - Search, reposts, mentions, blocks and mutes.
-- Post expiry, cleanup cron and automatic report threshold.
-- Video storage and third-party media providers.
-- Redis, analytics and observability integrations.
-- Additional external API adapters.
+- Admin panel, admin role management and moderation dashboard.
+- Password/email/Telegram auth migration. The current P-256 identity/recovery flow is intentionally preserved to avoid locking out existing accounts.
+- Scheduled cleanup and additional operational monitoring.
 
-## Database and deployment safety
+## Dependencies and reproducibility
 
-- This stage makes no Supabase schema changes and applies no migration.
-- The new app reads public feed data and health, and creates authenticated text posts through the existing active `orbis-api` Edge Function (version 55).
-- Service-role credentials and the guest HMAC secret are not included in the browser bundle or environment example.
-- The live database has 19 recorded migrations while the main repository contains 9 migration SQL files. Reconstruct and verify migration history before applying new DDL.
-- Vercel production remains on main. Cloudflare deployment remains optional and is not assumed active.
+Direct dependency versions are pinned (Next.js 16.4.6, React 19.3.1, TypeScript 5.9.3, Zod 4.6.7, Vitest 5.1.0, ESLint 9.39.5). A committed npm lockfile is still required for fully reproducible installs.
 
-## Tests and outstanding verification
+## Database and security boundaries
 
-- The first CI run installed dependencies and found a theme-toggle lint violation. It was corrected by using React's external-store API instead of updating component state synchronously from an effect.
-- A later PR CI run stopped before dependency installation because `actions/setup-node` was configured to cache npm while no `package-lock.json` exists yet. The workflow was corrected to omit npm caching until the lockfile is committed; no lint/type/test/build result can be inferred from that failed run.
-- The same run then exposed that the root TypeScript config was also including Supabase's Deno Edge Function source. The Next.js TypeScript project now scopes its checks to src/, Next.js config and test files. The Edge Function is a separate Deno target and needs its own Deno type-check/test task; it is not silently represented as type-checked by tsc.
-- The second run result: lint passed and tsc started; the diagnostics showed only Deno/remote-import scope mismatch, before the project boundary was corrected.
-- A branch-specific workflow runs lint, app TypeScript, Vitest, legacy static regression tests and production build. The latest Vercel preview (`nextjs-v2`, commit `d12142a`) completed production compilation and TypeScript successfully and lists the auth, post, like, comment, reply and bookmark routes. GitHub Actions full-suite validation is still pending after the npm-cache workflow correction; the earlier failing run did not reach install/lint/tests.
-- The latest GitHub static regression workflow completed successfully on commit `3510871`; the two Next.js full-suite workflow runs were still in progress at the time of this update.
-- Browser E2E and cross-device auth recovery are not yet proven.
+- No Supabase schema changes were made in this stage; no migration was applied.
+- The live database has 19 recorded migration entries, while the repository's checked-in SQL migration set is not a complete, verified mirror. Reconstruct the baseline before introducing DDL.
+- Service-role credentials and guest HMAC secrets must remain server-side and are not included in the browser bundle.
+- Supabase security advisors reported 15 informational RLS-enabled-without-policy findings and one warning for disabled leaked-password protection. Some no-policy tables may be service-role-only, but each finding still requires an access-model review.
+- Performance advisors reported six foreign-key indexes missing and 23 unused indexes. Unused indexes must not be removed based on an early/short observation window alone.
+- Vercel production remains on `main`; Cloudflare deployment is not configured and is not assumed active.
 
-## Next stage
+## Verification status
 
-Rerun branch CI after the npm-cache correction and commit a reproducible lockfile. Add integration tests for likes/comments/replies/bookmarks against the active Edge Function, then implement authenticated profile reads/updates. Recover the reproducible migration baseline before any new DDL. Keep the current P-256 key recovery flow until a safe credential migration is explicitly built.
+- The previous Next.js v2 CI run completed successfully: dependency install, lint, TypeScript check, tests and production build.
+- The Vercel preview for commit `03bb93d` completed with state `READY`. This was before the latest post-interaction UI commits; a fresh preview and CI run are required to validate the new changes.
+- The branch CI checks lint, TypeScript, Vitest, legacy static regression tests and production build.
+- The v2 UI has not yet been tested in a real browser with a real account across registration, recovery, post creation, likes, comments, replies and bookmarks. API proxy modules are compiled but runtime integration still needs browser-level verification.
+- No load test has been run. No claim is made that the current free-tier deployment supports 100,000 concurrent users.
+- Supabase Edge Function v55 was inspected through the connector, but its Deno source has not been independently type-checked or load-tested in this stage.
+
+## Next engineering stages
+
+Complete a browser end-to-end test pass against the preview and active backend; add a committed lockfile; then implement profile/follow, media upload, stories, messages, notifications, clans and search incrementally. Review migration drift and security-advisor findings before any database schema change. Keep production isolated until a release review is complete.
