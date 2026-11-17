@@ -22,8 +22,10 @@ The existing production application remains on `main`. The Next.js v2 work is is
 - Per-post like, bookmark and comment UI wired to the existing authenticated API. Comment threads support first-level comments and replies; reply lists load on demand.
 - Authenticated personal-state lookup for liked and saved posts, fetched in batches from the existing API.
 - User profile pages with authenticated profile reads, follower/following counts, follow/unfollow, and self-service display-name/bio editing through validated server routes.
+- Notifications inbox with unread count, single/all read operations, and actor profile links.
+- Clan discovery, creation, joining and leaving using the backend's one-clan-per-user rule; owner leave is blocked by the current backend contract.
 - Server Route Handlers proxy the social mutations to the existing Edge Function; the browser does not connect to PostgreSQL with service credentials.
-- Zod schemas validate text posts (1–500 characters), comments (1–1000 characters), profile updates and bookmark IDs; unknown fields are rejected where strict schemas are used.
+- Zod schemas validate text posts (1–500 characters), comments (1–1000 characters), profile updates, clan creation and bookmark IDs; unknown fields are rejected where strict schemas are used.
 - Existing PWA source remains in the repository.
 
 ## Existing backend capabilities verified
@@ -36,8 +38,8 @@ The database currently contains 19 recorded migrations and the existing social t
 
 - Profile photo upload and a dedicated account settings screen.
 - Media upload and media post composer; current v2 composer is text-only.
-- Stories UI.
-- Direct messages and conversation list.
+- Stories UI and story media upload.
+- Direct messages and conversation list (held until block/report controls and privacy safeguards are in place).
 - Notifications UI.
 - Clan discovery, membership and ranking UI.
 - Search, reposts, mentions, blocks and mutes.
@@ -63,7 +65,7 @@ Direct dependency versions are pinned (Next.js 16.4.6, React 19.3.1, TypeScript 
 - The previous Next.js v2 CI run completed successfully: dependency install, lint, TypeScript check, tests and production build.
 - The Vercel preview for commit `03bb93d` completed with state `READY`. This was before the latest post-interaction UI commits; a fresh preview and CI run are required to validate the new changes.
 - The branch CI checks lint, TypeScript, Vitest, legacy static regression tests and production build.
-- Profile, follow, like, bookmark and comment UI/API routes are covered by TypeScript compilation; profile adapter tests have been added, but the latest GitHub Actions full-suite result is not yet confirmed. The v2 UI has not yet been tested in a real browser with a real account across registration, recovery, post creation, likes, comments, replies, profile edits and follows.
+- Profile, follow, like, bookmark, comments, notifications and clan adapters have unit test coverage added. The latest GitHub Actions full-suite result is not yet confirmed. The v2 UI has not yet been tested in a real browser with a real account; browser verification is still required for registration, recovery, publishing, social actions, profile updates, notifications and clan membership.
 - No load test has been run. No claim is made that the current free-tier deployment supports 100,000 concurrent users.
 - Supabase Edge Function v55 was inspected through the connector, but its Deno source has not been independently type-checked or load-tested in this stage.
 
