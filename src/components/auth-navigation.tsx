@@ -49,7 +49,7 @@ export function AuthNavigation() {
   </div>;
 
   return <div className="auth-nav auth-nav-user">
-    <span className="auth-nav-username"><UserRound size={15}/>@{user.username}</span>
+    <Link href={"/u/"+encodeURIComponent(user.username)} className="auth-nav-username" title="Открыть мой профиль"><UserRound size={15}/>@{user.username}</Link>
     <button type="button" className="icon-button auth-logout" disabled={busy}
       onClick={()=>void logout()} aria-label="Выйти" title="Выйти">
       <LogOut size={16}/>
