@@ -104,6 +104,12 @@ export function LiveFeed() {
     } finally { setLoadingMore(false); }
   },[cursor,hasMore,loadingMore,mode]);
 
+  useEffect(()=>{
+    const onPostCreated=()=>setRefreshVersion(value=>value+1);
+    window.addEventListener("orbis-post-created",onPostCreated);
+    return ()=>window.removeEventListener("orbis-post-created",onPostCreated);
+  },[]);
+
   return <section className="feed-section" aria-label="Публичная лента ORBIS">
     <div className="feed-toolbar">
       <div className="feed-tabs" role="tablist" aria-label="Режим ленты">
