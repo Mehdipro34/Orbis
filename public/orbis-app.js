@@ -646,8 +646,19 @@ async function editProfile(){
  }catch(e){toast(e.message)}
 }
 async function downloadBackupAgain(){
- const saved=auth?.deviceId?await get("kv","recoveryBundle:"+auth.deviceId):null;if(saved?.bundle&&saved.bundle.deviceId===auth.deviceId){downloadBundle(saved.bundle);showToast(t("backupWarning"));return}
- toast("Сохрани исходный файл восстановления и секретный код.");
+ if(!auth?.deviceId){toast("Сначала войди в ORBIS.");return}
+ let saved=await get("kv","recoveryBundle:"+auth.deviceId);
+ if(!saved?.bundle){
+  const legacy=await get("kv","recoveryBundle");
+  if(legacy?.bundle?.deviceId===auth.deviceId){
+   saved=legacy;
+   await put("kv",{id:"recoveryBundle:"+auth.deviceId,bundle:legacy.bundle});
+  }
+ }
+ if(saved?.bundle&&saved.bundle.deviceId===auth.deviceId){
+  downloadBundle(saved.bundle);showToast(t("backupWarning"));return
+ }
+ toast("Исходный файл восстановления не найден. Используй ранее сохранённую копию и секретный код.");
 }
 function showToast(s){toast(s)}
 function bind(){
