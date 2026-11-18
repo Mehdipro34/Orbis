@@ -7,7 +7,27 @@
 
 ## Release boundaries
 
-The existing production application remains on `main`. The Next.js v2 work is isolated on `nextjs-v2`; production aliases have not been switched and no existing account or post has been migrated or deleted.
+The existing production application remains on `main`. The Next.js v2 work is isolated on `nextjs-v2`; the production alias has not been switched. The user explicitly requested a clean start, so the active Supabase project was cleared of all existing accounts and social records on 2026-11-18.
+
+
+## Work completed on 2026-11-18
+
+- Replaced the promotional home hero with a responsive social-first layout: left navigation, central timeline, right community panels and mobile bottom navigation.
+- Kept the public feed accessible without authentication. The composer remains available only to signed-in users; guests are not forced onto the registration screen when opening the home route.
+- Added automatic recovery of a saved P-256 device identity when the 30-day session cookie expires, unless the user explicitly signed out. Sign-out now clears the server session while retaining the local private key for easier return.
+- Existing authenticated sessions visiting `/login` or `/register` are redirected to the home feed. The composer and personal feed state respond to session changes.
+- Cleared all 56 existing profiles and the one linked Supabase Auth user. Verified zero rows in `auth.users`, `auth.identities`, `auth.sessions`, `auth.refresh_tokens`, `profiles`, `posts`, `post_likes`, `post_comments`, `follows`, `bookmarks`, `stories`, `notifications`, `messages`, `conversations`, `clans`, legacy ORBIS post/reaction/bookmark tables, reports, poll votes and ad tables. The database schema and server functions were preserved.
+- `public.api_rate_limits` was preserved as infrastructure state. One 46,878-byte object still exists in the `orbis-media` Storage bucket without a social record; it was not removed via direct SQL because Storage object deletion must use the Storage API.
+- Latest GitHub Actions run for commit `4ea05cee428d0783865337fde17d83ed09c6ea00` passed lint, TypeScript, unit/regression tests and the production build. Vercel preview deployment `dpl_AiLwCBhMkf9nVRvKRSFdiHF5WcJ3` reached `READY` at https://orbis-git-nextjs-v2-mehdipro34.vercel.app/.
+- Production still points to `main`; no live alias cutover was made because real-browser E2E for registration, recovery, post creation and social actions has not yet been completed.
+
+## External API integration status
+
+The supplied integration brief lists Upstash Redis; ImgBB, Pexels, Pixabay and Unsplash; Klipy and Giphy; Cloudinary; TMDB and OMDb; RAWG and IGDB; TheSportsDB; NASA, NewsAPI and The Guardian; Turnstile; Sentry; and PostHog. These are requested providers, not verified active integrations.
+
+- The current v2 `.env.example` contains only public Supabase URL and publishable-key settings.
+- Vercel currently has no project environment variables configured. Repository searches found no configured ImgBB, Upstash, Cloudinary or TMDB keys/adapters.
+- Supabase is the only confirmed connected backend in this branch. Other provider integrations remain `NEEDS API KEY / CONFIGURATION`; do not claim real image, video, GIF, search/news, sports or analytics integration until credentials are configured and real requests are tested.
 
 ## Implemented in Next.js v2
 
@@ -62,7 +82,7 @@ Direct dependency versions are pinned (Next.js 16.4.6, React 19.3.1, TypeScript 
 
 ## Verification status
 
-- The previous Next.js v2 GitHub verification run completed successfully; the newest media/report/bookmark commits still require their own full CI and preview completion.
+- Latest full GitHub Actions verification for the current preview head passed: lint, TypeScript, unit/regression tests and production build.
 - The branch CI checks lint, TypeScript, Vitest, legacy static regression tests and production build.
 - Profile, follow, like, bookmark, comments, notifications, clan, report and media-upload adapters have unit tests. The latest full-suite result must be checked against the latest branch head. The v2 UI has not yet been tested in a real browser with a real account; browser verification is still required for registration, recovery, publishing, uploads, social actions, profile updates, notifications and clan membership.
 - No load test has been run. No claim is made that the current free-tier deployment supports 100,000 concurrent users.
