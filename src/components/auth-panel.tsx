@@ -94,7 +94,7 @@ export function AuthPanel({initialMode="register"}:{initialMode?:Mode}) {
     }
     void bootstrap();
     return ()=>{active=false;};
-  },[]);
+  },[router]);
 
   async function handleRegister(event:React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
