@@ -1,7 +1,7 @@
 "use client";
 
 import {useCallback,useEffect,useState,type FormEvent} from "react";
-import {Activity,AlertTriangle,CheckCircle2,Clock,LoaderCircle,RefreshCw,Shield,ShieldCheck,Trash2,Users} from "lucide-react";
+import {Activity,AlertTriangle,CheckCircle2,Clock,LoaderCircle,RefreshCw,Shield,ShieldCheck,Trash2} from "lucide-react";
 
 type Count={table:string;count:number|null;error:boolean};
 type Report={
@@ -53,20 +53,44 @@ export function AdminView(){
     finally{setBusy("");}
   },[filter]);
 
-  const check=useCallback(async()=>{
-    setStatus("loading");setError("");
-    try{
-      const response=await fetch("/api/admin/status",{cache:"no-store"});
-      if(response.status===401){setStatus("guest");return;}
-      const value:unknown=await response.json();
-      if(!response.ok||!isRecord(value))throw new Error("Не удалось проверить права.");
-      if(value.isAdmin===true){setStatus("admin");}
-      else setStatus("not-admin");
-    }catch(e){setError(e instanceof Error?e.message:"Ошибка проверки.");setStatus("guest");}
+  useEffect(()=>{
+    let active=true;
+    void fetch("/api/admin/status",{cache:"no-store"})
+      .then(async response=>{
+        if(response.status===401)return {status:"guest" as const};
+        const value:unknown=await response.json();
+        if(!response.ok||!isRecord(value))throw new Error("Не удалось проверить права.");
+        return {status:value.isAdmin===true?"admin" as const:"not-admin" as const};
+      })
+      .then(result=>{if(active)setStatus(result.status);})
+      .catch(error=>{
+        if(active){
+          setError(error instanceof Error?error.message:"Ошибка проверки.");
+          setStatus("guest");
+        }
+      });
+    return ()=>{active=false;};
   },[]);
 
-  useEffect(()=>{void check();},[check]);
-  useEffect(()=>{if(status==="admin")void loadDashboard();},[status,loadDashboard]);
+  useEffect(()=>{
+    if(status!=="admin")return;
+    let active=true;
+    void Promise.all([
+      api("/api/admin/overview"),
+      api("/api/admin/reports?status="+filter)
+    ])
+      .then(([overviewRaw,reportsRaw])=>{
+        if(!active)return;
+        if(!isRecord(overviewRaw)||!Array.isArray(overviewRaw.counts))
+          throw new Error("Ответ панели некорректен.");
+        setOverview(overviewRaw as unknown as AdminOverview);
+        setReports(isRecord(reportsRaw)&&Array.isArray(reportsRaw.reports)?reportsRaw.reports as Report[]:[]);
+      })
+      .catch(error=>{
+        if(active)setError(error instanceof Error?error.message:"Не удалось загрузить панель.");
+      });
+    return ()=>{active=false;};
+  },[status,filter]);
 
   async function claim(event:FormEvent<HTMLFormElement>){
     event.preventDefault();setBusy("claim");setError("");setNotice("");
