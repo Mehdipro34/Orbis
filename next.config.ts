@@ -8,10 +8,10 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https://" + supabaseHost,
+  "img-src 'self' data: blob: https://" + supabaseHost + " https://i.ibb.co https://*.giphy.com https://upload.wikimedia.org https://covers.openlibrary.org https://books.google.com https://books.googleusercontent.com https://images.unsplash.com",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline'" + (development ? " 'unsafe-eval'" : ""),
-  "connect-src 'self' https://" + supabaseHost + (development ? " ws://localhost:* http://localhost:*" : ""),
+  "connect-src 'self' https://" + supabaseHost + " https://*.vercel-insights.com https://vitals.vercel-insights.com" + (development ? " ws://localhost:* http://localhost:*" : ""),
   "font-src 'self' data:",
   "upgrade-insecure-requests"
 ].join("; ");
