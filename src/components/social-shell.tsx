@@ -4,7 +4,7 @@ import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {useEffect,useState} from "react";
 import {
-  Activity, Bell, Bookmark, Compass, Home, Orbit, Search, Shield,
+  Activity, Bell, Bookmark, Home, Orbit, Search, Shield,
   Users, Sparkles
 } from "lucide-react";
 import {AuthNavigation} from "@/components/auth-navigation";
@@ -19,6 +19,7 @@ const links=[
 ];
 
 const titles:Record<string,string>={
+  "/":"Главная",
   "/explore":"Обзор",
   "/clans":"Сообщества",
   "/notifications":"Уведомления",
@@ -40,7 +41,7 @@ export function SocialShell({children}:{children:React.ReactNode}){
     return ()=>{active=false;};
   },[pathname]);
 
-  if(pathname==="/"||pathname==="/login"||pathname==="/register"){
+  if(pathname==="/login"||pathname==="/register"){
     return <>{children}</>;
   }
 
@@ -65,7 +66,7 @@ export function SocialShell({children}:{children:React.ReactNode}){
           <Shield size={22}/><span>Администрирование</span>
         </Link>}
       </nav>
-      <Link href="/explore" className="social-compose-button"><Sparkles size={17}/> Исследовать ORBIS</Link>
+      <Link href="/#composer" className="social-compose-button"><Sparkles size={17}/> Новая публикация</Link>
       <div className="social-sidebar-bottom">
         <div className="social-live"><span/> ORBIS · ЖИВОЕ СООБЩЕСТВО</div>
         <span>Твои идеи. Твой круг.</span>
