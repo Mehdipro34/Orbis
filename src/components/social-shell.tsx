@@ -11,7 +11,7 @@ import {AuthNavigation} from "@/components/auth-navigation";
 import {ThemeToggle} from "@/components/theme-toggle";
 
 const links=[
-  {href:"/",label:"Главная",icon:Home},
+  {href:"/home",label:"Главная",icon:Home},
   {href:"/explore",label:"Обзор",icon:Search},
   {href:"/clans",label:"Сообщества",icon:Users},
   {href:"/notifications",label:"Уведомления",icon:Bell},
@@ -19,7 +19,8 @@ const links=[
 ];
 
 const titles:Record<string,string>={
-  "/":"Главная",
+  "/":"Профиль",
+  "/home":"Главная",
   "/explore":"Обзор",
   "/clans":"Сообщества",
   "/notifications":"Уведомления",
@@ -49,14 +50,14 @@ export function SocialShell({children}:{children:React.ReactNode}){
     (pathname.startsWith("/u/")?"Профиль":"ORBIS");
   return <div className="social-shell">
     <aside className="social-sidebar">
-      <Link href="/" className="social-wordmark" aria-label="ORBIS — главная">
+      <Link href="/home" className="social-wordmark" aria-label="ORBIS — главная">
         <span className="social-mark"><Orbit size={23}/></span><span>ORBIS</span>
       </Link>
       <nav className="social-nav" aria-label="Основная навигация">
         {links.map(item=>{
           const Icon=item.icon;
           const active=pathname===item.href||
-            (item.href!=="/"&&pathname.startsWith(item.href+"/"));
+            (item.href!=="/home"&&pathname.startsWith(item.href+"/"));
           return <Link key={item.href} href={item.href}
             className={active?"social-nav-item active":"social-nav-item"}>
             <Icon size={22} strokeWidth={active?2.3:1.8}/><span>{item.label}</span>
@@ -66,7 +67,7 @@ export function SocialShell({children}:{children:React.ReactNode}){
           <Shield size={22}/><span>Администрирование</span>
         </Link>}
       </nav>
-      <Link href="/#composer" className="social-compose-button"><Sparkles size={17}/> Новая публикация</Link>
+      <Link href="/home#composer" className="social-compose-button"><Sparkles size={17}/> Новая публикация</Link>
       <div className="social-sidebar-bottom">
         <div className="social-live"><span/> ORBIS · ЖИВОЕ СООБЩЕСТВО</div>
         <span>Твои идеи. Твой круг.</span>
