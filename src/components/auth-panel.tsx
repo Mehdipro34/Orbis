@@ -156,7 +156,7 @@ export function AuthPanel({initialMode="register"}:{initialMode?:Mode}) {
       const profile=await completeKeyLogin(parsed.deviceId,privateKey);
       await saveIdentity({deviceId:parsed.deviceId,privateKey,username:parsed.username,profile});
       window.localStorage.removeItem("orbis_explicit_logout");
-      router.replace("/");
+      router.replace("/u/"+encodeURIComponent(profile.username));
     } catch(error) {
       setMessage(error instanceof Error?error.message:"Не удалось восстановить доступ.");
     } finally {
