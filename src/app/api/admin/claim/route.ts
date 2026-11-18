@@ -1,4 +1,3 @@
-import {NextResponse} from "next/server";
 import {callGuestApi,isRecord,isSameOriginMutation,jsonNoStore,readJsonBody,sessionTokenFromRequest} from "@/lib/orbis/guest-auth.server";
 
 export const dynamic="force-dynamic";
