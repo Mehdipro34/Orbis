@@ -233,7 +233,7 @@ export function ExploreView(){
         <span>{formatNumber(currency.amount)} {text(currency.base)} =</span>
         <strong>{formatNumber(currency.converted)} {text(currency.quote)}</strong>
         <small>1 {text(currency.base)} = {formatNumber(currency.rate)} {text(currency.quote)} · {text(currency.date)}</small>
-        {currency.note&&<p>{text(currency.note)}</p>}
+        {typeof currency.note==="string"&&<p>{currency.note}</p>}
         <a href="https://frankfurter.dev/" target="_blank" rel="noreferrer">Источник: Frankfurter <ExternalLink size={13}/></a>
       </div>}
     </section>}
