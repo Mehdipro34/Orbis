@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {callGuestApi,isSameOriginMutation,jsonNoStore,readJsonBody,sessionTokenFromRequest} from "@/lib/orbis/guest-auth.server";
+import {callGuestApi,isRecord,isSameOriginMutation,jsonNoStore,readJsonBody,sessionTokenFromRequest} from "@/lib/orbis/guest-auth.server";
 
 export const dynamic="force-dynamic";
 
@@ -9,6 +9,7 @@ export async function POST(request:Request){
   if(!token)return jsonNoStore({error:"Войди в ORBIS."},401);
   const body=await readJsonBody(request);
   if(!body.success)return jsonNoStore({error:body.message},body.status);
+  if(!isRecord(body.data))return jsonNoStore({error:"Некорректный запрос настройки администратора."},400);
   const code=typeof body.data.bootstrapCode==="string"?body.data.bootstrapCode.trim():"";
   if(!/^[a-f0-9]{64}$/i.test(code))return jsonNoStore({error:"Введи корректный одноразовый код настройки."},400);
   const upstream=await callGuestApi("/api/admin/claim","POST",{bootstrapCode:code},token,request);
