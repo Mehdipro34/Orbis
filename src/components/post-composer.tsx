@@ -33,15 +33,23 @@ export function PostComposer() {
 
   useEffect(()=>{
     let active=true;
-    void fetch("/api/auth/me",{cache:"no-store"})
-      .then(async response=>{
-        if(!response.ok)return null;
-        const payload:unknown=await response.json();
-        return isRecord(payload)&&isAuthUser(payload.user)?payload.user:null;
-      })
-      .catch(()=>null)
-      .then(value=>{if(active){setUser(value);setReady(true);}});
-    return ()=>{active=false;};
+    async function syncSession(){
+      try{
+        const response=await fetch("/api/auth/me",{cache:"no-store"});
+        const payload:unknown=await response.json().catch(()=>null);
+        const value=response.ok&&isRecord(payload)&&isAuthUser(payload.user)?payload.user:null;
+        if(active)setUser(value);
+      }catch{if(active)setUser(null);}
+      finally{if(active)setReady(true);}
+    }
+    const onAuthChanged=(event:Event)=>{
+      const detail=(event as CustomEvent<{signedIn?:boolean}>).detail;
+      if(detail?.signedIn) void syncSession();
+      else setUser(null);
+    };
+    void syncSession();
+    window.addEventListener("orbis-auth-changed",onAuthChanged);
+    return ()=>{active=false;window.removeEventListener("orbis-auth-changed",onAuthChanged);};
   },[]);
 
   function chooseFiles(event:ChangeEvent<HTMLInputElement>) {
