@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   ArrowUpRight, Bell, Bookmark, Compass, Home, Orbit, ShieldCheck,
-  Sparkles, Users
+  Sparkles, Users, Search
 } from "lucide-react";
 import {AuthNavigation} from "@/components/auth-navigation";
 import {LiveFeed} from "@/components/live-feed";
@@ -10,7 +10,8 @@ import {ThemeToggle} from "@/components/theme-toggle";
 
 const navigation=[
   {href:"/",label:"Главная",icon:Home},
-  {href:"/clans",label:"Кланы",icon:Users},
+  {href:"/explore",label:"Обзор",icon:Search},
+  {href:"/clans",label:"Сообщества",icon:Users},
   {href:"/notifications",label:"Уведомления",icon:Bell},
   {href:"/bookmarks",label:"Закладки",icon:Bookmark},
 ];
@@ -34,7 +35,7 @@ export default function HomePage() {
           <div><strong>Твоё пространство</strong><p>Публикуй идеи, находи людей и сохраняй важное.</p></div>
         </div>
         <div className="orb-sidebar-bottom">
-          <div className="orb-online-line"><span className="orb-live-dot"/><span>Публичная лента доступна всем</span></div>
+          <div className="orb-online-line"><span className="orb-live-dot"/><span>Только для зарегистрированных участников</span></div>
           <span className="orb-copyright">ORBIS · YOUR WORLD. YOUR VOICE.</span>
         </div>
       </aside>
@@ -51,7 +52,7 @@ export default function HomePage() {
         </div>
         <PostComposer/>
         <div className="orb-stream-heading" id="feed">
-          <div><h2>Лента</h2><p>Обновления сообщества в одном месте</p></div>
+          <div><h2>Лента</h2><p>Публикации людей, на которых ты подписан, и открытые темы</p></div>
           <span className="orb-stream-badge"><Compass size={14}/> Открытая</span>
         </div>
         <LiveFeed/>
@@ -67,14 +68,14 @@ export default function HomePage() {
         <section className="orb-right-card">
           <div className="orb-right-title"><Users size={17}/><h3>Сообщества</h3></div>
           <p className="orb-muted-copy">Найди людей с общими интересами, вступай в кланы и создавай своё сообщество.</p>
-          <Link href="/clans" className="orb-secondary-link">Открыть кланы <ArrowUpRight size={14}/></Link>
+          <Link href="/explore" className="orb-secondary-link">Открыть обзор <ArrowUpRight size={14}/></Link>
         </section>
         <section className="orb-right-card orb-safety-card">
           <div className="orb-right-title"><ShieldCheck size={17}/><h3>Твой аккаунт под защитой</h3></div>
           <p className="orb-muted-copy">Вход в ORBIS сохраняется на устройстве. Для восстановления используй резервный файл и секретный код.</p>
           <Link href="/login" className="orb-secondary-link">Вход и восстановление <ArrowUpRight size={14}/></Link>
         </section>
-        <div className="orb-right-footer"><span>ORBIS</span><span>Твоё мнение имеет значение.</span></div>
+        <div className="orb-right-footer"><span>ORBIS</span><span>Делись идеями. Слушай других.</span></div>
       </aside>
     </div>
 
