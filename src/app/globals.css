@@ -380,3 +380,96 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
 .composer-file button:hover{background:rgba(229,138,145,.1);color:#e58a91}
 .composer-file button:disabled{opacity:.5;cursor:not-allowed}
 .composer-upload-hint{margin:8px 0 0;color:var(--subtle);font-size:9px}
+
+
+/* ORBIS social-first home — responsive three-column feed */
+.orb-shell{--orb-panel:var(--surface);--orb-panel-soft:var(--surface-soft);width:100%;min-height:100vh}
+.orb-layout{width:min(1460px,calc(100% - 44px));min-height:100vh;margin:0 auto;display:grid;grid-template-columns:226px minmax(0,690px) 294px;gap:30px;justify-content:center}
+.orb-sidebar{height:100vh;position:sticky;top:0;display:flex;flex-direction:column;padding:25px 8px 22px 0;border-right:1px solid var(--border)}
+.orb-brand{display:inline-flex;align-items:center;gap:11px;width:max-content;padding:5px 8px;color:var(--text);font-size:21px;font-weight:850;letter-spacing:.15em}
+.orb-brand-mark{width:39px;height:39px;border-radius:14px;display:grid;place-items:center;color:#eeeaff;background:linear-gradient(140deg,#7e6de2,#355b66);box-shadow:0 8px 24px rgba(101,85,196,.24)}
+.orb-nav{display:grid;gap:7px;margin-top:42px}
+.orb-nav-link{min-height:52px;padding:0 15px;display:flex;align-items:center;gap:15px;border-radius:14px;color:var(--muted);font-size:14px;font-weight:650;transition:background .18s ease,color .18s ease,transform .18s ease}
+.orb-nav-link:hover{background:var(--surface-soft);color:var(--text);transform:translateX(2px)}
+.orb-nav-link.is-active{color:var(--text);background:color-mix(in srgb,var(--accent) 13%,var(--surface));box-shadow:inset 3px 0 0 var(--accent)}
+.orb-sidebar-note{display:flex;align-items:flex-start;gap:11px;margin:38px 8px 0;padding:14px 12px;border:1px solid var(--border);border-radius:15px;background:var(--surface)}
+.orb-note-icon{flex:0 0 31px;width:31px;height:31px;display:grid;place-items:center;border-radius:10px;color:var(--mint);background:color-mix(in srgb,var(--mint) 12%,transparent)}
+.orb-sidebar-note strong{font-size:12px}
+.orb-sidebar-note p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.55}
+.orb-sidebar-bottom{margin-top:auto;padding:0 12px;display:grid;gap:12px}
+.orb-online-line{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:10px}
+.orb-live-dot{display:inline-block;width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#6edbb6;box-shadow:0 0 0 4px rgba(110,219,182,.1)}
+.orb-copyright{font-size:8px;letter-spacing:.12em;color:var(--subtle)}
+.orb-center{min-width:0;min-height:100vh;padding:0 0 70px;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+.orb-center-header{position:sticky;top:0;z-index:15;min-height:76px;padding:13px 23px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(18px)}
+.orb-center-header h1{margin:4px 0 0;font-size:21px;line-height:1.2;font-weight:800;letter-spacing:-.04em}
+.orb-eyebrow{font-size:9px;color:var(--subtle);font-weight:800;letter-spacing:.16em}
+.orb-header-actions{display:flex;align-items:center;gap:9px}
+.orb-mobile-header{display:none}
+.orb-feed-intro{padding:20px 23px 17px;border-bottom:1px solid var(--border)}
+.orb-feed-intro>div{display:flex;align-items:center;gap:9px;color:var(--mint);font-size:9px;letter-spacing:.13em;font-weight:850}
+.orb-feed-intro p{margin:7px 0 0;color:var(--muted);font-size:12px}
+.orb-stream-heading{padding:23px 23px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.orb-stream-heading h2{font-size:19px;letter-spacing:-.035em;margin:0}
+.orb-stream-heading p{font-size:10px;color:var(--muted);margin:4px 0 0}
+.orb-stream-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--border);border-radius:99px;color:var(--muted);font-size:9px;font-weight:700}
+.orb-right{position:sticky;top:0;align-self:start;padding-top:93px;display:grid;gap:14px}
+.orb-right-card{padding:19px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:0 8px 32px rgba(0,0,0,.05)}
+.orb-welcome-card{background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 15%,var(--surface)),var(--surface) 76%);border-color:color-mix(in srgb,var(--accent) 22%,var(--border))}
+.orb-card-kicker,.orb-right-title{display:flex;align-items:center;gap:8px;color:var(--accent);font-size:9px;font-weight:850;letter-spacing:.1em}
+.orb-welcome-card h2{font-size:18px;line-height:1.25;letter-spacing:-.035em;margin:15px 0 8px}
+.orb-welcome-card p,.orb-muted-copy{color:var(--muted);font-size:11px;line-height:1.7;margin:0}
+.orb-text-link,.orb-secondary-link{display:inline-flex;align-items:center;gap:7px;margin-top:15px;color:var(--accent);font-size:11px;font-weight:750}
+.orb-text-link:hover,.orb-secondary-link:hover{color:var(--text)}
+.orb-right-title h3{margin:0;color:var(--text);font-size:12px;letter-spacing:0}
+.orb-right-card .orb-muted-copy{margin-top:11px}
+.orb-right-footer{padding:3px 4px;display:flex;flex-direction:column;gap:5px;color:var(--subtle);font-size:9px}
+.orb-right-footer span:first-child{font-weight:850;letter-spacing:.16em;color:var(--muted)}
+.orb-mobile-nav{display:none}
+.orb-shell .auth-nav{display:flex;align-items:center;gap:8px}
+.orb-shell .auth-nav-link{padding:8px 11px;border-radius:10px;color:var(--muted);font-size:11px;font-weight:700}
+.orb-shell .auth-nav-link:hover{background:var(--surface-soft);color:var(--text)}
+.orb-shell .auth-nav-register{min-height:35px;padding:0 12px;font-size:10px;border-radius:10px}
+.orb-shell .auth-nav-user{gap:6px}
+.orb-shell .auth-nav-username{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:10px;font-weight:700}
+.orb-shell .auth-nav-placeholder{width:80px;height:34px}
+.orb-shell .theme-toggle{border-radius:10px}
+.orb-shell .composer-panel{margin:0;padding:19px 23px;border:0;border-bottom:1px solid var(--border);border-radius:0;background:transparent;box-shadow:none}
+.orb-shell .composer-heading{margin-bottom:10px}
+.orb-shell .feed-section{padding:0 22px}
+.orb-shell .feed-toolbar{padding:10px 0 13px}
+.orb-shell .post-card{margin:0;padding:19px 0;border:0;border-bottom:1px solid var(--border);border-radius:0;background:transparent;box-shadow:none}
+.orb-shell .post-card:hover{background:color-mix(in srgb,var(--surface) 45%,transparent)}
+.orb-shell .feed-skeletons{padding-top:12px}
+.orb-shell .feed-empty,.orb-shell .feed-error{border-radius:14px}
+.orb-shell .post-actions{padding-top:10px}
+.orb-mobile-nav a{color:var(--muted)}
+.orb-mobile-nav a.is-active{color:var(--accent)}
+@media(max-width:1220px){
+ .orb-layout{grid-template-columns:190px minmax(0,690px);width:min(920px,calc(100% - 32px));gap:22px}
+ .orb-right{display:none}
+}
+@media(max-width:760px){
+ .orb-layout{display:block;width:100%;min-height:100vh;padding:0}
+ .orb-sidebar{display:none}
+ .orb-center{min-height:100vh;border:0;padding-bottom:90px}
+ .orb-center-header{display:none}
+ .orb-mobile-header{height:61px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(18px)}
+ .orb-mobile-header .orb-brand{font-size:17px;gap:8px}
+ .orb-mobile-header .orb-brand-mark{width:31px;height:31px;border-radius:11px}
+ .orb-mobile-header .auth-nav-link{display:none}
+ .orb-mobile-header .auth-nav-register{min-height:32px}
+ .orb-mobile-header .auth-nav-username{max-width:122px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .orb-feed-intro{padding:15px 17px}
+ .orb-stream-heading{padding:19px 17px 10px}
+ .orb-shell .composer-panel{padding:15px 16px}
+ .orb-shell .feed-section{padding:0 16px}
+ .orb-shell .post-card{padding:16px 0}
+ .orb-mobile-nav{position:fixed;z-index:40;left:0;right:0;bottom:0;display:flex;justify-content:space-around;align-items:center;min-height:61px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:color-mix(in srgb,var(--surface) 93%,transparent);backdrop-filter:blur(18px)}
+ .orb-mobile-nav a{min-width:54px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px}
+}
+@media(max-width:400px){
+ .orb-mobile-header .auth-nav-register{padding:0 8px;font-size:9px}
+ .orb-mobile-header .orb-header-actions{gap:5px}
+ .orb-shell .post-card .post-body{font-size:14px}
+}
