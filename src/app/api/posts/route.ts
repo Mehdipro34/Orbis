@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {callGuestApi,isSameOriginMutation,jsonNoStore,readJsonBody,sessionTokenFromRequest,upstreamErrorMessage} from "@/lib/orbis/guest-auth.server";
+import {callGuestApi,isRecord,isSameOriginMutation,jsonNoStore,readJsonBody,sessionTokenFromRequest,upstreamErrorMessage} from "@/lib/orbis/guest-auth.server";
 import {CreatePostSchema} from "@/lib/orbis/posts";
 import {PublicFeedResponseSchema,parsePublicFeedQuery} from "@/lib/orbis/public-feed";
 
