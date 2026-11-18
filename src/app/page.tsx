@@ -40,12 +40,9 @@ export default function HomePage() {
       </aside>
 
       <section className="orb-center">
-        <header className="orb-mobile-header">
-          <Link href="/" className="orb-brand"><span className="orb-brand-mark"><Orbit size={21}/></span><span>ORBIS</span></Link>
-          <div className="orb-header-actions"><AuthNavigation/><ThemeToggle/></div>
-        </header>
         <header className="orb-center-header">
-          <div><div className="orb-eyebrow">ТВОЯ ОРБИТА</div><h1>Главная</h1></div>
+          <Link href="/" className="orb-mobile-brand"><span className="orb-brand-mark"><Orbit size={21}/></span><span>ORBIS</span></Link>
+          <div className="orb-center-heading"><div className="orb-eyebrow">ТВОЯ ОРБИТА</div><h1>Главная</h1></div>
           <div className="orb-header-actions"><AuthNavigation/><ThemeToggle/></div>
         </header>
         <div className="orb-feed-intro">
