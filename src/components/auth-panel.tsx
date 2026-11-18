@@ -65,22 +65,26 @@ export function AuthPanel({initialMode="register"}:{initialMode?:Mode}) {
     let active=true;
     async function bootstrap() {
       try {
+        const explicitlySignedOut=window.localStorage.getItem("orbis_explicit_logout")==="1";
         const response=await fetch("/api/auth/me",{cache:"no-store"});
         const payload:unknown=await response.json().catch(()=>({}));
         if(response.ok && payload && typeof payload==="object" && "user" in payload &&
           typeof payload.user==="object" && payload.user!==null) {
-          if(active) {window.localStorage.removeItem("orbis_explicit_logout");router.replace("/");}
+          const currentUser=payload.user as {username?:unknown};
+          const destination=typeof currentUser.username==="string"
+            ?"/u/"+encodeURIComponent(currentUser.username):"/";
+          if(active) {window.localStorage.removeItem("orbis_explicit_logout");router.replace(destination);}
           return;
         }
         if(response.status!==401) {
           if(active) {setMessage("Не удалось проверить сессию. Проверь подключение.");setView("form");}
           return;
         }
-        const saved=await loadSavedIdentity();
+        const saved=explicitlySignedOut?null:await loadSavedIdentity();
         if(saved) {
           const profile=await completeKeyLogin(saved.deviceId,saved.privateKey);
           await saveIdentity({...saved,profile});
-          if(active) {window.localStorage.removeItem("orbis_explicit_logout");router.replace("/");}
+          if(active) {window.localStorage.removeItem("orbis_explicit_logout");router.replace("/u/"+encodeURIComponent(profile.username));}
           return;
         }
       } catch {
@@ -206,9 +210,10 @@ export function AuthPanel({initialMode="register"}:{initialMode?:Mode}) {
       </label>
       {message && <p className="auth-error" role="alert">{message}</p>}
       <button type="button" className="primary-button auth-wide-button"
-        disabled={!downloaded} onClick={()=>router.replace("/")}>
-        Продолжить <ArrowRight size={16}/>
+        onClick={()=>router.replace("/u/"+encodeURIComponent(bundle.username))}>
+        Войти в свой профиль <ArrowRight size={16}/>
       </button>
+      {!downloaded&&<p className="auth-footnote">Резервный файл и секретный код лучше сохранить отдельно. Можно продолжить сейчас и сохранить их позже в этом браузере.</p>}
     </section>;
   }
 
