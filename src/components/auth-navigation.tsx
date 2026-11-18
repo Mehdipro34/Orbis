@@ -67,6 +67,7 @@ export function AuthNavigation() {
       if(!active)return;
       setUser(value);setReady(true);
       broadcastAuth(Boolean(value));
+      if(value)window.localStorage.removeItem(SIGNED_OUT_KEY);
     });
     return ()=>{active=false;};
   },[]);
