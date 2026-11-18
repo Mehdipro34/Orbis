@@ -88,11 +88,18 @@ export function LiveFeed() {
 
   useEffect(()=>{
     let active=true;
+    const onAuthChanged=(event:Event)=>{
+      const detail=(event as CustomEvent<{signedIn?:boolean}>).detail;
+      const signedIn=detail?.signedIn===true;
+      setAuthStatus(signedIn?"signed-in":"guest");
+      if(!signedIn){setLikedIds(new Set());setSavedIds(new Set());}
+    };
     void fetch("/api/auth/me",{cache:"no-store"})
       .then(response=>response.ok?"signed-in":"guest")
       .catch(()=>"guest")
       .then(status=>{if(active)setAuthStatus(status as AuthStatus);});
-    return ()=>{active=false;};
+    window.addEventListener("orbis-auth-changed",onAuthChanged);
+    return ()=>{active=false;window.removeEventListener("orbis-auth-changed",onAuthChanged);};
   },[]);
 
   useEffect(()=>{
@@ -124,10 +131,7 @@ export function LiveFeed() {
   },[mode,refreshVersion]);
 
   useEffect(()=>{
-    if(authStatus!=="signed-in"||posts.length===0) {
-      if(authStatus==="guest") {setLikedIds(new Set());setSavedIds(new Set());}
-      return;
-    }
+    if(authStatus!=="signed-in"||posts.length===0) return;
     const controller=new AbortController();
     let active=true;
     async function loadPersonalState() {
