@@ -65,7 +65,7 @@ describe("ORBIS mandatory account access",()=>{
     });
     const response=await proxy(request);
     expect(response.headers.get("location")).toBe(origin+"/register");
-    expect(response.headers.get("set-cookie")).toContain("max-age=0");
+    expect(response.headers.get("set-cookie")).toMatch(/max-age=0/i);
   });
 
   it("allows the registration page when the visitor has no existing account",async()=>{
