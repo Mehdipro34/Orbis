@@ -8,13 +8,14 @@ type SessionResult={username:string}|null|"unavailable";
 
 async function verifySession(token:string):Promise<SessionResult>{
   try{
+    const headers=new Headers({
+      apikey:supabasePublishableKey,
+      accept:"application/json",
+      Authorization:"Bearer "+token
+    });
     const response=await fetch(orbisEdgeFunctionUrl+"/api/guest/me",{
       method:"GET",
-      headers:{
-        apikey:supabasePublishableKey,
-        accept:"application/json",
-        Authorization:"Bearer "+token
-      },
+      headers,
       cache:"no-store",
       signal:AbortSignal.timeout(3500)
     });
@@ -61,7 +62,7 @@ export async function proxy(request:NextRequest){
       NextResponse.redirect(new URL("/register",request.url));
     return clearCookie(response);
   }
-  if(authPage){
+  if(authPage||path==="/"){
     return NextResponse.redirect(new URL("/u/"+encodeURIComponent(session.username),request.url));
   }
   return NextResponse.next();
