@@ -29,15 +29,14 @@ const titles:Record<string,string>={
 export function SocialShell({children}:{children:React.ReactNode}){
   const pathname=usePathname();
   const [admin,setAdmin]=useState(false);
-  const [adminChecked,setAdminChecked]=useState(false);
 
   useEffect(()=>{
     let active=true;
     void fetch("/api/admin/status",{cache:"no-store"})
       .then(async response=>response.ok?await response.json():null)
       .then(payload=>{
-        if(active){setAdmin(Boolean(payload?.isAdmin));setAdminChecked(true);}
-      }).catch(()=>{if(active)setAdminChecked(true);});
+        if(active){setAdmin(Boolean(payload?.isAdmin));}
+      }).catch(()=>{if(active)setAdmin(false);});
     return ()=>{active=false;};
   },[pathname]);
 
