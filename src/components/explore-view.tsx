@@ -130,19 +130,10 @@ export function ExploreView(){
   async function searchGiphy(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
     const q=search.trim();
-    const key=process.env.NEXT_PUBLIC_GIPHY_API_KEY||"";
-    if(!key){setError("Для GIPHY нужен бесплатный API key из кабинета разработчика. Остальные интеграции доступны без него.");return;}
     if(q.length<2){setError("Введи тему для поиска GIF.");return;}
     await run("giphy",async()=>{
-      const url=new URL("https://api.giphy.com/v1/gifs/search");
-      url.searchParams.set("api_key",key);
-      url.searchParams.set("q",q);
-      url.searchParams.set("limit","12");
-      url.searchParams.set("rating","pg");
-      const response=await fetch(url);
-      const data:unknown=await response.json();
-      if(!response.ok||typeof data!=="object"||data===null)throw new Error("GIPHY временно недоступен.");
-      setGifs(rows((data as AnyRecord).data));
+      const result=await getJson("/api/integrations/giphy?q="+encodeURIComponent(q));
+      setGifs(rows(result.results));
     });
   }
 
@@ -308,16 +299,12 @@ export function ExploreView(){
     {active==="gifs"&&<section className="explore-card">
       <div className="explore-card-heading"><div className="explore-heading-icon"><Film size={20}/></div>
         <div><span>GIPHY</span><h3>GIF и стикеры</h3></div></div>
-      <p className="explore-muted">Поиск выполняется напрямую в браузере, как требует документация GIPHY.</p>
+      <p className="explore-muted">Поиск идёт через сервер ORBIS. Ключ API остаётся закрытым и не попадает в браузер.</p>
       <form className="explore-search-form" onSubmit={searchGiphy}>
         <Film size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск GIF…"/>
         <button type="submit" disabled={busy==="giphy"}>{busy==="giphy"?<LoaderCircle size={15} className="spin"/>:"Найти"}</button>
       </form>
-      {!process.env.NEXT_PUBLIC_GIPHY_API_KEY&&<div className="explore-key-needed">
-        <strong>Требуется API key GIPHY</strong>
-        <p>Ключ ещё не настроен. Получи его в кабинете разработчика и добавь в Vercel как NEXT_PUBLIC_GIPHY_API_KEY для preview-ветки.</p>
-        <a href="https://developers.giphy.com/dashboard/" target="_blank" rel="noreferrer">Кабинет GIPHY <ExternalLink size={13}/></a>
-      </div>}
+
       {gifs.length>0&&<div className="giphy-grid">{gifs.map((gif,i)=>{
         const images=gif.images as AnyRecord|undefined;
         const fixed=images?.fixed_width as AnyRecord|undefined;
@@ -342,7 +329,7 @@ export function ExploreView(){
           ["Wikimedia Commons","Изображения и лицензии","Без ключа"],
           ["NASA APOD","Космические материалы","DEMO_KEY с лимитом"],
           ["ImgBB","Хранение изображений","Секретный ключ сервера"],
-          ["GIPHY","GIF и стикеры","Нужен личный API key"]
+          ["GIPHY","GIF и стикеры","Серверный ключ настроен"]
         ].map(([name,description,access])=><div className="integration-status-item" key={name}>
           <span className={access.startsWith("Нужен")?"integration-status-dot pending":"integration-status-dot"}/>
           <div><strong>{name}</strong><small>{description}</small></div><em>{access}</em>
