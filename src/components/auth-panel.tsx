@@ -69,7 +69,7 @@ export function AuthPanel({initialMode="register"}:{initialMode?:Mode}) {
         const payload:unknown=await response.json().catch(()=>({}));
         if(response.ok && payload && typeof payload==="object" && "user" in payload &&
           typeof payload.user==="object" && payload.user!==null) {
-          if(active) {setUser(payload.user as IdentityProfile);setView("signed-in");}
+          if(active) {window.localStorage.removeItem("orbis_explicit_logout");router.replace("/");}
           return;
         }
         if(response.status!==401) {
@@ -80,7 +80,7 @@ export function AuthPanel({initialMode="register"}:{initialMode?:Mode}) {
         if(saved) {
           const profile=await completeKeyLogin(saved.deviceId,saved.privateKey);
           await saveIdentity({...saved,profile});
-          if(active) {setUser(profile);setView("signed-in");}
+          if(active) {window.localStorage.removeItem("orbis_explicit_logout");router.replace("/");}
           return;
         }
       } catch {
@@ -151,8 +151,7 @@ export function AuthPanel({initialMode="register"}:{initialMode?:Mode}) {
       const privateKey=await importPrivateKey(privateJwk);
       const profile=await completeKeyLogin(parsed.deviceId,privateKey);
       await saveIdentity({deviceId:parsed.deviceId,privateKey,username:parsed.username,profile});
-      setUser(profile);
-      setView("signed-in");
+      window.localStorage.removeItem("orbis_explicit_logout");
       router.replace("/");
     } catch(error) {
       setMessage(error instanceof Error?error.message:"Не удалось восстановить доступ.");
