@@ -1,5 +1,7 @@
 import type {Metadata,Viewport} from "next";
 import "./globals.css";
+import {Analytics} from "@vercel/analytics/next";
+import {SocialShell} from "@/components/social-shell";
 
 export const metadata:Metadata = {
   title:{default:"ORBIS — Твои идеи заслуживают аудитории",template:"%s · ORBIS"},
@@ -15,5 +17,5 @@ export const viewport:Viewport = {
 };
 
 export default function RootLayout({children}:{children:React.ReactNode}) {
-  return <html lang="ru" data-theme="dark"><body>{children}</body></html>;
+  return <html lang="ru" data-theme="dark"><body><SocialShell>{children}</SocialShell><Analytics/></body></html>;
 }
